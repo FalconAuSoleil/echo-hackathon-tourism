@@ -211,7 +211,10 @@ aggregateCooperative(farms: { farmId; consent; messages: { month; status; coopFi
 - **Whole message not sure**: language ∉ `supportedLangs` (`unsupported_language`), `languageProbability <
   minLanguageProbability` (`low_language_probability`), or `confidence < minTranscriptConfidence`
   (`message_low_confidence`) → every chunk `not_sure`, nothing counted.
-- **Chunk**: score per finding = max (or top-k mean) cosine with its examples (all languages, or detected language
+- **Chunk, `scoring: "linear"` (shipped default, chosen by the evaluation)**: logistic regression on the catalog examples'
+  embeddings (trained in `createMatcher`, cacheable via `matcher.classifier`); accept the most probable finding if
+  probability ≥ `acceptProbability` and negation agreement holds for it; floor and uncertain negation as below.
+- **Chunk, `scoring: "similarity"`**: score per finding = max (or top-k mean) cosine with its examples (all languages, or detected language
   only with `crossLingual: false`). Best ≥ `acceptThreshold` → `matched` (2nd finding only if it also passes and is
   within `secondFindingMargin`; max 2). `offListThreshold ≤ best < acceptThreshold` → `not_sure`. Below → `off_list`.
 - **Negation agreement** (the "safe, tested rule"): every catalog example is tagged negated or not with
@@ -270,17 +273,21 @@ off-list clustering; documented in the README privacy section. Demo data (3 simu
 
 ## 8. Evaluation (`eval/`)
 
-`pnpm eval` runs everything (levels may be selected with flags, e.g. `--level 2`). Uses `@echo/models` and
-`@echo/core` exactly as the app does.
-- `eval/data/feedback.jsonl` (committed): 150–300 synthetic visitor feedbacks, annotated, disjoint from catalog examples.
-- Level 1: FLEURS test subsets (en, fr, de, es, + sw) in `datasets/` → WER per language per Whisper size.
-- Level 2: text → core pipeline → precision/recall/F1 per finding and overall, not-sure rate, error rate among
-  accepted answers, coverage-vs-error curve over thresholds (→ chosen `acceptThreshold`), confusion matrix,
-  unknown-topic detection, keyword baseline on the same data.
-- Level 3: 60–100 feedbacks synthesised (multilingual TTS, varied voices/speed) + public ambient noise at
-  several SNRs (`eval/audio/generated/`, git-ignored) → Whisper → core; WER and loss vs level 2.
-- Performance: model sizes, RSS memory, time for a 30 s message (Node here; low-end Android → manual test).
-- Outputs: `eval/results/summary.json` + `eval/results/summary.md` (committed), raw outputs git-ignored.
+`pnpm eval` runs everything; `pnpm eval -- --level 1|2|3|perf|report` (repeatable) runs one part,
+`--whisper tiny,base,small` picks the ASR sizes. Uses `@echo/models` and `@echo/core` exactly as the app does.
+Full results: `eval/results/RESULTS.md` (generated) + `level1.json`, `level2.json`, `level3.json`, `perf.json`,
+`thresholds.json`, `coverage-error-curve.svg` (committed); transcript caches in `eval/results/raw/` (git-ignored).
+- Level 1: FLEURS test (en_us, fr_fr, de_de, es_419, sw_ke) fetched from the hub's `refs/convert/parquet` branch by
+  `eval/scripts/fetch_fleurs.py` into `datasets/fleurs/` (fixed seeded sample, 100 utterances/language; whisper-small 50).
+- Level 2: `eval/data/feedback.jsonl` split 50/50 calibration / held-out test (stratified, seeded). On the calibration
+  half: variant (embedding model × scoring × L2), off-list floor, then acceptance threshold (max remarks captured s.t.
+  error among accepted answers ≤ 5 % and cancelling-negation accuracy ≥ 85 %). The chosen values are **written to
+  `packages/core/src/calibration.ts`**, which `DEFAULT_CONFIG` reads, and `DEFAULT_EMBEDDING_MODEL` (`@echo/models`)
+  follows `CALIBRATION.embeddingModel`. Unknown-topic cluster threshold calibrated on catalog examples only.
+- Level 3: the 80 Piper clips (clean, clean + 0.4 s silence, 20/10/5 dB SNR ESC-50) → `analyzeAudioMessage`.
+- Performance: per-process peak RSS and 30 s message timings with 8/2/1 cores (`taskset`), WebAssembly overhead measured
+  with onnxruntime-web vs onnxruntime-node on the same ONNX files, low-end Android = labelled estimate
+  (real measurement: `docs/MANUAL_TESTS.md`).
 
 ## 9. Commands
 

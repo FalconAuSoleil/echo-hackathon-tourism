@@ -4,7 +4,11 @@ import type { EmbedFn } from "@echo/core";
 import { MODELS } from "./registry.ts";
 
 export interface EmbedderOptions {
-  /** Taille des lots envoyés au modèle. */
+  /**
+   * Taille des lots envoyés au modèle. Défaut 1 : avec la quantification dynamique (q8), l'embedding d'un texte
+   * dépend des autres textes du lot (remplissage, plages de quantification) — mesuré : jusqu'à 0,003 de cosinus,
+   * assez pour faire basculer une décision près du seuil. Un texte à la fois rend le résultat reproductible.
+   */
   batchSize?: number;
   device?: "cpu" | "wasm" | "webgpu";
 }
@@ -12,7 +16,7 @@ export interface EmbedderOptions {
 export async function createEmbedder(modelId: string, options: EmbedderOptions = {}): Promise<EmbedFn> {
   const info = MODELS[modelId];
   const prefix = info?.textPrefix ?? "";
-  const batchSize = options.batchSize ?? 32;
+  const batchSize = options.batchSize ?? 1;
   const extractor = (await pipeline("feature-extraction", modelId, {
     dtype: "q8",
     ...(options.device ? { device: options.device } : {}),

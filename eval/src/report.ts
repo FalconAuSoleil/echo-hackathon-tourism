@@ -140,7 +140,15 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     w("### How the threshold was chosen (calibration half only)");
     w();
-    w(`Rule, fixed before looking at the test half: ${c.rule}.`);
+    w(`Rule (computed on the calibration half only): ${c.rule}.`);
+    w();
+    w("Honesty note on the order of decisions: the classifier change (similarity → linear) and the hyper-parameter grid were");
+    w("decided on the calibration half. Test-half numbers were then printed by intermediate runs, and three changes were made");
+    w("after that: (1) the off-list floor is now chosen *before* the threshold sweep (the first version swept without the floor,");
+    w("so the calibration numbers did not describe the shipped configuration); (2) relaxed negation margins were excluded (below);");
+    w("(3) the unknown-topic rule (below). Changes (1) and (2) made the procedure more faithful or the system stricter; change (3)");
+    w("was made so that the picking signal fires, i.e. it is tuned on the only recurring-topic example. The test half is therefore");
+    w("not perfectly untouched.");
     w();
     w(`Chosen: **${c.variant.name}** — embedding model \`${c.embeddingModel}\`, scoring \`${c.scoring}\`` +
       (c.scoring === "linear" ? `, accept when the classifier probability ≥ **${c.acceptProbability}** (L2 ${c.linearL2}, ${c.linearEpochs} epochs, trained only on catalog examples)` : `, accept threshold **${c.acceptThreshold}**`) +

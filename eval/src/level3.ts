@@ -24,8 +24,22 @@ interface AudioRow {
   tts: { voice: string; speaker: number | null; speed: number };
 }
 
-export const CONDITIONS = ["clean", "snr20", "snr10", "snr5"] as const;
-const pathOf = (r: AudioRow, c: (typeof CONDITIONS)[number]) => (c === "clean" ? r.clean : r.noisy[c.slice(3)]!);
+/**
+ * clean : voix de synthèse brute (sans silence autour) ; clean_pad : la même avec 0,4 s de silence avant et
+ * après, comme les versions bruitées (et comme un vrai message vocal, où l'on appuie avant de parler) ;
+ * snr20/10/5 : bruits ESC-50 (avec ces 0,4 s de bruit seul avant et après).
+ */
+export const CONDITIONS = ["clean", "clean_pad", "snr20", "snr10", "snr5"] as const;
+type Condition = (typeof CONDITIONS)[number];
+const pathOf = (r: AudioRow, c: Condition) => (c === "clean" || c === "clean_pad" ? r.clean : r.noisy[c.slice(3)]!);
+function loadCondition(r: AudioRow, c: Condition): Float32Array {
+  const a = loadAudio16k(abs(pathOf(r, c)));
+  if (c !== "clean_pad") return a;
+  const pad = Math.round(0.4 * 16000);
+  const out = new Float32Array(a.length + 2 * pad);
+  out.set(a, pad);
+  return out;
+}
 
 export async function runLevel3(opts: { sizes: string[]; log: (s: string) => void; config?: AnalysisConfig }) {
   const log = opts.log;
@@ -64,7 +78,7 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
       const analyses: MessageAnalysis[] = [];
       for (const [i, r] of rows.entries()) {
         currentKey = `${cond}/${r.id}`;
-        const audio = loadAudio16k(abs(pathOf(r, cond)));
+        const audio = loadCondition(r, cond);
         const a = await analyzeAudioMessage(
           { id: r.id, receivedAt: "2026-09-15T10:00:00Z", audio16k: audio },
           { catalog, matcher, config, transcriber, withEnglishTranslation: false },
