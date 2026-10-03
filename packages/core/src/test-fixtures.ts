@@ -6,6 +6,10 @@ import { validateCatalog } from "./catalog.ts";
 import type { EmbedFn, Transcriber } from "./ports.ts";
 import type { FindingId, Transcript, VisitorLang } from "./types.ts";
 import { words } from "./text.ts";
+import type { AnalysisConfig } from "./config.ts";
+
+/** Règle « similarité » avec les seuils historiques des tests (le défaut livré est calibré par l'évaluation). */
+export const SIMILARITY_TEST_CONFIG: Partial<AnalysisConfig> = { scoring: "similarity", acceptThreshold: 0.6, offListThreshold: 0.4, aggregation: "max", crossLingual: true };
 
 /**
  * Concepts : un axe par concept, mots de toutes les langues. Comme un vrai modèle multilingue, le faux
@@ -101,6 +105,18 @@ const RW_TEMPLATES: Record<RecapTemplateId, string> = {
   no_feedback: "Nta gitekerezo uku kwezi.",
 };
 
+/** Sources fr/en figées pour les tests (indépendantes des reformulations du vrai catalogue). */
+const TEMPLATE_SOURCES: Record<RecapTemplateId, { fr: string; en: string }> = {
+  volume: { fr: "Ce mois-ci : {n} retours.", en: "This month: {n} feedback messages." },
+  keep: { fr: "À garder : {finding} ({k} sur {n}).", en: "Keep doing: {finding} ({k} out of {n})." },
+  fix: { fr: "À corriger en priorité : {finding} ({k} sur {n}).", en: "Fix first: {finding} ({k} out of {n})." },
+  fix_streak: { fr: "À corriger en priorité : {finding} ({k} sur {n}), {x}e mois de suite.", en: "Fix first: {finding} ({k} out of {n}), month {x} in a row." },
+  nothing_urgent: { fr: "Rien d'urgent à corriger.", en: "Nothing urgent to fix." },
+  unknown_topic: { fr: "Un sujet que l'outil ne connaît pas revient chez {k} visiteurs : demandez à une personne de lire ces remarques.", en: "A topic the tool does not know comes back from {k} visitors: ask a person to read these remarks." },
+  not_understood: { fr: "{p} remarques pas comprises : demandez à une personne.", en: "{p} remarks not understood: ask a person." },
+  no_feedback: { fr: "Pas de retour ce mois-ci.", en: "No feedback this month." },
+};
+
 function sentence(rw: string, fr: string, en: string, audio: string | null): KinyarwandaSentence {
   return { rw, source: { fr, en }, backTranslation: {}, similarity: 0.9, attempts: 1, audio, status: "machine_translated_unvalidated" };
 }
@@ -119,12 +135,15 @@ export function testCatalog(options: { audioParts?: boolean; numbers?: boolean }
   }
   for (const t of raw.templates) {
     const rw = RW_TEMPLATES[t.id];
-    t.kinyarwanda = sentence(rw, t.kinyarwanda.source.fr, t.kinyarwanda.source.en, `audio/template-${t.id}.wav`);
+    const src = TEMPLATE_SOURCES[t.id];
+    t.kinyarwanda = sentence(rw, src.fr, src.en, `audio/template-${t.id}.wav`);
+    delete t.audioParts;
     if (options.audioParts) {
       const parts = rw.split(/\{(?:n|k|x|p|finding)\}/);
       t.audioParts = parts.map((p, i) => (p.trim() ? `audio/template-${t.id}-${i}.wav` : null));
     }
   }
+  delete raw.numbers; // indépendant des clips de nombres du vrai catalogue
   if (options.numbers) {
     raw.numbers = {};
     for (let i = 0; i <= 30; i++) raw.numbers[String(i)] = { rw: String(i), audio: `audio/num-${i}.wav` };

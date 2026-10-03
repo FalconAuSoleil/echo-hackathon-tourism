@@ -1,6 +1,48 @@
 // Point d'entrée unique de l'évaluation (SPEC 9) : `pnpm eval`.
-// Niveau 1 : WER Whisper sur FLEURS ; niveau 2 : classement sur retours écrits synthétiques ;
-// niveau 3 : bout en bout sur audio synthétique bruité. Mêmes modèles (@echo/models) et même code (@echo/core) que l'app.
-// Squelette : les niveaux sont écrits par l'agent d'évaluation (voir docs/ARCHITECTURE.md).
-console.error("pnpm eval: the evaluation levels are not implemented yet (scaffold). See docs/ARCHITECTURE.md § Evaluation.");
-process.exit(2);
+//   pnpm eval                       # tout : niveaux 1, 2, 3, performances, puis RESULTS.md
+//   pnpm eval -- --level 2          # un seul niveau (répétable : --level 2 --level 3), aussi perf, report
+//   pnpm eval -- --whisper tiny,base,small   --fleurs-limit 20   --quick
+// Mêmes modèles (@echo/models) et même code (@echo/core) que l'app. Les sorties brutes (transcriptions
+// en cache) vont dans eval/results/raw/ (git-ignoré) : relancer reprend là où l'on s'était arrêté.
+import { parseArgs } from "node:util";
+import { runLevel1 } from "./level1.ts";
+
+const { values } = parseArgs({
+  options: {
+    level: { type: "string", multiple: true },
+    whisper: { type: "string" },
+    "fleurs-limit": { type: "string" },
+    quick: { type: "boolean", default: false },
+    "small-limit": { type: "string" },
+  },
+  allowPositionals: true,
+});
+
+const levels = new Set(values.level?.length ? values.level.flatMap((l) => l.split(",")) : ["1", "2", "3", "perf", "report"]);
+const sizes = (values.whisper ?? "tiny,base,small").split(",");
+const log = (s: string) => console.log(`${new Date().toISOString().slice(11, 19)} ${s}`);
+
+// whisper-small : 50 énoncés par langue par défaut (RTF ≈ 1,4 ici, 100 × 5 langues prendraient > 2 h).
+if (levels.has("1"))
+  await runLevel1({
+    sizes,
+    limit: values["fleurs-limit"] ? Number(values["fleurs-limit"]) : undefined,
+    limits: { small: Number(values["small-limit"] ?? values["fleurs-limit"] ?? 50) },
+    log,
+  });
+if (levels.has("2")) {
+  const { runLevel2 } = await import("./level2.ts");
+  await runLevel2({ log, variants: values.quick ? ["similarity-minilm-max", "linear-minilm-l2=3e-4"] : undefined });
+}
+if (levels.has("3")) {
+  const { runLevel3 } = await import("./level3.ts");
+  await runLevel3({ sizes, log });
+}
+if (levels.has("perf")) {
+  const { runPerf } = await import("./perf.ts");
+  await runPerf({ sizes, log, devices: ["default"] });
+}
+if (levels.has("report")) {
+  const { runReport } = await import("./report.ts");
+  runReport(log);
+}

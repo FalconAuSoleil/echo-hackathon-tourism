@@ -4,12 +4,12 @@ import { analyzeAudioMessage } from "./audio.ts";
 import { makeConfig } from "./config.ts";
 import { createMatcher } from "./matcher.ts";
 import { toReviewChunks, toStoredMessage } from "./storage.ts";
-import { fakeEmbedder, fakeTranscriber, testCatalog } from "./test-fixtures.ts";
+import { SIMILARITY_TEST_CONFIG, fakeEmbedder, fakeTranscriber, testCatalog } from "./test-fixtures.ts";
 import type { MessageInput, Transcript } from "./types.ts";
 
 async function deps(extra: Partial<AnalyzeDeps> = {}): Promise<AnalyzeDeps> {
   const catalog = testCatalog();
-  const config = makeConfig();
+  const config = makeConfig(SIMILARITY_TEST_CONFIG);
   return { catalog, config, matcher: await createMatcher(catalog, fakeEmbedder(), config), ...extra };
 }
 

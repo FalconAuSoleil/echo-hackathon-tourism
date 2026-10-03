@@ -1,8 +1,28 @@
-// Paramètres d'analyse. Les seuils par défaut sont provisoires : l'évaluation (SPEC 9) les calibre
-// et la valeur retenue est recopiée ici avec sa justification (docs/PROGRESS.md, README).
+// Paramètres d'analyse. Les seuils par défaut viennent de calibration.ts, GÉNÉRÉ par l'évaluation
+// (`pnpm eval -- --level 2`, SPEC 9) : l'app lit DEFAULT_CONFIG, donc les seuils mesurés sont ceux livrés.
+import { CALIBRATION } from "./calibration.ts";
 
 export interface AnalysisConfig {
-  /** Score ≥ acceptThreshold : le morceau est rattaché au constat. */
+  /**
+   * Comment un morceau est rattaché à un constat :
+   * - "similarity" : score = cosinus max (ou top-k) avec les exemples du constat, accepté si ≥ acceptThreshold ;
+   * - "linear" : régression logistique entraînée sur les embeddings des exemples du catalogue, acceptée si la
+   *   probabilité ≥ acceptProbability (meilleure calibration mesurée, voir eval/results/RESULTS.md).
+   * Dans les deux cas : plancher « hors liste » (cosinus) et accord de négation identiques.
+   */
+  scoring: "similarity" | "linear";
+  /** Mode "linear" : probabilité minimale du constat pour l'accepter. */
+  acceptProbability: number;
+  /** Mode "linear" : pénalité L2 et nombre d'époques de l'entraînement (sur les exemples du catalogue). */
+  linearL2: number;
+  linearEpochs: number;
+  /**
+   * Mode "linear" : accord de négation toléré à cette marge près (cosinus). 0 = règle stricte (les exemples de
+   * même négation doivent être au moins aussi proches que ceux de négation opposée). Calibré par l'évaluation
+   * sous contrainte : les négations qui annulent un constat ne doivent pas passer plus souvent.
+   */
+  negationMargin: number;
+  /** Mode "similarity" : score ≥ acceptThreshold : le morceau est rattaché au constat. */
   acceptThreshold: number;
   /** Score < offListThreshold pour tous les constats : « hors liste ». Entre les deux : « pas sûr ». */
   offListThreshold: number;
@@ -36,8 +56,10 @@ export interface AnalysisConfig {
   minAudioDynamicRangeDb: number;
   /** Langues traitées ; une autre langue détectée met le message en « pas sûr ». */
   supportedLangs: string[];
-  /** Regroupement hors liste : similarité moyenne min pour fusionner deux groupes. */
+  /** Regroupement hors liste : similarité moyenne min pour fusionner deux groupes (dépend du modèle d'embedding). */
   offListClusterThreshold: number;
+  /** Morceaux regroupés pour le signal « sujet inconnu qui revient » (voir unknownTopicItems). */
+  unknownTopicSources: "off_list" | "off_list_and_unsure";
   /** Nombre de visiteurs distincts pour signaler un sujet inconnu qui revient (SPEC 4.5). */
   offListMinVisitors: number;
   /** Cosinus entre messages entiers au-dessus duquel c'est un quasi-doublon. */
@@ -47,13 +69,18 @@ export interface AnalysisConfig {
 }
 
 export const DEFAULT_CONFIG: AnalysisConfig = {
-  acceptThreshold: 0.6,
-  offListThreshold: 0.4,
+  scoring: CALIBRATION.scoring,
+  acceptProbability: CALIBRATION.acceptProbability,
+  linearL2: CALIBRATION.linearL2,
+  linearEpochs: CALIBRATION.linearEpochs,
+  negationMargin: CALIBRATION.negationMargin,
+  acceptThreshold: CALIBRATION.acceptThreshold,
+  offListThreshold: CALIBRATION.offListThreshold,
   maxFindingsPerChunk: 2,
   secondFindingMargin: 0.08,
-  aggregation: "max",
-  topK: 3,
-  crossLingual: true,
+  aggregation: CALIBRATION.aggregation,
+  topK: CALIBRATION.topK,
+  crossLingual: CALIBRATION.crossLingual,
   minTranscriptConfidence: 0.45,
   inaudibleConfidence: 0.2,
   minLanguageProbability: 0.5,
@@ -61,7 +88,8 @@ export const DEFAULT_CONFIG: AnalysisConfig = {
   minAudioRms: 0.005,
   minAudioDynamicRangeDb: 3,
   supportedLangs: ["en", "fr", "de", "es"],
-  offListClusterThreshold: 0.55,
+  offListClusterThreshold: CALIBRATION.offListClusterThreshold,
+  unknownTopicSources: CALIBRATION.unknownTopicSources,
   offListMinVisitors: 3,
   duplicateEmbeddingThreshold: 0.98,
   duplicateWindowDays: 7,
@@ -70,7 +98,8 @@ export const DEFAULT_CONFIG: AnalysisConfig = {
 /** Configuration complète à partir de surcharges partielles (ex. seuils calibrés gardés dans les réglages). */
 export function makeConfig(overrides: Partial<AnalysisConfig> = {}): AnalysisConfig {
   const c = { ...DEFAULT_CONFIG, ...overrides };
-  if (!(c.offListThreshold <= c.acceptThreshold)) throw new Error("offListThreshold must be <= acceptThreshold");
+  if (c.scoring === "similarity" && !(c.offListThreshold <= c.acceptThreshold)) throw new Error("offListThreshold must be <= acceptThreshold");
+  if (!(c.acceptProbability > 0 && c.acceptProbability <= 1)) throw new Error("acceptProbability must be in (0, 1]");
   if (c.maxFindingsPerChunk < 1 || c.maxFindingsPerChunk > 2) throw new Error("maxFindingsPerChunk must be 1 or 2");
   if (c.topK < 1) throw new Error("topK must be >= 1");
   return c;

@@ -14,6 +14,7 @@ import type { AnalysisConfig } from "./config.ts";
 import type { EmbedFn } from "./ports.ts";
 import type { ChunkStatus, DetectedLang, FindingId, FindingScore, NegationInfo, VisitorLang } from "./types.ts";
 import { detectNegation } from "./negation.ts";
+import { predictProba, trainLinearClassifier, type LinearClassifier } from "./linear.ts";
 
 export interface ChunkMatch {
   status: ChunkStatus;
@@ -41,12 +42,32 @@ export interface FindingRawScore {
   inverted: number;
   /** Score avec tous les exemples (affichage). */
   any: number;
+  /** Mode "linear" : probabilité du constat selon le classifieur linéaire. */
+  probability?: number;
 }
 
 export type MatchConfig = Pick<
   AnalysisConfig,
-  "acceptThreshold" | "offListThreshold" | "maxFindingsPerChunk" | "secondFindingMargin" | "aggregation" | "topK" | "crossLingual"
+  | "acceptThreshold"
+  | "offListThreshold"
+  | "maxFindingsPerChunk"
+  | "secondFindingMargin"
+  | "aggregation"
+  | "topK"
+  | "crossLingual"
+  | "scoring"
+  | "acceptProbability"
+  | "linearL2"
+  | "linearEpochs"
+  | "negationMargin"
 >;
+
+/** Paramètres utilisés par decideChunk. */
+export type DecideConfig = Pick<
+  AnalysisConfig,
+  "acceptThreshold" | "offListThreshold" | "maxFindingsPerChunk" | "secondFindingMargin"
+> &
+  Partial<Pick<AnalysisConfig, "scoring" | "acceptProbability" | "negationMargin">>;
 
 export interface Matcher {
   /** Classe des morceaux déjà nettoyés. La négation est fournie pour décider « pas sûr » / constat. */
@@ -57,6 +78,8 @@ export interface Matcher {
   embed: EmbedFn;
   /** Exemples préparés (lecture seule). */
   readonly examples: readonly PreparedExample[];
+  /** Classifieur linéaire (mode "linear"), à mettre en cache par l'app avec les embeddings des exemples. */
+  readonly classifier?: LinearClassifier;
 }
 
 const NONE = -1;
@@ -111,7 +134,7 @@ const round = (x: number): number => Math.round(x * 1000) / 1000;
 export function decideChunk(
   scores: readonly FindingRawScore[],
   negation: NegationInfo,
-  config: Pick<AnalysisConfig, "acceptThreshold" | "offListThreshold" | "maxFindingsPerChunk" | "secondFindingMargin">,
+  config: DecideConfig,
 ): { status: ChunkStatus; findings: FindingScore[]; topScores: FindingScore[]; reason: string } {
   const topScores = [...scores]
     .sort((a, b) => b.any - a.any)
@@ -125,6 +148,29 @@ export function decideChunk(
 
   if (overall < config.offListThreshold) return { status: "off_list", findings: [], topScores, reason: "below_floor" };
   if (negation.uncertain) return { status: "not_sure", findings: [], topScores, reason: "negation_uncertain" };
+
+  if (config.scoring === "linear" && scores.every((s) => s.probability !== undefined)) {
+    // Probabilité du classifieur linéaire ; l'accord de négation s'applique au constat proposé : si ses
+    // exemples de négation opposée ressemblent plus au morceau que ceux de même négation, sens inversé.
+    // negationMargin : tolérance (cosinus) avant de juger le sens inversé ; le constat doit de toute façon avoir
+    // des exemples de même négation que le morceau (agree > NONE).
+    const minP = config.acceptProbability ?? 0.5;
+    const margin = config.negationMargin ?? 0;
+    const agrees = (s: FindingRawScore) => s.agree > NONE && s.agree >= s.inverted - margin;
+    const byP = [...scores].sort((a, b) => b.probability! - a.probability!);
+    const top = byP[0]!;
+    const linTop = byP.slice(0, 3).map((s) => ({ id: s.id, score: round(s.probability!) }));
+    if (top.probability! >= minP && agrees(top)) {
+      const findings: FindingScore[] = [{ id: top.id, score: round(top.probability!) }];
+      for (const s of byP.slice(1)) {
+        if (findings.length >= config.maxFindingsPerChunk || s.probability! < minP) break;
+        if (agrees(s)) findings.push({ id: s.id, score: round(s.probability!) });
+      }
+      return { status: "matched", findings, topScores: linTop, reason: "above_threshold" };
+    }
+    if (!agrees(top)) return { status: "not_sure", findings: [], topScores: linTop, reason: "negation" };
+    return { status: "not_sure", findings: [], topScores: linTop, reason: "below_threshold" };
+  }
 
   if (best && bestAgree >= config.acceptThreshold && bestAgree >= bestInverted) {
     const findings: FindingScore[] = [{ id: best.id, score: round(bestAgree) }];
@@ -149,6 +195,8 @@ export interface CreateMatcherOptions {
    * texte → vecteur. Seuls les exemples absents sont plongés. Doivent venir du MÊME modèle.
    */
   precomputed?: ReadonlyMap<string, Float32Array>;
+  /** Classifieur linéaire déjà entraîné (mode "linear") avec le MÊME modèle et le MÊME catalogue. */
+  classifier?: LinearClassifier;
 }
 
 /** Embeddings des exemples d'un matcher, à mettre en cache (texte → vecteur). */
@@ -174,21 +222,38 @@ export async function createMatcher(catalog: Catalog, embed: EmbedFn, config: Ma
   const fresh = new Map(missing.map((t, i) => [t, vectors[i]!]));
   const examples: PreparedExample[] = pending.map((p) => ({ ...p, embedding: cache?.get(p.text) ?? fresh.get(p.text)! }));
   const findingIds = catalog.findings.map((f) => f.id);
+  let classifier: LinearClassifier | undefined;
+  if (config.scoring === "linear") {
+    classifier = options.classifier;
+    if (!classifier || classifier.classes.join() !== findingIds.join() || classifier.dim !== (examples[0]?.embedding.length ?? 0)) {
+      classifier = trainLinearClassifier(
+        examples.map((e) => e.embedding),
+        examples.map((e) => findingIds.indexOf(e.findingId)),
+        findingIds,
+        { l2: config.linearL2, epochs: config.linearEpochs },
+      );
+    }
+  }
 
   const score: Matcher["score"] = async (chunks, lang) => {
     if (chunks.length === 0) return [];
     const embs = await embed(chunks.map((c) => c.text));
     if (embs.length !== chunks.length) throw new Error("EmbedFn must return one vector per text");
-    return chunks.map((c, i) => ({
-      embedding: embs[i]!,
-      scores: scoreFindings(embs[i]!, examples, { negated: c.negation.negated, lang }, config, findingIds),
-    }));
+    return chunks.map((c, i) => {
+      const scores = scoreFindings(embs[i]!, examples, { negated: c.negation.negated, lang }, config, findingIds);
+      if (classifier) {
+        const p = predictProba(classifier, embs[i]!);
+        scores.forEach((s, k) => (s.probability = p[k]!));
+      }
+      return { embedding: embs[i]!, scores };
+    });
   };
 
   return {
     examples,
     embed,
     score,
+    classifier,
     async match(chunks, lang) {
       const scored = await score(chunks, lang);
       return scored.map((s, i) => ({ ...decideChunk(s.scores, chunks[i]!.negation, config), embedding: s.embedding }));

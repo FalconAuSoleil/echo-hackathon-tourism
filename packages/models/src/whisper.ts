@@ -21,10 +21,17 @@ export interface WhisperOptions {
   /** Limite le choix de langue à ces codes (ex. ["en","fr","de","es","sw"]). Sinon toutes les langues Whisper. */
   candidateLanguages?: string[];
   maxNewTokens?: number;
+  /**
+   * Arrête le décodage quand Whisper boucle (même bloc de tokens répété 3 fois de suite, ou même token
+   * 6 fois) et garde une seule occurrence du bloc. Défaut : true. Sans ce garde-fou, le décodage glouton
+   * remplit max_new_tokens de répétitions (WER > 100 % mesuré sur FLEURS), et c'est plus lent.
+   */
+  stopRepetitionLoops?: boolean;
 }
 
 interface GenerationConfigLike {
   decoder_start_token_id: number;
+  eos_token_id: number | number[];
   lang_to_id: Record<string, number>;
 }
 
@@ -51,6 +58,52 @@ class LogProbRecorder extends LogitsProcessor {
     const row = (logits.dims.length === 2 ? (logits.data as Float32Array).subarray(0, logits.dims[1]) : (logits.data as Float32Array));
     this.prev = logSoftmax(row);
     this.prevLen = ids.length;
+    return logits;
+  }
+}
+
+/**
+ * Repère une boucle de répétition à la fin des tokens générés : renvoie la longueur à garder
+ * (une seule occurrence du bloc répété), ou -1. Exporté pour les tests.
+ */
+export function repetitionLoopCut(generated: readonly number[], maxPeriod = 32): number {
+  const n = generated.length;
+  for (let p = 1; p <= maxPeriod; p++) {
+    const reps = p === 1 ? 6 : 3;
+    if (n < p * reps) break;
+    let loop = true;
+    for (let k = 1; k < reps && loop; k++) {
+      for (let i = 0; i < p; i++) {
+        if (generated[n - 1 - i] !== generated[n - 1 - i - k * p]) {
+          loop = false;
+          break;
+        }
+      }
+    }
+    if (loop) return n - (reps - 1) * p;
+  }
+  return -1;
+}
+
+/** Force la fin du décodage quand une boucle de répétition est détectée (voir stopRepetitionLoops). */
+class RepetitionLoopStopper extends LogitsProcessor {
+  promptLen = -1;
+  keep = -1;
+  constructor(private eosId: number) {
+    super();
+  }
+  override _call(input_ids: bigint[][], logits: Tensor): Tensor {
+    const ids = input_ids[0] ?? [];
+    if (this.promptLen < 0) this.promptLen = ids.length;
+    if (this.keep < 0) {
+      const cut = repetitionLoopCut(ids.slice(this.promptLen).map(Number));
+      if (cut >= 0) this.keep = cut;
+    }
+    if (this.keep >= 0) {
+      const data = logits.data as Float32Array;
+      const vocab = logits.dims.at(-1) as number;
+      for (let i = 0; i < vocab; i++) data[i] = i === this.eosId ? 0 : -Infinity;
+    }
     return logits;
   }
 }
@@ -82,6 +135,8 @@ export async function createWhisperTranscriber(modelId: string, options: Whisper
     .map(([tok, id]) => ({ code: tok.slice(2, -2), id }))
     .filter((l) => !options.candidateLanguages || options.candidateLanguages.includes(l.code));
   const maxNewTokens = options.maxNewTokens ?? 220;
+  const stopLoops = options.stopRepetitionLoops ?? true;
+  const eosId = Array.isArray(gen.eos_token_id) ? gen.eos_token_id[0]! : gen.eos_token_id;
 
   async function features(audio: Float32Array): Promise<Tensor> {
     const out = (await processor(audio)) as { input_features: Tensor };
@@ -108,13 +163,21 @@ export async function createWhisperTranscriber(modelId: string, options: Whisper
 
   async function decode(input_features: Tensor, language: string, task: "transcribe" | "translate") {
     const recorder = new LogProbRecorder();
+    const stopper = stopLoops ? new RepetitionLoopStopper(eosId) : null;
     const ids = (await model.generate({
       inputs: input_features,
       language,
       task,
       max_new_tokens: maxNewTokens,
-      logits_processor: [recorder],
+      logits_processor: stopper ? [stopper, recorder] : [recorder],
     } as Record<string, unknown>)) as Tensor;
+    if (stopper && stopper.keep >= 0) {
+      // Boucle : on ne garde que la première occurrence du bloc répété (et les log-probas correspondantes).
+      const all = Array.from(ids.data as BigInt64Array, Number);
+      const kept = all.slice(0, stopper.promptLen + stopper.keep);
+      const text = tokenizer.decode(kept, { skip_special_tokens: true });
+      return { text: text.trim(), logprobs: recorder.logprobs.slice(0, stopper.keep) };
+    }
     const text = tokenizer.batch_decode(ids, { skip_special_tokens: true })[0] ?? "";
     return { text: text.trim(), logprobs: recorder.logprobs };
   }

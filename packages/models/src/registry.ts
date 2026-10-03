@@ -1,3 +1,4 @@
+import { CALIBRATION } from "@echo/core";
 // Modèles candidats (vérifiés sur Hugging Face le 2026-10-03, chargés avec transformers.js 4.3 en Node).
 // Les fichiers sont servis depuis models/<id>/ (téléchargés par tools/scripts/download-models.mjs).
 
@@ -62,4 +63,8 @@ export const MODELS: Record<string, ModelInfo> = {
 
 /** Choix par défaut du squelette ; l'évaluation (SPEC 9) confirme ou remplace. */
 export const DEFAULT_ASR_MODEL = "onnx-community/whisper-base";
-export const DEFAULT_EMBEDDING_MODEL = "Xenova/paraphrase-multilingual-MiniLM-L12-v2";
+/**
+ * Modèle d'embedding livré : celui avec lequel l'évaluation a calibré les seuils (packages/core/src/calibration.ts,
+ * généré par `pnpm eval -- --level 2`). Les seuils n'ont de sens qu'avec ce modèle.
+ */
+export const DEFAULT_EMBEDDING_MODEL: string = CALIBRATION.embeddingModel;

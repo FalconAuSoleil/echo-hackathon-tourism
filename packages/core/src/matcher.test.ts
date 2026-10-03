@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, makeConfig } from "./config.ts";
+import { makeConfig } from "./config.ts";
 import { createMatcher, decideChunk, exportExampleEmbeddings, type FindingRawScore } from "./matcher.ts";
 import { detectNegation } from "./negation.ts";
-import { fakeEmbedder, testCatalog } from "./test-fixtures.ts";
+import { SIMILARITY_TEST_CONFIG, fakeEmbedder, testCatalog } from "./test-fixtures.ts";
 import type { FindingId, NegationInfo } from "./types.ts";
 
 const plain: NegationInfo = { negated: false, uncertain: false, cues: [] };
@@ -10,13 +10,13 @@ const raw = (id: FindingId, agree: number, inverted = -1): FindingRawScore => ({
 
 async function setup(overrides = {}) {
   const embed = fakeEmbedder();
-  const matcher = await createMatcher(testCatalog(), embed, makeConfig(overrides));
+  const matcher = await createMatcher(testCatalog(), embed, makeConfig({ ...SIMILARITY_TEST_CONFIG, ...overrides }));
   const one = async (text: string, lang = "en") => (await matcher.match([{ text, negation: detectNegation(text, lang) }], lang))[0]!;
   return { embed, matcher, one };
 }
 
 describe("decideChunk (règles pures)", () => {
-  const cfg = DEFAULT_CONFIG; // accept 0.6, floor 0.4, marge 0.08, max 2
+  const cfg = makeConfig(SIMILARITY_TEST_CONFIG); // accept 0.6, floor 0.4, marge 0.08, max 2
   it("au-dessus du seuil → rattaché", () => {
     const d = decideChunk([raw("N1", 0.8), raw("P1", 0.3)], plain, cfg);
     expect(d).toMatchObject({ status: "matched", findings: [{ id: "N1", score: 0.8 }] });
@@ -62,7 +62,7 @@ describe("createMatcher (faux embedder)", () => {
     const cache = exportExampleEmbeddings(matcher);
     cache.delete("Kein Schatten");
     const embed2 = fakeEmbedder();
-    const m2 = await createMatcher(testCatalog(), embed2, makeConfig(), { precomputed: cache });
+    const m2 = await createMatcher(testCatalog(), embed2, makeConfig(SIMILARITY_TEST_CONFIG), { precomputed: cache });
     expect(embed2.calls).toEqual([["Kein Schatten"]]);
     expect(m2.examples).toHaveLength(matcher.examples.length);
   });
@@ -113,5 +113,37 @@ describe("createMatcher (faux embedder)", () => {
     const n1 = s!.scores.find((x) => x.id === "N1")!;
     expect(n1.agree).toBeLessThanOrEqual(1);
     expect(n1.agree).toBeGreaterThan(0.6);
+  });
+});
+
+describe("mode linear (régression logistique sur les exemples)", () => {
+  const lin = makeConfig({ scoring: "linear", acceptProbability: 0.6, offListThreshold: 0.3 });
+  const rawP = (id: FindingId, probability: number, agree = 0.7, inverted = -1): FindingRawScore => ({ id, agree, inverted, any: Math.max(agree, inverted), probability });
+  it("accepte le constat le plus probable au-dessus du seuil de probabilité", () => {
+    expect(decideChunk([rawP("N1", 0.8), rawP("P1", 0.1)], plain, lin)).toMatchObject({ status: "matched", findings: [{ id: "N1", score: 0.8 }] });
+  });
+  it("probabilité trop basse → pas sûr ; cosinus sous le plancher → hors liste", () => {
+    expect(decideChunk([rawP("N1", 0.5), rawP("P1", 0.4)], plain, lin)).toMatchObject({ status: "not_sure", reason: "below_threshold" });
+    expect(decideChunk([rawP("N1", 0.9, 0.2)], plain, lin)).toMatchObject({ status: "off_list" });
+  });
+  it("accord de négation : exemples de négation opposée plus proches → pas sûr (negation)", () => {
+    const neg: NegationInfo = { negated: true, uncertain: false, cues: ["not"] };
+    expect(decideChunk([rawP("N1", 0.9, 0.4, 0.8)], neg, lin)).toMatchObject({ status: "not_sure", reason: "negation", findings: [] });
+  });
+  it("negationMargin tolère un léger avantage des exemples de négation opposée, jamais un constat sans exemple de même négation", () => {
+    const loose = { ...lin, negationMargin: 0.1 };
+    expect(decideChunk([rawP("N8", 0.9, 0.75, 0.8)], plain, loose)).toMatchObject({ status: "matched" });
+    expect(decideChunk([rawP("N8", 0.9, 0.6, 0.8)], plain, loose)).toMatchObject({ status: "not_sure", reason: "negation" });
+    expect(decideChunk([rawP("N1", 0.9, -1, 0.8)], plain, { ...lin, negationMargin: 5 })).toMatchObject({ status: "not_sure", reason: "negation" });
+  });
+  it("le matcher entraîne le classifieur sur les exemples et le réutilise s'il est fourni", async () => {
+    const embed = fakeEmbedder();
+    const m = await createMatcher(testCatalog(), embed, lin);
+    expect(m.classifier?.classes.length).toBe(testCatalog().findings.length);
+    const [s] = await m.score([{ text: "The path to the farm was far too long", negation: plain }], "en");
+    const best = [...s!.scores].sort((a, b) => b.probability! - a.probability!)[0]!;
+    expect(best.id).toBe("N1");
+    const m2 = await createMatcher(testCatalog(), embed, lin, { classifier: m.classifier });
+    expect(m2.classifier).toBe(m.classifier);
   });
 });
