@@ -55,6 +55,10 @@ export interface ChunkResult {
   mentionsGuide: boolean;
   /** Raison lisible du statut (ex. "below_threshold", "negation_uncertain", "message_low_confidence"). */
   reason?: string;
+  /** Identifiant stable du morceau : `${messageId}:${index}`. */
+  id: string;
+  /** Embedding du morceau (regroupement hors liste). Absent si le message n'a pas été analysé. */
+  embedding?: Float32Array;
 }
 
 export interface Transcript {
@@ -82,7 +86,7 @@ export interface MessageInput {
   /** Langue déclarée ou détectée pour un message écrit (détection simple, ou choix de l'utilisateur). */
   declaredLang?: DetectedLang;
   /** Mesures audio simples calculées avant transcription (durée, énergie) pour le cas « inaudible ». */
-  audioStats?: { durationSec: number; rms: number };
+  audioStats?: { durationSec: number; rms: number; dynamicRangeDb?: number };
 }
 
 export interface MessageAnalysis {
@@ -101,4 +105,16 @@ export interface MessageAnalysis {
   fingerprint: string;
   englishTranslation?: string;
   transcriptConfidence?: number;
+  /**
+   * Constats appuyés par au moins un morceau qui ne parle PAS du guide : seuls ceux-là peuvent sortir
+   * vers la vue coopérative ou un export (SPEC 4.7).
+   */
+  coopFindings: FindingId[];
+  /** Nombre de morceaux « pas sûr » et « hors liste » (le récap affiche p = somme des « pas sûr »). */
+  notSureCount: number;
+  offListCount: number;
+  /** Raison du statut du message (ex. "too_short", "silence", "unsupported_language", "duplicate_fingerprint"). */
+  reason?: string;
+  /** Embedding du texte nettoyé entier : détection des quasi-doublons. Absent si inaudible ou doublon exact. */
+  messageEmbedding?: Float32Array;
 }

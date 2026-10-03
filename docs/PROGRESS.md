@@ -76,3 +76,61 @@ WDI redistribution of the UN Tourism series (CC BY 4.0) instead of the dashboard
 **Remains**: two clearly marked TODO slots in `docs/DATASHEET.md` (Piper voice list / clip count / hours, and ESC-50
 clip count / SNR levels) to fill from the evaluation manifests once level 3 is final; the README agent copies or
 links the data sheet into README section 6.
+
+## 2026-10-03 — core analysis (`packages/core`, core-analysis agent)
+
+**Built** (pure TS, zero dependency, test-first with a fake embedder of controlled concept vectors and a fake
+transcriber; 100 tests in `packages/core/src/*.test.ts`). API documented in `packages/core/README.md`,
+`docs/ARCHITECTURE.md` §5 and §7 updated.
+- `analyzeMessage` (whole pipeline) and `analyzeAudioMessage` (audio stats → inaudible without transcription, or
+  transcribe with English MT → audio buffer zero-filled → analyse).
+- PII scrubbing (`scrubPii`): introductions in en/fr/de/es ("my name is", "je m'appelle", "ich heiße", "me llamo"…),
+  honorifics and roles ("Frau Müller", "our guide Eric"), thanks + name, capitalised mid-sentence words (en/fr/es,
+  with a list of places/languages/days/brands kept), phone numbers (≥7 digits), e-mails (written or dictated
+  "at … dot com"), @handles. Also applied to Whisper's English translation.
+- Sentence then clause segmentation (contrastive connectors always; and/et/und/y only between clauses of ≥3 words;
+  leading concessive "Although X, Y").
+- Negation per language with non-negating idioms (not only, sans doute, nicht nur, sin duda, never forget) and
+  uncertain forms (litotes, attenuation, en/de double negation; fr/es negative concord is not doubt).
+- Matcher: max or top-k-mean cosine, cross-lingual or same-language, **negation agreement** rule (examples tagged
+  negated/not; acceptance only through examples of the same negation status; inverted meaning → not sure).
+  ≤2 findings per chunk, accept / off-list thresholds as parameters, `score` + pure `decideChunk` for threshold
+  sweeps, `precomputed` example embeddings (cache: 756 examples take 13 s to embed with MiniLM in Node).
+- Inaudible (<3 s, silence, steady noise by frame-energy dynamic range, Whisper phantom transcripts, very low
+  confidence), whole-message not sure (unsupported language, low language probability, low ASR confidence).
+- Guide mentions flagged; `coopFindings` excludes findings supported only by guide chunks.
+- Duplicates: normalised-text fingerprint + near-identical message embedding, within a date window.
+- Off-list clustering (average linkage), recurring when ≥3 distinct visitors, topic never named.
+- Monthly recap: only frozen catalog templates + digits, ≤5 lines, exact SPEC 4.6 rules, rw + FR/EN glosses +
+  audio clip list (+ `missingAudio`). Test asserts on 1000 random months that every line is exactly a catalog
+  template with digits in numeric slots and a frozen finding sentence in `{finding}`; the same check runs on
+  `catalog/catalog.json` automatically once its Kinyarwanda is filled.
+- SMS: GSM-7 check/length/transliteration, splitting into ≤160-char self-contained SMS (lines never split unless
+  too long alone), optional "(i/N)" numbering.
+- Keyword baseline: lists are data; reads the `eval/keywords/<lang>.json` format (`keywordListsFromFiles`);
+  default matching = word start + any continuation (the eval lists are stems, e.g. "welcom", "röst"); "word" mode.
+- `toStoredMessage` / `toReviewChunks` = exactly what SPEC 6 allows to persist; `aggregateCooperative` = numbers
+  per finding over consenting farms only.
+
+**How to run**: `pnpm vitest run packages/core`, `pnpm typecheck`. Sanity run with the real MiniLM and the current
+catalog (756 examples) works end to end: e.g. "Die Röstung war wunderbar, aber der Weg zur Farm war viel zu lang"
+→ P3 (+P11) and N1; "The path was not too long" → not sure (negation); a vague message → not sure.
+
+**Deviations / decisions**
+- Added config fields: `aggregation`, `topK`, `crossLingual`, `inaudibleConfidence`, `minAudioDynamicRangeDb`,
+  `duplicateEmbeddingThreshold`, `duplicateWindowDays`; added types fields `ChunkResult.id/embedding`,
+  `MessageAnalysis.coopFindings/notSureCount/offListCount/reason/messageEmbedding`, `ScrubResult.removed.handles`,
+  optional catalog `templates[].audioParts`. `keywordClassify` takes keyword lists or a catalog (+ match mode).
+- Negation: instead of "negated + matched → not sure" for everything, the negation-agreement rule keeps negative
+  findings that are expressed with a negation ("no shade", "couldn't buy coffee"). The catalog must therefore never
+  contain polarity-inverted phrasings in a finding's examples (written in the core README for the catalog agent).
+- Duplicates are only duplicates within `duplicateWindowDays` (7) when both dates are known, so a common short
+  sentence a month later is not dropped. Two visitors sending the identical sentence within a week count once.
+- The recap throws `RecapError` while the catalog has no Kinyarwanda (never a fallback text).
+- `not-implemented.ts` removed (no stub left).
+
+**Remains**
+- Threshold calibration (`acceptThreshold` 0.6 / `offListThreshold` 0.4 are provisional; with real MiniLM the
+  off-list "cherry picking" sentences score 0.75–0.86 against P2/P3, so the eval must calibrate, possibly with
+  `topk_mean`). `minAudioDynamicRangeDb` (3 dB) and `inaudibleConfidence` (0.2) to check on level-3 noisy audio.
+- PII for German relies on cue phrases only (nouns are capitalised); spelled-out phone numbers not detected.

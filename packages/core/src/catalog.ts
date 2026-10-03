@@ -63,6 +63,13 @@ export interface RecapTemplate {
   id: RecapTemplateId;
   slots: Slot[];
   kinyarwanda: KinyarwandaSentence;
+  /**
+   * Optionnel : clips audio des parties fixes de `kinyarwanda.rw`, découpées aux emplacements
+   * (longueur = nombre d'emplacements dans rw + 1 ; null pour une partie vide). Le récap audio enchaîne
+   * partie, clip de l'emplacement (nombre ou constat), partie... Sans ce champ, `kinyarwanda.audio`
+   * est lu seul (les chiffres sont alors seulement affichés).
+   */
+  audioParts?: (string | null)[];
 }
 
 export interface CatalogProvenance {
@@ -119,6 +126,12 @@ export function validateCatalog(raw: unknown): Catalog {
     const rw = t.kinyarwanda?.rw ?? "";
     for (const s of t.slots ?? []) {
       if (rw && !rw.includes(`{${s}}`)) errors.push(`template ${t.id}: slot {${s}} missing in kinyarwanda`);
+    }
+    if (t.audioParts !== undefined) {
+      const occurrences = (rw.match(/\{(n|k|x|p|finding)\}/g) ?? []).length;
+      if (!Array.isArray(t.audioParts) || t.audioParts.length !== occurrences + 1) {
+        errors.push(`template ${t.id}: audioParts must have ${occurrences + 1} entries`);
+      }
     }
   }
   if (errors.length) throw new CatalogError(`invalid catalog:\n- ${errors.join("\n- ")}`);

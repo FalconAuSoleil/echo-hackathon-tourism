@@ -144,13 +144,15 @@ polarity; examples, keywords and Kinyarwanda empty (filled by the catalog agent)
 
 Rules: numbers stay digits, slots `{n} {k} {x} {p} {finding}` must survive translation (checked by
 `validateCatalog`); every Kinyarwanda string keeps its back-translation and similarity score; nothing is
-translated at runtime. Audio recap = template audio split at slots + number clips + finding clips, all
+translated at runtime. Audio recap = template audio split at slots (optional `templates[].audioParts`: one clip per
+fixed part of `rw` between slots, length = slot occurrences + 1, checked by `validateCatalog`) + number clips + finding clips, all
 pre-generated (if number clips are not produced, the audio recap reads the fixed parts and the UI shows the
 digits; log it as a deviation). Examples used for matching are strictly separate from eval data.
 
 ## 5. Core API (`packages/core/src`)
 
-Signatures exist as stubs (`notImplemented`) in the scaffold; the core agent implements them. Types in `types.ts`.
+Implemented and tested (fake embedder with controlled vectors, fake transcriber). Full reference and rules:
+`packages/core/README.md`. Types in `types.ts`.
 
 ```ts
 // ports.ts — implemented by @echo/models (real) and by fakes in tests
@@ -159,52 +161,78 @@ interface Transcriber { transcribe(audio16k: Float32Array, o?: { language?: stri
 interface Transcript { text; language; languageProbability?; confidence /*0..1*/; durationSec; englishTranslation? }
 interface Ctx { newId(): string; now(): string }
 
-// config.ts
+// config.ts — thresholds provisional until calibrated by the evaluation
 interface AnalysisConfig { acceptThreshold; offListThreshold; maxFindingsPerChunk /*2*/; secondFindingMargin;
-  minTranscriptConfidence; minLanguageProbability; minAudioSeconds /*3*/; minAudioRms; supportedLangs;
-  offListClusterThreshold; offListMinVisitors /*3*/ }
-const DEFAULT_CONFIG: AnalysisConfig   // thresholds provisional until calibrated by the evaluation
+  aggregation /*"max"|"topk_mean"*/; topK; crossLingual; minTranscriptConfidence; inaudibleConfidence;
+  minLanguageProbability; minAudioSeconds /*3*/; minAudioRms; minAudioDynamicRangeDb; supportedLangs;
+  offListClusterThreshold; offListMinVisitors /*3*/; duplicateEmbeddingThreshold; duplicateWindowDays }
+DEFAULT_CONFIG; makeConfig(overrides)
 
 // catalog.ts
-validateCatalog(raw: unknown): Catalog
-fillSlots(template: string, values: Partial<Record<Slot, string|number>>): string
+validateCatalog(raw): Catalog; fillSlots(template, values): string   // templates[].audioParts? optional
 
-// segment.ts — sentences, then clauses on but/mais/aber/pero/however/cependant/jedoch/sin embargo...
-segment(text: string, lang: DetectedLang): { text; sentenceIndex; clauseIndex }[]
-// pii.ts — names, phone numbers, e-mails → [nom]/[numéro]/[e-mail] tokens, before any storage
-scrubPii(text: string, lang: DetectedLang): { text; removed: { names; phones; emails } }
-// negation.ts — per-language cues (not/n't/no/never, ne…pas/jamais/aucun, nicht/kein/nie, no/nunca/ningún)
-detectNegation(chunk: string, lang: DetectedLang): { negated; uncertain; cues: string[] }
-// matcher.ts — embeds catalog examples once; per chunk: max cosine per finding
-createMatcher(catalog, embed: EmbedFn, config): Promise<Matcher>
-Matcher.match(chunks: { text; negation }[], lang): Promise<{ status; findings /*≤2*/; topScores /*top3*/; embedding; reason? }[]>
-cosine(a, b): number
-// analyze.ts — whole pipeline for one message (transcript already produced)
-analyzeMessage(input: MessageInput, deps: { catalog; matcher; config; knownFingerprints? }): Promise<MessageAnalysis>
-GUIDE_WORDS: Record<lang, string[]>
-// duplicates.ts
-fingerprint(text: string): string      // hash of normalised scrubbed text (not reversible)
-// offlist.ts — greedy/agglomerative clustering on embeddings; recurring if ≥3 distinct visitors
-clusterOffList(items: { chunkId; visitorKey; month; text; embedding }[], cfg): { id; chunkIds; distinctVisitors; recurring }[]
-// recap.ts — ONLY frozen catalog sentences + digits, ≤5 lines (SPEC 4.6)
-buildMonthlyRecap({ month, messages: { id; month; status; findings; notSureCount }[], recurringUnknownVisitors }, catalog): { month; lines: RecapLine[] }
-RecapLine = { templateId; findingId?; slots; rw; fr; en; audio: string[] }
-// sms.ts
-isGsm7(text): boolean; toGsm7(text): string; splitSms(lines: string[], maxLen = 160): string[]; smsUri(phone, body): string
-// baseline.ts — keyword method for the comparison mode and the eval (no negation handling on purpose)
-keywordClassify(chunk: string, lang, catalog): FindingId[]
+// whole pipeline
+analyzeMessage(input: MessageInput, deps: { catalog; matcher; config; knownFingerprints?; knownMessages? }): Promise<MessageAnalysis>
+analyzeAudioMessage({ id, receivedAt, audio16k }, { ...deps, transcriber, withEnglishTranslation? }): Promise<MessageAnalysis>
+  // stats → inaudible without transcription, or transcribe; the audio buffer is zero-filled afterwards
+MessageAnalysis = { id; receivedAt; month; source; lang; status; reason?; scrubbedText; chunks: ChunkResult[];
+  findings: {id, score}[]; coopFindings: FindingId[] /*not from guide chunks*/; notSureCount; offListCount;
+  fingerprint; messageEmbedding?; englishTranslation? /*scrubbed*/; transcriptConfidence? }
+ChunkResult = { id /*`${messageId}:${i}`*/; text; sentenceIndex; clauseIndex; status; findings /*≤2*/; topScores;
+  negation; mentionsGuide; reason?; embedding? }
+toStoredMessage(analysis): StoredMessage        // exactly the `messages` store row (no text)
+toReviewChunks(analysis): ReviewChunk[]         // exactly the `reviewChunks` rows (scrubbed not-sure / off-list text)
+
+// building blocks
+segment(text, lang): { text; sentenceIndex; clauseIndex }[]     // splitSentences, splitClauses
+scrubPii(text, lang): { text; removed: { names; phones; emails; handles } }   // [nom] [numéro] [e-mail] [pseudo]
+detectNegation(chunk, lang): { negated; uncertain; cues }
+detectTextLanguage(text): { lang; probability }                 // written messages only
+createMatcher(catalog, embed, config, { precomputed?: Map<text, Float32Array> }): Promise<Matcher>
+Matcher.match(chunks, lang) / .score(chunks, lang) / .embed / .examples
+scoreFindings(...), decideChunk(rawScores, negation, config)   // pure: threshold sweeps in the eval
+exportExampleEmbeddings(matcher)                               // cache for the app (13 s to embed 756 examples in Node)
+mentionsGuide(text, lang); GUIDE_WORDS; isPhantomTranscript(text)
+fingerprint(text); checkDuplicate(candidate, known, cfg)
+computeAudioStats(samples, sampleRate) → { durationSec; rms; dynamicRangeDb }; audioInaudibleReason(stats, cfg)
+clusterOffList(items, cfg): { id; chunkIds; distinctVisitors; months; recurring }[]; recurringUnknownVisitors(clusters)
+buildMonthlyRecap({ month, messages: MonthMessage[], recurringUnknownVisitors }, catalog): { month; lines; stats }
+RecapLine = { templateId; findingId?; slots; rw; fr; en; audio: string[]; missingAudio: string[] }
+recapRwLines(recap); recapAudio(recap)
+isGsm7; gsm7Length; toGsm7; splitSms(lines, maxLen = 160, { numbered? }); smsUri(phone, body)
+keywordClassify(chunk, lang, lists | catalog, mode = "prefix"); keywordAnalyze(...); keywordListsFromFiles(eval/keywords/*.json)
+aggregateCooperative(farms: { farmId; consent; messages: { month; status; coopFindings }[] }[], catalog, { months? })
 ```
 
-### Decision rules (to implement in core, tested with fakes)
-- **Inaudible** (message): `audioStats.durationSec < 3`, RMS < `minAudioRms`, or empty/near-empty transcript → `status: "inaudible"`, no chunks counted, no guess.
-- **Whole message not sure**: detected language ∉ `supportedLangs`, `languageProbability < minLanguageProbability`, or `confidence < minTranscriptConfidence` → every chunk `not_sure` (`reason: "message_low_confidence"`).
-- **Chunk**: best score ≥ `acceptThreshold` → `matched` (add a 2nd finding only if it also passes the threshold and is within `secondFindingMargin`; max 2). `offListThreshold ≤ best < acceptThreshold` → `not_sure`. best < `offListThreshold` → `off_list`.
-- **Negation**: a negated chunk must not count the matched finding as is (e.g. "path was not too long" must not give N1). Default: negated + matched → `not_sure` (`reason: "negation"`), unless the core agent implements a safe, tested rule; `uncertain` → `not_sure`.
-- **Duplicates**: same `fingerprint` as a stored message → `status: "duplicate"`, not counted.
-- **Guide**: chunk containing a `GUIDE_WORDS` word → `mentionsGuide: true` (host only, never in the cooperative view).
+### Decision rules (implemented in core, tested with fakes)
+- **Inaudible** (message, never counted, no guess): audio < `minAudioSeconds`, RMS < `minAudioRms`, frame-energy
+  dynamic range < `minAudioDynamicRangeDb` (steady noise without speech), Whisper phantom transcript
+  (`[Music]`, Amara.org subtitle credits…), ASR confidence < `inaudibleConfidence` (too noisy), empty text.
+- **Whole message not sure**: language ∉ `supportedLangs` (`unsupported_language`), `languageProbability <
+  minLanguageProbability` (`low_language_probability`), or `confidence < minTranscriptConfidence`
+  (`message_low_confidence`) → every chunk `not_sure`, nothing counted.
+- **Chunk**: score per finding = max (or top-k mean) cosine with its examples (all languages, or detected language
+  only with `crossLingual: false`). Best ≥ `acceptThreshold` → `matched` (2nd finding only if it also passes and is
+  within `secondFindingMargin`; max 2). `offListThreshold ≤ best < acceptThreshold` → `not_sure`. Below → `off_list`.
+- **Negation agreement** (the "safe, tested rule"): every catalog example is tagged negated or not with
+  `detectNegation`. A chunk is only accepted through examples with the same negation status. If the closest example
+  has the opposite status, the meaning is inverted → never counted, `not_sure` (`reason: "negation"`). So "the path was
+  not too long" never gives N1 and "the food was not good" never gives P4, while "there was no shade" still gives N8
+  through its negated examples. Uncertain negation (litotes, attenuation, en/de double negation) → `not_sure`.
+  Catalog rule: examples phrase the finding itself, never a polarity-inverted version of it.
+- **Duplicates**: same `fingerprint` (normalised scrubbed text) or message-embedding cosine ≥
+  `duplicateEmbeddingThreshold`, within `duplicateWindowDays` when dates are known → `status: "duplicate"`.
+- **Guide**: chunk containing a `GUIDE_WORDS` word → `mentionsGuide: true`; counts for the host, excluded from
+  `coopFindings` (cooperative view and exports).
 - **Message findings**: union over chunks, each finding counted once per message ("k out of n" counts visitors).
-- **Recap**: n = non-duplicate, non-inaudible messages of the month (`not_sure` messages count in n? → yes as feedback received; their chunks count in p). Keep = most cited positive. Fix = most cited negative if ≥2 mentions or cited in ≥2 consecutive months; tie → longest streak; else `nothing_urgent`. `fix_streak` when streak x ≥ 2. Unknown topic line if a recurring off-list cluster exists. `not_understood` with p = number of not-sure chunks. No messages → single `no_feedback` line.
-- **Distinct visitors** (off-list rule): visitor key = message id after duplicate removal (phone numbers are never stored, so two messages from the same visitor count twice — documented limit).
+- **Recap**: n = non-duplicate, non-inaudible messages of the month (a `not_sure` message counts in n; its chunks in p).
+  Keep = most cited positive (tie → longest streak, then catalog order; no line if none). Fix = most cited negative
+  among those with ≥2 mentions or cited in ≥2 consecutive calendar months; tie → longest streak; else
+  `nothing_urgent`. `fix_streak` when streak x ≥ 2. Unknown-topic line if `recurringUnknownVisitors > 0`.
+  `not_understood` with p = number of not-sure chunks. No messages → single `no_feedback` line. ≤ 5 lines.
+  Throws `RecapError` if a frozen Kinyarwanda sentence is missing (never a fallback text).
+- **Distinct visitors** (off-list rule): visitor key = message id after duplicate removal (phone numbers are never
+  stored, so two messages from the same visitor count twice — documented limit).
 
 ## 6. Message pipeline (app)
 
@@ -213,7 +241,7 @@ WhatsApp "Share" ─▶ Web Share Target (POST multipart, handled in the service
                     └▶ IndexedDB `queue` (audio Blob or text) ─▶ UI "N messages waiting"
 Worker (on demand, offline):
   audio ─▶ decode to 16 kHz mono (OfflineAudioContext; WhatsApp sends .opus/.ogg — Chrome decodes Opus)
-        ─▶ audioStats (duration, RMS) ─▶ Transcriber.transcribe(withEnglishTranslation)
+        ─▶ core.analyzeAudioMessage: audioStats (duration, RMS, dynamic range) ─▶ Transcriber.transcribe(withEnglishTranslation)
         ─▶ DELETE the audio Blob from `queue` immediately
   text  ─▶ (no transcription; language = simple detector or user choice)
   ─▶ core.analyzeMessage ─▶ store only what SPEC 6 allows ─▶ recompute off-list clusters ─▶ recap
@@ -231,12 +259,12 @@ Fallback: file picker "Import a voice message" and paste box for text.
 | Store | Key | Fields | Notes |
 |---|---|---|---|
 | `queue` | `id` | `receivedAt`, `kind: "audio"|"text"`, `blob?`, `text?`, `mime?` | Temporary inbox. Audio deleted right after transcription; text deleted after analysis. |
-| `messages` | `id` | `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `notSureCount`, `offListCount`, `fingerprint` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
-| `reviewChunks` | `id` | `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?`, `mentionsGuide`, `embedding` (Float32Array, for clustering), `clusterId?` | The "To be read by a person" list. |
+| `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint`, `embedding?` (message embedding, near-duplicates), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
+| `reviewChunks` | `id` | `ReviewChunk` from `toReviewChunks`: `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?` (scrubbed), `mentionsGuide`, `reason?`, `embedding` (Float32Array, for clustering), `clusterId?` (set by the app) | The "To be read by a person" list. |
 | `recaps` | `month` | `lines: RecapLine[]`, `builtAt`, `smsOpenedAt?` | |
 | `settings` | `key` | `hostPhone` (the host's own number), `pinHash?`, `coopConsent`, `asrModel`, `thresholds?` | |
 
-`fingerprint` (non-reversible hash) and `embedding` are derived technical data needed for duplicates and
+`fingerprint` (non-reversible hash) and the embeddings are derived technical data needed for duplicates and
 off-list clustering; documented in the README privacy section. Demo data (3 simulated months) is stored with
 `synthetic: true` and shown with a "synthetic" badge. Optional PIN (SPEC 6 bonus): hash with PBKDF2 (WebCrypto).
 

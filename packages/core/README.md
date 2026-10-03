@@ -1,0 +1,93 @@
+# @echo/core
+
+Pure TypeScript analysis logic of Echo, shared by the web app (Web Worker) and the evaluation (`pnpm eval`),
+so the numbers measured are the numbers of the shipped code. Zero dependency, no I/O, no model runtime:
+models come in through two ports (`EmbedFn`, `Transcriber`) implemented by `@echo/models` and by fakes in
+the tests.
+
+```bash
+pnpm vitest run packages/core      # tests (fake embedder with controlled vectors, fake transcriber)
+pnpm --filter @echo/core typecheck
+```
+
+## Pipeline of one message (SPEC 4.3, 6, 7)
+
+```
+audio ─▶ computeAudioStats ─▶ inaudible? (<3 s, silence, steady noise) ──▶ status "inaudible", not transcribed
+      ─▶ Transcriber.transcribe(withEnglishTranslation) ─▶ audio buffer zero-filled      (analyzeAudioMessage)
+text / transcript ─▶ phantom transcript? / very low confidence ─▶ "inaudible"
+  ─▶ language (Whisper, declared, or detectTextLanguage for text)
+  ─▶ scrubPii (names, phones, e-mails, @handles)  ← nothing unscrubbed leaves analyzeMessage
+  ─▶ fingerprint / message embedding ─▶ "duplicate"
+  ─▶ unsupported language, low language probability, low ASR confidence ─▶ whole message "not_sure"
+  ─▶ segment (sentences, then clauses) ─▶ detectNegation + mentionsGuide per chunk
+  ─▶ Matcher: cosine vs catalog examples, negation agreement ─▶ matched (≤2 findings) | not_sure | off_list
+  ─▶ MessageAnalysis ─▶ toStoredMessage (no text) + toReviewChunks (scrubbed not-sure / off-list text only)
+```
+
+## API
+
+| Module | Exports | Notes |
+|---|---|---|
+| `config.ts` | `AnalysisConfig`, `DEFAULT_CONFIG`, `makeConfig(overrides)` | Thresholds provisional until calibrated by the evaluation. |
+| `analyze.ts` | `analyzeMessage(input, deps)`, `GUIDE_WORDS`, `mentionsGuide`, `isPhantomTranscript` | `deps = { catalog, matcher, config, knownFingerprints?, knownMessages? }`. |
+| `audio.ts`, `audio-stats.ts` | `analyzeAudioMessage({id, receivedAt, audio16k}, {...deps, transcriber})`, `computeAudioStats`, `audioInaudibleReason` | Zero-fills the audio buffer after transcription (also on error). |
+| `matcher.ts` | `createMatcher(catalog, embed, config, {precomputed?})`, `Matcher.match/score/embed/examples`, `scoreFindings`, `decideChunk`, `cosine`, `exportExampleEmbeddings` | `score` + `decideChunk` let the eval sweep thresholds without re-embedding. `precomputed` = cache of example embeddings (13 s for 756 examples with MiniLM in Node). |
+| `segment.ts` | `segment(text, lang)`, `splitSentences`, `splitClauses`, `CLAUSE_SPLITTERS`, `COORDINATORS` | Contrastive connectors always split; and/et/und/y only between two clauses of ≥3 words (or after a comma). |
+| `negation.ts` | `detectNegation(chunk, lang)` → `{negated, uncertain, cues}` | not/n't/never/no/without…, ne…pas/jamais/rien/aucun/sans, ne…plus, nicht/kein*/nie/ohne, no/nunca/nada/ningún/tampoco/sin. Non-negating idioms removed (not only, sans doute, nicht nur, sin duda, never forget). Litotes/attenuation (not bad, pas mal, nicht wirklich, no estuvo mal) and en/de double negation → `uncertain`. |
+| `pii.ts` | `scrubPii(text, lang)` → `{text, removed}`, `PII_TOKENS` | Tokens `[nom]`, `[numéro]`, `[e-mail]`, `[pseudo]`. |
+| `language.ts` | `detectTextLanguage(text)` | Stop words + letters; `unknown` when unsure (→ whole message not sure). |
+| `duplicates.ts` | `fingerprint`, `checkDuplicate`, `KnownMessage` | Exact (normalised-text hash) and near (message-embedding cosine ≥ 0.98), within `duplicateWindowDays`. |
+| `offlist.ts` | `clusterOffList(items, cfg)`, `recurringUnknownVisitors(clusters)` | Average-linkage clustering; `recurring` when ≥3 distinct visitors. Never names the topic. |
+| `recap.ts` | `buildMonthlyRecap({month, messages, recurringUnknownVisitors}, catalog)`, `renderLine`, `findingStreak`, `recapRwLines`, `recapAudio`, `RecapError` | Only frozen catalog sentences + digits; each line has `rw`, `fr`/`en` glosses, `audio` clip list, `missingAudio`. Throws if the frozen Kinyarwanda is missing (never a fallback text). |
+| `sms.ts` | `splitSms(lines, maxLen=160, {numbered?})`, `toGsm7`, `isGsm7`, `gsm7Length`, `smsUri` | Lines are transliterated to GSM-7 and never split across SMS unless one line alone exceeds the limit. |
+| `baseline.ts` | `keywordClassify(chunk, lang, lists \| catalog)`, `keywordAnalyze`, `KeywordLists`, `keywordListsFromCatalog` | Keyword lists are data (`eval/keywords/`); `word*` = prefix. Naive on purpose (no negation). |
+| `storage.ts` | `toStoredMessage(analysis)`, `toReviewChunks(analysis)` | Exactly what SPEC 6 allows to persist. |
+| `coop.ts` | `aggregateCooperative(farms, catalog, {months?})` | Consenting farms only, `coopFindings` only (never guide chunks), numbers only. |
+| `catalog.ts` | `validateCatalog`, `fillSlots`, types | Optional `templates[].audioParts` (clips of the fixed parts between slots). |
+
+## Decision rules
+
+- **Inaudible** (never counted, never guessed): audio < `minAudioSeconds` (3 s), RMS < `minAudioRms`,
+  dynamic range (p90/p10 frame energy) < `minAudioDynamicRangeDb` (steady noise), Whisper phantom transcript
+  (`[Music]`, Amara.org credits…), ASR confidence < `inaudibleConfidence`, empty text.
+- **Whole message not sure**: language ∉ `supportedLangs`, `languageProbability < minLanguageProbability`,
+  or ASR confidence < `minTranscriptConfidence`. All chunks `not_sure`, nothing counted.
+- **Chunk**: per finding, score = max (or top-k mean, `aggregation`) cosine with its examples, across languages
+  (`crossLingual: true`) or the detected language only. Best ≥ `acceptThreshold` → `matched`; a 2nd finding
+  if it also passes and is within `secondFindingMargin`; at most `maxFindingsPerChunk` (2).
+  Between `offListThreshold` and `acceptThreshold` → `not_sure`; below `offListThreshold` → `off_list`.
+- **Negation agreement**: each catalog example is tagged negated or not. A chunk can only be *accepted* through
+  examples with the same negation status. If the closest example has the opposite status (e.g. "the path was
+  not too long" vs "the path was too long", or "the food was not good" vs "the food was delicious"), the meaning
+  is inverted: never counted, `not_sure` (`reason: "negation"`). Negative findings phrased with a negation
+  ("there was no shade", "we couldn't buy coffee") still match their negated examples.
+  **Catalog authors**: phrase each example as the finding itself; never put a polarity-inverted phrasing
+  (e.g. "the path wasn't long") in a finding's examples.
+  Uncertain negation → `not_sure` (`negation_uncertain`).
+- **Guide**: chunks mentioning the guide are flagged `mentionsGuide`; they count for the host's recap but
+  not in `coopFindings` (cooperative view, exports).
+- **Message findings**: union over chunks, each finding once per message ("k out of n" counts messages).
+- **Recap**: n = messages of the month that are neither duplicate nor inaudible (a `not_sure` message counts as
+  feedback received). Keep = most cited positive (tie: longest streak, then catalog order; no line if none).
+  Fix = most cited negative among those with ≥2 mentions or cited in ≥2 consecutive calendar months
+  (tie: longest streak); `fix_streak` with x = streak when x ≥ 2; otherwise `nothing_urgent`.
+  `unknown_topic` if `recurringUnknownVisitors > 0`; `not_understood` with p = sum of not-sure chunks.
+  No message → only `no_feedback`. At most 5 lines.
+
+## Tests
+
+`src/test-fixtures.ts` (test-only, not exported): a fake embedder whose vectors are built from concept axes
+shared across languages (so paraphrases match across languages and negation is nearly ignored, like a real
+model), a fake transcriber, and a test catalog with **fake** Kinyarwanda strings. `recap.test.ts` asserts on
+1000 random months that every recap line is exactly a catalog template with digits in the numeric slots and a
+frozen finding sentence in `{finding}`; the same check runs against `catalog/catalog.json` once its
+Kinyarwanda is filled.
+
+## Known limits
+
+- PII: German capitalises all nouns, so for `de` only introductions, honorifics/roles ("Frau Müller",
+  "Guide Jean") and thanks ("danke Jean") remove names. Spelled-out phone numbers are not detected.
+- Distinct visitors for off-list topics = message ids (phone numbers are never stored).
+- Duplicates: two different visitors sending the exact same short sentence within the window count once.
+- Clause splitting is rule-based; German "aber" used as a particle can split a sentence.

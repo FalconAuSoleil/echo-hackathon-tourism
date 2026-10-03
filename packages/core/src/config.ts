@@ -10,20 +10,40 @@ export interface AnalysisConfig {
   maxFindingsPerChunk: number;
   /** Écart max entre le 1er et le 2e score pour retenir aussi le 2e constat. */
   secondFindingMargin: number;
+  /** Score d'un constat : similarité max avec ses exemples, ou moyenne des k meilleures. */
+  aggregation: "max" | "topk_mean";
+  /** k pour aggregation = "topk_mean". */
+  topK: number;
+  /**
+   * true : compare à tous les exemples, toutes langues confondues (modèle multilingue).
+   * false : seulement aux exemples de la langue détectée quand le constat en a.
+   */
+  crossLingual: boolean;
   /** Confiance de transcription sous laquelle tout le message passe en « pas sûr ». */
   minTranscriptConfidence: number;
+  /** Confiance si basse que le message est traité comme trop bruité : « inaudible » (SPEC 7). */
+  inaudibleConfidence: number;
   /** Probabilité de langue sous laquelle tout le message passe en « pas sûr ». */
   minLanguageProbability: number;
   /** Message audio plus court : « inaudible » (SPEC 7). */
   minAudioSeconds: number;
   /** Énergie RMS sous laquelle l'audio est considéré comme silence. */
   minAudioRms: number;
+  /**
+   * Écart (dB) entre trames fortes (90e centile) et trames faibles (10e centile) sous lequel l'audio
+   * est un bruit continu sans parole distincte : « inaudible ». 0 désactive la règle.
+   */
+  minAudioDynamicRangeDb: number;
   /** Langues traitées ; une autre langue détectée met le message en « pas sûr ». */
   supportedLangs: string[];
-  /** Regroupement hors liste : similarité min pour rejoindre un groupe. */
+  /** Regroupement hors liste : similarité moyenne min pour fusionner deux groupes. */
   offListClusterThreshold: number;
   /** Nombre de visiteurs distincts pour signaler un sujet inconnu qui revient (SPEC 4.5). */
   offListMinVisitors: number;
+  /** Cosinus entre messages entiers au-dessus duquel c'est un quasi-doublon. */
+  duplicateEmbeddingThreshold: number;
+  /** Fenêtre (jours) dans laquelle un message identique est un doublon, quand les deux dates sont connues. */
+  duplicateWindowDays: number;
 }
 
 export const DEFAULT_CONFIG: AnalysisConfig = {
@@ -31,11 +51,27 @@ export const DEFAULT_CONFIG: AnalysisConfig = {
   offListThreshold: 0.4,
   maxFindingsPerChunk: 2,
   secondFindingMargin: 0.08,
+  aggregation: "max",
+  topK: 3,
+  crossLingual: true,
   minTranscriptConfidence: 0.45,
+  inaudibleConfidence: 0.2,
   minLanguageProbability: 0.5,
   minAudioSeconds: 3,
   minAudioRms: 0.005,
+  minAudioDynamicRangeDb: 3,
   supportedLangs: ["en", "fr", "de", "es"],
   offListClusterThreshold: 0.55,
   offListMinVisitors: 3,
+  duplicateEmbeddingThreshold: 0.98,
+  duplicateWindowDays: 7,
 };
+
+/** Configuration complète à partir de surcharges partielles (ex. seuils calibrés gardés dans les réglages). */
+export function makeConfig(overrides: Partial<AnalysisConfig> = {}): AnalysisConfig {
+  const c = { ...DEFAULT_CONFIG, ...overrides };
+  if (!(c.offListThreshold <= c.acceptThreshold)) throw new Error("offListThreshold must be <= acceptThreshold");
+  if (c.maxFindingsPerChunk < 1 || c.maxFindingsPerChunk > 2) throw new Error("maxFindingsPerChunk must be 1 or 2");
+  if (c.topK < 1) throw new Error("topK must be >= 1");
+  return c;
+}
