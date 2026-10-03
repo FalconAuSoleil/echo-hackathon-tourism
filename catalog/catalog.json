@@ -1,0 +1,627 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.0-scaffold",
+  "provenance": {
+    "examples": "synthetic",
+    "kinyarwanda": {
+      "disclaimer": "Machine translation, not validated by a Kinyarwanda speaker / Traduction automatique, non validée par un locuteur",
+      "mtModel": null,
+      "similarityModel": null,
+      "ttsModel": null,
+      "ttsLicense": null,
+      "floresReference": null,
+      "acceptThreshold": null
+    }
+  },
+  "languages": [
+    "en",
+    "fr",
+    "de",
+    "es"
+  ],
+  "findings": [
+    {
+      "id": "P1",
+      "labels": {
+        "fr": "Accueil chaleureux",
+        "en": "Warm welcome"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P2",
+      "labels": {
+        "fr": "Visite du champ et des caféiers intéressante",
+        "en": "Interesting tour of the field and coffee trees"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P3",
+      "labels": {
+        "fr": "Torréfaction ou dégustation appréciée",
+        "en": "Roasting or tasting enjoyed"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P4",
+      "labels": {
+        "fr": "Repas apprécié",
+        "en": "Meal enjoyed"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P5",
+      "labels": {
+        "fr": "Explications claires sur le café et la ferme",
+        "en": "Clear explanations about coffee and the farm"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P6",
+      "labels": {
+        "fr": "Expérience authentique, vie de la ferme",
+        "en": "Authentic experience, farm life"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P7",
+      "labels": {
+        "fr": "Paysage, cadre",
+        "en": "Landscape, setting"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P8",
+      "labels": {
+        "fr": "Bon rapport qualité-prix",
+        "en": "Good value for money"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P9",
+      "labels": {
+        "fr": "Envie d'acheter du café",
+        "en": "Wants to buy coffee"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P10",
+      "labels": {
+        "fr": "Envie de revenir ou de recommander",
+        "en": "Wants to come back or recommend"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "P11",
+      "labels": {
+        "fr": "Satisfaction générale",
+        "en": "General satisfaction"
+      },
+      "polarity": "positive",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N1",
+      "labels": {
+        "fr": "Chemin ou accès trop long ou difficile",
+        "en": "Path or access too long or difficult"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N2",
+      "labels": {
+        "fr": "Prix pas clairs ou annoncés trop tard",
+        "en": "Prices unclear or announced too late"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N3",
+      "labels": {
+        "fr": "Visite trop longue",
+        "en": "Visit too long"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N4",
+      "labels": {
+        "fr": "Visite trop courte",
+        "en": "Visit too short"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N5",
+      "labels": {
+        "fr": "Difficulté à se comprendre",
+        "en": "Hard to understand each other"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N6",
+      "labels": {
+        "fr": "Repas absent ou insuffisant",
+        "en": "No meal or not enough food"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N7",
+      "labels": {
+        "fr": "Toilettes ou hygiène",
+        "en": "Toilets or hygiene"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N8",
+      "labels": {
+        "fr": "Manque d'eau, d'ombre ou de pause",
+        "en": "Lack of water, shade or breaks"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N9",
+      "labels": {
+        "fr": "Attente, horaires non respectés",
+        "en": "Waiting, schedule not kept"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    },
+    {
+      "id": "N10",
+      "labels": {
+        "fr": "Impossible d'acheter du café ou un souvenir",
+        "en": "Could not buy coffee or a souvenir"
+      },
+      "polarity": "negative",
+      "examples": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "examplesSynthetic": true,
+      "keywords": {
+        "en": [],
+        "fr": [],
+        "de": [],
+        "es": []
+      },
+      "kinyarwanda": null
+    }
+  ],
+  "templates": [
+    {
+      "id": "volume",
+      "slots": [
+        "n"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "Ce mois-ci : {n} retours.",
+          "en": "This month: {n} feedback messages."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "keep",
+      "slots": [
+        "finding",
+        "k",
+        "n"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "À garder : {finding} ({k} sur {n}).",
+          "en": "Keep doing: {finding} ({k} out of {n})."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "fix",
+      "slots": [
+        "finding",
+        "k",
+        "n"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "À corriger en priorité : {finding} ({k} sur {n}).",
+          "en": "Fix first: {finding} ({k} out of {n})."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "fix_streak",
+      "slots": [
+        "finding",
+        "k",
+        "n",
+        "x"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "À corriger en priorité : {finding} ({k} sur {n}), {x}e mois de suite.",
+          "en": "Fix first: {finding} ({k} out of {n}), month {x} in a row."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "nothing_urgent",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "Rien d'urgent à corriger.",
+          "en": "Nothing urgent to fix."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "unknown_topic",
+      "slots": [
+        "k"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "Un sujet que l'outil ne connaît pas revient chez {k} visiteurs : demandez à une personne de lire ces remarques.",
+          "en": "A topic the tool does not know comes back from {k} visitors: ask a person to read these remarks."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "not_understood",
+      "slots": [
+        "p"
+      ],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "{p} remarques pas comprises : demandez à une personne.",
+          "en": "{p} remarks not understood: ask a person."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "no_feedback",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "",
+        "source": {
+          "fr": "Pas de retour ce mois-ci.",
+          "en": "No feedback this month."
+        },
+        "backTranslation": {},
+        "similarity": null,
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    }
+  ]
+}

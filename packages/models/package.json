@@ -1,0 +1,21 @@
+{
+  "name": "@echo/models",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "transformers.js adapters implementing the @echo/core ports (Transcriber, EmbedFn), shared by the web worker and the evaluation",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@echo/core": "workspace:*",
+    "@huggingface/transformers": "^4.3.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

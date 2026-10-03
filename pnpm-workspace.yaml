@@ -1,0 +1,15 @@
+packages:
+  - packages/*
+  - apps/*
+  - eval
+
+# pnpm 11 n'exécute les scripts d'installation que des paquets autorisés ici.
+# onnxruntime-node : binaire natif utilisé par transformers.js dans l'évaluation (Node).
+allowBuilds:
+  esbuild: true
+  onnxruntime-node: true
+  protobufjs: true
+  sharp: true
+
+minimumReleaseAgeExclude:
+  - vite-plugin-pwa@2.0.0

@@ -1,0 +1,11 @@
+# Outillage Python de build uniquement (jamais au runtime). Installer dans /root/echo/.venv :
+#   .venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch
+#   .venv/bin/pip install -r tools/requirements.txt
+transformers>=4.46
+sentencepiece
+sacremoses
+sentence-transformers
+datasets
+soundfile
+numpy
+scipy

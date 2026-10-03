@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://echo.local/catalog.schema.json",
+  "title": "Echo findings catalog",
+  "description": "Closed list of findings and frozen Kinyarwanda recap sentences (SPEC 5). TypeScript mirror: packages/core/src/catalog.ts.",
+  "type": "object",
+  "required": ["schemaVersion", "version", "provenance", "languages", "findings", "templates"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "version": { "type": "string" },
+    "provenance": {
+      "type": "object",
+      "required": ["examples", "kinyarwanda"],
+      "properties": {
+        "examples": { "const": "synthetic" },
+        "kinyarwanda": {
+          "type": "object",
+          "required": ["disclaimer"],
+          "properties": {
+            "disclaimer": { "type": "string" },
+            "mtModel": { "type": ["string", "null"] },
+            "similarityModel": { "type": ["string", "null"] },
+            "ttsModel": { "type": ["string", "null"] },
+            "ttsLicense": { "type": ["string", "null"] },
+            "floresReference": {
+              "type": ["object", "null"],
+              "properties": { "metric": { "type": "string" }, "value": { "type": "number" }, "source": { "type": "string" } }
+            },
+            "acceptThreshold": { "type": ["number", "null"] }
+          }
+        }
+      }
+    },
+    "languages": { "type": "array", "items": { "$ref": "#/$defs/visitorLang" } },
+    "findings": { "type": "array", "minItems": 21, "maxItems": 21, "items": { "$ref": "#/$defs/finding" } },
+    "templates": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+    "numbers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["rw", "audio"],
+        "properties": { "rw": { "type": "string" }, "audio": { "type": ["string", "null"] } }
+      }
+    }
+  },
+  "$defs": {
+    "visitorLang": { "enum": ["en", "fr", "de", "es"] },
+    "perLang": {
+      "type": "object",
+      "required": ["en", "fr", "de", "es"],
+      "properties": {
+        "en": { "type": "array", "items": { "type": "string" } },
+        "fr": { "type": "array", "items": { "type": "string" } },
+        "de": { "type": "array", "items": { "type": "string" } },
+        "es": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "kinyarwanda": {
+      "type": "object",
+      "required": ["rw", "source", "backTranslation", "similarity", "audio", "status"],
+      "properties": {
+        "rw": { "type": "string" },
+        "source": { "type": "object", "required": ["fr", "en"], "properties": { "fr": { "type": "string" }, "en": { "type": "string" } } },
+        "backTranslation": { "type": "object", "properties": { "fr": { "type": "string" }, "en": { "type": "string" } } },
+        "similarity": { "type": ["number", "null"] },
+        "attempts": { "type": "integer" },
+        "audio": { "type": ["string", "null"] },
+        "status": { "enum": ["machine_translated_unvalidated", "speaker_validated"] }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["id", "labels", "polarity", "examples", "examplesSynthetic", "keywords", "kinyarwanda"],
+      "properties": {
+        "id": { "pattern": "^(P([1-9]|1[01])|N([1-9]|10))$" },
+        "labels": { "type": "object", "required": ["fr", "en"], "properties": { "fr": { "type": "string" }, "en": { "type": "string" } } },
+        "polarity": { "enum": ["positive", "negative"] },
+        "examples": { "$ref": "#/$defs/perLang" },
+        "examplesSynthetic": { "const": true },
+        "keywords": { "$ref": "#/$defs/perLang" },
+        "kinyarwanda": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/kinyarwanda" }] }
+      }
+    },
+    "template": {
+      "type": "object",
+      "required": ["id", "slots", "kinyarwanda"],
+      "properties": {
+        "id": { "enum": ["volume", "keep", "fix", "fix_streak", "nothing_urgent", "unknown_topic", "not_understood", "no_feedback"] },
+        "slots": { "type": "array", "items": { "enum": ["n", "k", "x", "p", "finding"] } },
+        "kinyarwanda": { "$ref": "#/$defs/kinyarwanda" }
+      }
+    }
+  }
+}

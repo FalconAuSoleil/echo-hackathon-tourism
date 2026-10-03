@@ -1,0 +1,27 @@
+{
+  "name": "echo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Echo: offline visit-feedback logbook for small rural tourism hosts (Small AI for Development hackathon)",
+  "type": "module",
+  "packageManager": "pnpm@11.2.2",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "dev": "pnpm --filter @echo/web dev",
+    "build": "pnpm --filter @echo/web build",
+    "preview": "pnpm --filter @echo/web preview",
+    "eval": "pnpm --filter @echo/eval eval",
+    "models:download": "node tools/scripts/download-models.mjs",
+    "smoke:models": "pnpm --filter @echo/eval smoke"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

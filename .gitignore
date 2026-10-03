@@ -1,0 +1,29 @@
+# Dépendances et builds
+node_modules/
+dist/
+dev-dist/
+*.tsbuildinfo
+.vite/
+coverage/
+
+# Python (outillage de build uniquement)
+.venv/
+__pycache__/
+*.pyc
+
+# Gros binaires recréables par script
+models/*
+!models/README.md
+datasets/
+eval/data/generated/
+eval/audio/generated/
+eval/results/raw/
+tools/cache/
+*.onnx
+*.onnx_data
+
+# Divers
+.env
+.DS_Store
+*.log
+nohup.out

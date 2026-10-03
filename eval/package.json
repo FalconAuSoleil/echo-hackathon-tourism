@@ -1,0 +1,23 @@
+{
+  "name": "@echo/eval",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Three-level evaluation (SPEC 9) running the same models and the same @echo/core code as the app",
+  "scripts": {
+    "eval": "tsx src/run.ts",
+    "smoke": "tsx src/smoke.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@echo/core": "workspace:*",
+    "@echo/models": "workspace:*",
+    "@huggingface/transformers": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.3"
+  }
+}
