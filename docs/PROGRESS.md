@@ -134,3 +134,60 @@ catalog (756 examples) works end to end: e.g. "Die Röstung war wunderbar, aber 
   off-list "cherry picking" sentences score 0.75–0.86 against P2/P3, so the eval must calibrate, possibly with
   `topk_mean`). `minAudioDynamicRangeDb` (3 dB) and `inaudibleConfidence` (0.2) to check on level-3 noisy audio.
 - PII for German relies on cue phrases only (nouns are capitalised); spelled-out phone numbers not detected.
+
+## 2026-10-04 — evaluation corpus, keywords, test audio, demo samples (eval-corpus agent)
+
+**Built** (all SYNTHETIC, labelled as such in every README and manifest)
+- `eval/data/feedback.jsonl`: 250 synthetic visitor feedbacks (en 62, fr 62, de 63, es 63), authored in
+  `eval/data/src/fb_*.py`, validated and written by `python3 eval/data/build_feedback.py` (spans are exact
+  substrings, composition checks). Per feedback: `expectedFindings`, `mustNotFindings`, `chunks` (span + kind
+  `finding` | `not_sure` | `off_list` (+topic) | `negated` (+negates)), flags (negation cancels/inherent,
+  multiFinding, typo, length, offList + topics, ambiguous, picking, mentionsGuide). Composition: 28 off-list (11 %,
+  25 distinct non-picking topics, none ×3), exactly 3 coffee-cherry picking (en-026, fr-025, de-025), 17 ambiguous,
+  23 cancelling negations, 46 inherent negations ("no shade" → N8), 46 multi-finding, 21 typos, 18 very short,
+  8 long, every finding 8–21 times. Schema and semantics: `eval/data/README.md`.
+- `eval/data/check_disjoint.py`: near-duplicate check feedback vs `catalog/catalog.json` examples. First run against
+  the catalog's 756 examples found 11 near-duplicates; 9 feedbacks rewritten; now passes. Re-run when the catalog changes.
+- `eval/keywords/{en,fr,de,es}.json` + README: keyword lists per finding for the no-AI baseline (stems, prefix
+  match, no negation handling). Bias noted: same author as the feedback → favours the baseline.
+- Real-review sources checked (Amazon reviews multi: defunct + non-commercial; Yelp: own non-redistributable
+  agreement, English; SemEval-2016 ABSA: no explicit license, no German; Wikivoyage: not reviews) → none used,
+  documented as a limitation in `eval/data/README.md`.
+- Level 3: `tools/tts/` (Piper TTS 1.8.0, 13 voices en/fr/de/es, licenses verified in each MODEL_CARD: CC0, CC-BY,
+  CC-BY-SA, Unlicense; NC/AGPL voices excluded). `synthesize_eval.py` → 80 feedbacks (20/lang, stratified, seeded,
+  rotating voices, random speakers, length_scale 0.8–1.25). `tools/datasets/fetch_noise.py` → 48 ESC-50 outdoor
+  clips (Freesound source CC0/CC-BY only; ESC-50 CC BY-NC 3.0, ESC-10 CC BY 3.0; per-clip author/license
+  recorded); `mix_noise.py` → SNR 20/10/5 dB. Manifest `eval/data/audio_manifest.jsonl` (voice, speaker, speed,
+  licenses, noise clips, paths). Audio git-ignored in `eval/data/generated/audio/`.
+- `eval/data/demo-samples/`: the 10 SPEC 8 demo messages (de roasting+path, en prices+buy, fr welcome+meal,
+  es visit too long, en negation, fr ambiguous, picking en/de/fr, 1.6 s inaudible noise), WAV 16 kHz, 1.6 MB,
+  `manifest.json` with transcripts, voices, licenses and expected outcomes.
+- `tools/tts/check_asr.mts`: intelligibility check with the shipped Whisper adapter.
+
+**How to run**
+```bash
+python3 eval/data/build_feedback.py            # validate + rewrite feedback.jsonl
+python3 eval/data/check_disjoint.py            # disjointness vs catalog examples
+.venv/bin/pip install -r tools/tts/requirements.txt
+bash tools/tts/make_eval_audio.sh              # all level-3 audio in one command (~5 min)
+.venv/bin/python tools/tts/synthesize_demo.py  # demo samples (4 takes each, keeps lowest whisper-base WER)
+cd eval && npx tsx ../tools/tts/check_asr.mts ../eval/data/audio_manifest.jsonl clean   # or 20 / 10 / 5
+```
+Measured (sanity, not the evaluation): whisper-base on the 80 clean clips WER 0.17 (en 0.12, fr 0.27, de 0.24,
+es 0.24), language right on 79/80; demo takes WER 0–0.22, all languages right.
+
+**Deviations / notes for other agents**
+- `.gitignore` line `datasets/` also matches `tools/datasets/`: I force-added my three files there
+  (`git add -f`). Suggest the owner changes it to `/datasets/`.
+- Generated audio lives in `eval/data/generated/audio/` (already ignored), not `eval/audio/generated/`.
+- Piper samples noise inside its ONNX graph (not seedable): selection/voices/speeds/noise are seeded, but a
+  re-generated waveform differs slightly. Demo samples are *selected* takes (best of 4 by whisper-base WER), so
+  they demonstrate, they do not measure; the level-3 audio is not selected.
+- Very short feedbacks ("Thanks!", "Meh.") become < 3 s clips → inaudible by the SPEC 7 rule; the eval should
+  report them separately at level 3. 18 level-2 feedbacks are ≤ 3 words.
+- Unannotated text in a feedback (fillers) expects no finding; `negated` chunks accept off-list or not sure.
+- The level-3 noise is ESC-50 (CC BY-NC for most classes): fine for evaluation, never ship it.
+- Keyword lists also live in my `eval/keywords/`, the catalog's `keywords` field is the catalog agent's call.
+
+**Remains**: nothing blocking for this task. Running levels 2/3 and the comparison is the evaluation agent's
+(`pnpm eval`). No real human voices or real reviews (limitation documented).

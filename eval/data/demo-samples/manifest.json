@@ -1,0 +1,263 @@
+{
+  "description": "Demo sample messages of SPEC section 8. SYNTHETIC voices (Piper TTS), not real visitors. Label them 'synthetic voice' in the UI.",
+  "synthetic": true,
+  "sampleRate": 16000,
+  "recurringUnknownTopic": {
+    "ids": [
+      "en-picking",
+      "de-picking",
+      "fr-picking"
+    ],
+    "expectedVisitors": 3
+  },
+  "samples": [
+    {
+      "id": "de-roasting-path",
+      "file": "de-roasting-path.wav",
+      "lang": "de",
+      "transcript": "Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht. Aber der Weg vom Dorf hinauf zur Farm war wirklich viel zu lang.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "de_DE-thorsten-medium",
+        "speaker": null,
+        "lengthScale": 1.1,
+        "license": "CC0-1.0",
+        "dataset": "Thorsten-Voice, https://github.com/thorstenMueller/Thorsten-Voice",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/de/de_DE/thorsten/medium",
+        "take": "2 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 7.08,
+      "expected": {
+        "status": "analyzed",
+        "findings": [
+          "P3",
+          "N1"
+        ],
+        "notSure": false,
+        "note": "SPEC 8: German, roasting appreciated + path too long"
+      }
+    },
+    {
+      "id": "en-prices-buy",
+      "file": "en-prices-buy.wav",
+      "lang": "en",
+      "transcript": "We only found out what the visit cost at the very end, it should be said earlier. And I would really love to buy a bag of your coffee to take home.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "en_US-libritts_r-medium",
+        "speaker": 3,
+        "lengthScale": 1.0,
+        "license": "CC-BY-4.0",
+        "dataset": "LibriTTS-R, http://www.openslr.org/141/",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts_r/medium",
+        "take": "1 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 6.0,
+      "expected": {
+        "status": "analyzed",
+        "findings": [
+          "N2",
+          "P9"
+        ],
+        "notSure": false,
+        "note": "SPEC 8: English, unclear prices + wants to buy coffee"
+      }
+    },
+    {
+      "id": "fr-welcome-meal",
+      "file": "fr-welcome-meal.wav",
+      "lang": "fr",
+      "transcript": "Merci pour cet accueil si chaleureux, on s'est sentis attendus. Et le repas préparé par la famille était vraiment délicieux.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "fr_FR-siwis-medium",
+        "speaker": null,
+        "lengthScale": 1.0,
+        "license": "CC-BY-4.0",
+        "dataset": "SIWIS, https://datashare.is.ed.ac.uk/handle/10283/2353",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/fr/fr_FR/siwis/medium",
+        "take": "2 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 6.73,
+      "expected": {
+        "status": "analyzed",
+        "findings": [
+          "P1",
+          "P4"
+        ],
+        "notSure": false,
+        "note": "SPEC 8: French, welcome + meal"
+      }
+    },
+    {
+      "id": "es-visit-too-long",
+      "file": "es-visit-too-long.wav",
+      "lang": "es",
+      "transcript": "La visita duró demasiado. Después de casi cuatro horas de pie estábamos agotados.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "es_ES-davefx-medium",
+        "speaker": null,
+        "lengthScale": 1.0,
+        "license": "CC0-1.0",
+        "dataset": "davefx, https://github.com/OHF-Voice/voice-datasets",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/es/es_ES/davefx/medium",
+        "take": "1 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 4.38,
+      "expected": {
+        "status": "analyzed",
+        "findings": [
+          "N3"
+        ],
+        "notSure": false,
+        "note": "SPEC 8: Spanish, visit too long"
+      }
+    },
+    {
+      "id": "en-negation",
+      "file": "en-negation.wav",
+      "lang": "en",
+      "transcript": "The walk up to the farm was not too long at all, honestly it was fine.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "en_GB-vctk-medium",
+        "speaker": 10,
+        "lengthScale": 1.0,
+        "license": "CC-BY-4.0",
+        "dataset": "VCTK, https://datashare.ed.ac.uk/handle/10283/3443",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_GB/vctk/medium",
+        "take": "2 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 3.9,
+      "expected": {
+        "status": "analyzed",
+        "findings": [],
+        "mustNot": [
+          "N1"
+        ],
+        "notSure": "allowed",
+        "note": "SPEC 7/8: negation, must NOT give N1 (path too long); not sure is acceptable"
+      }
+    },
+    {
+      "id": "fr-ambiguous",
+      "file": "fr-ambiguous.wav",
+      "lang": "fr",
+      "transcript": "Bon, c'était particulier, comme expérience. Honnêtement, je ne sais pas trop quoi en penser.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "fr_FR-upmc-medium",
+        "speaker": 1,
+        "lengthScale": 1.1,
+        "license": "CC-BY-SA-4.0",
+        "dataset": "UPMC Pierre, https://github.com/marytts/upmc-pierre-data",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/fr/fr_FR/upmc/medium",
+        "take": "1 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 6.55,
+      "expected": {
+        "status": "analyzed",
+        "findings": [],
+        "notSure": true,
+        "note": "SPEC 8: ambiguous, must end in not sure (ask a person)"
+      }
+    },
+    {
+      "id": "en-picking",
+      "file": "en-picking.wav",
+      "lang": "en",
+      "transcript": "I wish we could have picked some of the ripe red coffee cherries ourselves during the harvest.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "en_US-libritts_r-medium",
+        "speaker": 40,
+        "lengthScale": 1.05,
+        "license": "CC-BY-4.0",
+        "dataset": "LibriTTS-R, http://www.openslr.org/141/",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts_r/medium",
+        "take": "1 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 3.75,
+      "expected": {
+        "status": "analyzed",
+        "findings": [],
+        "offList": true,
+        "topic": "picking",
+        "note": "SPEC 8: picking 1/3, off-list; with the two others: unknown recurring topic signal (3 visitors)"
+      }
+    },
+    {
+      "id": "de-picking",
+      "file": "de-picking.wav",
+      "lang": "de",
+      "transcript": "Wir hätten so gern selbst bei der Ernte geholfen und ein paar Kaffeekirschen vom Strauch gepflückt.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "de_DE-thorsten_emotional-medium",
+        "speaker": 1,
+        "lengthScale": 1.0,
+        "license": "CC0-1.0",
+        "dataset": "Thorsten-Voice emotional, https://github.com/thorstenMueller/Thorsten-Voice",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/de/de_DE/thorsten_emotional/medium",
+        "take": "1 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 5.67,
+      "expected": {
+        "status": "analyzed",
+        "findings": [],
+        "offList": true,
+        "topic": "picking",
+        "note": "SPEC 8: picking 2/3"
+      }
+    },
+    {
+      "id": "fr-picking",
+      "file": "fr-picking.wav",
+      "lang": "fr",
+      "transcript": "On aurait aimé participer à la cueillette, ramasser nous-mêmes les grains de café mûrs sur les arbustes.",
+      "synthetic": true,
+      "voice": {
+        "engine": "piper-tts 1.8.0",
+        "model": "fr_FR-upmc-medium",
+        "speaker": 0,
+        "lengthScale": 1.1,
+        "license": "CC-BY-SA-4.0",
+        "dataset": "UPMC Pierre, https://github.com/marytts/upmc-pierre-data",
+        "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/fr/fr_FR/upmc/medium",
+        "take": "3 of 4 (lowest whisper-base WER)"
+      },
+      "durationSec": 5.68,
+      "expected": {
+        "status": "analyzed",
+        "findings": [],
+        "offList": true,
+        "topic": "picking",
+        "note": "SPEC 8: picking 3/3"
+      }
+    },
+    {
+      "id": "inaudible-noise",
+      "file": "inaudible-noise.wav",
+      "lang": null,
+      "transcript": "",
+      "synthetic": true,
+      "voice": null,
+      "generator": "numpy brown noise (seed 3), no third-party audio",
+      "durationSec": 1.6,
+      "expected": {
+        "status": "inaudible",
+        "findings": [],
+        "note": "SPEC 7/8: 1.6 s of faint generated noise, under the 3 s minimum: inaudible, not counted"
+      }
+    }
+  ]
+}

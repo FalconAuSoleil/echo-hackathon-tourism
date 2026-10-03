@@ -1,0 +1,4 @@
+# Level-3 test audio and demo samples (build time only). .venv/bin/pip install -r tools/tts/requirements.txt
+piper-tts==1.8.0
+soundfile
+numpy

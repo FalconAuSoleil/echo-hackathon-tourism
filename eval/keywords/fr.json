@@ -1,0 +1,26 @@
+{
+  "lang": "fr",
+  "findings": {
+    "P1": ["accueil", "chaleureu", "reçus", "accueillant", "gentil", "comme à la maison", "comme de la famille", "sympathique"],
+    "P2": ["caféiers", "plantation", "visite du champ", "balade", "parcelles", "plants de café", "visite des"],
+    "P3": ["torréf", "griller", "dégustation", "goûter", "meilleur café", "café délicieux", "cérémonie du café"],
+    "P4": ["repas", "déjeuner", "cuisine", "délicieu", "bon repas", "manger"],
+    "P5": ["expliqu", "explication", "appris", "compris", "clair", "pédagog"],
+    "P6": ["authentique", "vraie vie", "quotidien", "vie de la ferme", "pas du folklore", "sans mise en scène"],
+    "P7": ["paysage", "vue", "collines", "décor", "cadre", "magnifique", "panorama"],
+    "P8": ["rapport qualité", "pas cher", "prix raisonnable", "bon prix", "notre argent", "une affaire"],
+    "P9": ["acheter du café", "acheter", "ramener", "commander", "en vente", "rapporter du café"],
+    "P10": ["reviendr", "revenir", "recommand", "à refaire", "conseiller", "nos amis"],
+    "P11": ["merci", "super", "génial", "formidable", "excellent", "top", "journée magnifique"],
+    "N1": ["chemin", "route", "trajet", "montée", "piste", "accès", "raide", "glissant", "marche"],
+    "N2": ["prix", "tarif", "coût", "combien", "payer", "pas clair"],
+    "N3": ["trop long", "longue", "interminable", "des heures", "épuisant", "ennuyeu"],
+    "N4": ["trop court", "courte", "écourtée", "trente minutes", "rapide", "pas eu le temps"],
+    "N5": ["comprendre", "traduisait", "traduction", "langue", "anglais", "se comprendre"],
+    "N6": ["faim", "pas de repas", "rien à manger", "trop léger", "pas assez à manger", "portion"],
+    "N7": ["toilettes", "wc", "hygiène", "sale", "se laver les mains", "propreté"],
+    "N8": ["eau", "ombre", "pause", "soif", "chaleur", "chaud", "boire"],
+    "N9": ["attendu", "attente", "retard", "à l'heure", "horaire", "en retard"],
+    "N10": ["impossible d'acheter", "rien à vendre", "pas de boutique", "souvenir", "pas en vente", "aucun magasin"]
+  }
+}

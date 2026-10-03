@@ -1,0 +1,26 @@
+{
+  "lang": "en",
+  "findings": {
+    "P1": ["welcom", "warm", "friendly", "hospitab", "kind host", "greeted", "felt at home", "lovely people", "nice people"],
+    "P2": ["tour of the field", "field tour", "coffee trees", "coffee plants", "plantation", "walk through the", "farm tour", "interesting tour"],
+    "P3": ["roast", "tasting", "taste", "coffee ceremony", "best coffee", "delicious coffee", "brew"],
+    "P4": ["lunch was", "meal was", "food was", "delicious", "tasty", "great food", "lovely meal", "home cooked"],
+    "P5": ["explain", "explanation", "learned", "learnt", "informative", "understand how", "clear"],
+    "P6": ["authentic", "genuine", "real life", "farm life", "daily life", "everyday life", "not staged", "not touristy"],
+    "P7": ["view", "landscape", "scenery", "hills", "beautiful setting", "breathtaking", "stunning", "gorgeous"],
+    "P8": ["value", "worth the money", "worth it", "cheap", "bargain", "affordable", "fair price", "good price"],
+    "P9": ["buy coffee", "buy some", "buy a bag", "for sale", "sell it", "take some home", "order some", "purchase"],
+    "P10": ["come back", "return", "recommend", "tell our friends", "tell everyone", "again"],
+    "P11": ["thank", "great day", "amazing", "fantastic", "wonderful", "superb", "loved it", "awesome"],
+    "N1": ["path", "road", "track", "climb", "uphill", "steep", "long walk", "far away", "access", "hike"],
+    "N2": ["price", "cost", "fee", "how much", "unclear", "hidden", "charged"],
+    "N3": ["too long", "dragged", "long visit", "hours", "exhausting", "endless", "boring"],
+    "N4": ["too short", "short", "rushed", "over quickly", "minutes", "stay longer"],
+    "N5": ["understand", "language", "translat", "communicat", "english", "couldn't follow"],
+    "N6": ["hungry", "no lunch", "no food", "not enough food", "small portion", "nothing to eat"],
+    "N7": ["toilet", "bathroom", "restroom", "hygiene", "dirty", "wash our hands", "latrine"],
+    "N8": ["water", "shade", "thirsty", "break", "rest", "hot", "drink"],
+    "N9": ["wait", "late", "delay", "on time", "punctual", "schedule", "hour before"],
+    "N10": ["couldn't buy", "could not buy", "nothing for sale", "no shop", "souvenir", "nowhere to buy", "not for sale"]
+  }
+}

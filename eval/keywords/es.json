@@ -1,0 +1,26 @@
+{
+  "lang": "es",
+  "findings": {
+    "P1": ["bienvenida", "acogida", "recibi", "cariño", "amable", "hospital", "como en casa", "cálid"],
+    "P2": ["cafetos", "cafetal", "plantación", "recorrido", "paseo", "visita al campo", "plantas de café"],
+    "P3": ["tost", "degustación", "probar", "ceremonia del café", "mejor café", "café delicioso", "café recién"],
+    "P4": ["comida", "almuerzo", "rica", "riquísim", "delicios", "casera"],
+    "P5": ["explic", "aprendimos", "aprendí", "claridad", "entendimos cómo", "claro"],
+    "P6": ["auténtic", "vida real", "vida en el campo", "día a día", "de verdad", "nada de teatro"],
+    "P7": ["vista", "paisaje", "colinas", "espectacular", "precioso lugar", "entorno"],
+    "P8": ["calidad-precio", "calidad precio", "barato", "ganga", "vale la pena", "buen precio", "pagamos poco"],
+    "P9": ["comprar café", "comprar", "llevarnos", "pedir", "venden", "a la venta"],
+    "P10": ["volver", "volveremos", "volvería", "recomend", "a nuestros amigos", "repetir"],
+    "P11": ["gracias", "genial", "maravillos", "increíble", "estupendo", "fantástico", "día tan bonito"],
+    "N1": ["camino", "carretera", "subida", "empinado", "acceso", "lejos", "cuesta"],
+    "N2": ["precio", "cobraron", "costaba", "cuánto", "pagar", "no estaba claro"],
+    "N3": ["demasiado larga", "larga", "eterna", "horas", "agotad", "aburrid"],
+    "N4": ["demasiado corta", "corta", "media hora", "con prisas", "supo a poco", "rápido"],
+    "N5": ["entender", "entendíamos", "traduc", "idioma", "inglés", "comunicar"],
+    "N6": ["hambre", "escasa", "nada de comer", "sin comida", "poca comida", "no nos dieron de comer"],
+    "N7": ["baño", "aseo", "higiene", "sucio", "jabón", "lavabo"],
+    "N8": ["agua", "sombra", "pausa", "sed", "calor", "beber"],
+    "N9": ["esper", "tarde", "retraso", "puntual", "horario", "una hora"],
+    "N10": ["no poder comprar", "nada a la venta", "no vendían", "recuerdo", "souvenir", "no había tienda"]
+  }
+}

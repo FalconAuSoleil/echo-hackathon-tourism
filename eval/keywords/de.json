@@ -1,0 +1,26 @@
+{
+  "lang": "de",
+  "findings": {
+    "P1": ["empfang", "begrüßung", "herzlich", "freundlich", "gastfreundlich", "willkommen", "wie zu hause", "gastgeber"],
+    "P2": ["rundgang", "kaffeesträucher", "kaffeepflanzen", "plantage", "führung durch", "kaffeefelder", "feld"],
+    "P3": ["röst", "verkostung", "probieren", "kaffeezeremonie", "bester kaffee", "leckerer kaffee", "frischer kaffee"],
+    "P4": ["essen war", "mittagessen", "lecker", "mahlzeit", "gekocht", "köstlich"],
+    "P5": ["erklär", "verständlich", "gelernt", "anschaulich", "informativ", "erfahren"],
+    "P6": ["authentisch", "echt", "landleben", "alltag", "leben auf dem hof", "nicht gestellt"],
+    "P7": ["aussicht", "landschaft", "hügel", "blick", "atemberaubend", "kulisse", "umgebung"],
+    "P8": ["preis-leistung", "preiswert", "günstig", "geld wert", "fairer preis", "viel geboten"],
+    "P9": ["kaffee kaufen", "kaufen", "mitnehmen", "bestellen", "verkauft ihr", "zu verkaufen"],
+    "P10": ["wiederkommen", "kommen wieder", "empfehlen", "weiterempfehlen", "jederzeit wieder", "nochmal"],
+    "P11": ["danke", "toll", "super", "großartig", "wunderbar", "klasse", "schöner tag"],
+    "N1": ["weg", "anfahrt", "aufstieg", "steil", "pfad", "zu weit", "fußweg", "anstrengend", "zugang"],
+    "N2": ["preis", "kosten", "kostet", "eintritt", "bezahlen", "unklar"],
+    "N3": ["zu lang", "zu viel", "stunden", "ewig", "langweilig", "anstrengend"],
+    "N4": ["zu kurz", "kurz", "schnell vorbei", "halbe stunde", "hektisch", "mehr zeit"],
+    "N5": ["verständigung", "verstanden", "sprache", "übersetz", "englisch", "deutsch"],
+    "N6": ["hunger", "zu wenig essen", "kein essen", "nichts zu essen", "nur ein paar", "kein mittagessen"],
+    "N7": ["toilette", "wc", "sanitär", "hygiene", "schmutzig", "händewaschen"],
+    "N8": ["wasser", "schatten", "pause", "durst", "heiß", "trinken"],
+    "N9": ["warten", "gewartet", "wartezeit", "verspät", "zu spät", "pünktlich"],
+    "N10": ["keinen kaffee kaufen", "nichts zu kaufen", "kein laden", "souvenir", "andenken", "nicht kaufen"]
+  }
+}
