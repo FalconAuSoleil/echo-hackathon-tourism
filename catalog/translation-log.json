@@ -1,0 +1,1705 @@
+{
+  "model": "facebook/nllb-200-distilled-600M",
+  "threshold": 0.75,
+  "items": [
+    {
+      "id": "finding:P1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont été bien accueillis.",
+            "en": "Visitors felt welcome."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bumvaga bakiriwe neza.",
+              "rw": "Abashyitsi bumvaga bakiriwe neza.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ont été bien accueillis.",
+                "en": "The visitors felt welcomed."
+              },
+              "similarityFr": 1.0,
+              "similarityEn": 0.9806,
+              "score": 0.9806
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bakiriwe neza.",
+              "rw": "Abashyitsi bakiriwe neza.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités ont été bien accueillis.",
+                "en": "The guests were warmly welcomed."
+              },
+              "similarityFr": 0.8878,
+              "similarityEn": 0.8111,
+              "score": 0.8111
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "La visite du champ de café a plu.",
+            "en": "Visitors liked the visit of the coffee field."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bakundaga gusura umurima w'ikawa.",
+              "rw": "Abashyitsi bakundaga gusura umurima w'ikawa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs se rendaient souvent dans les champs de café.",
+                "en": "Guests often visited the coffee plantation."
+              },
+              "similarityFr": 0.8146,
+              "similarityEn": 0.8206,
+              "score": 0.8146
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urugendo rwo gusura umurima w'ikawa rwarashimishije.",
+              "rw": "Urugendo rwo gusura umurima w'ikawa rwarashimishije.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "La visite d'un champ de café a été agréable.",
+                "en": "The visit to the coffee plantation was enjoyable."
+              },
+              "similarityFr": 0.8492,
+              "similarityEn": 0.8094,
+              "score": 0.8094
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont aimé griller et goûter le café.",
+            "en": "Visitors liked roasting and tasting the coffee."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
+              "rw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités appréciaient cuisiner et déguster du café.",
+                "en": "Guests enjoyed cooking and tasting coffee."
+              },
+              "similarityFr": 0.9092,
+              "similarityEn": 0.8576,
+              "score": 0.8576
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bakundaga guteka no kunywa ikawa.",
+              "rw": "Abashyitsi bakundaga guteka no kunywa ikawa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités appréciaient la cuisine et le café.",
+                "en": "Guests enjoyed cooking and drinking coffee."
+              },
+              "similarityFr": 0.8354,
+              "similarityEn": 0.8217,
+              "score": 0.8217
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont aimé le repas.",
+            "en": "Visitors liked the meal."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bakundaga ibyo kurya.",
+              "rw": "Abashyitsi bakundaga ibyo kurya.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités ont adoré leur nourriture.",
+                "en": "The guests enjoyed the food."
+              },
+              "similarityFr": 0.8905,
+              "similarityEn": 0.9062,
+              "score": 0.8905
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bishimiye ibyo kurya.",
+              "rw": "Abashyitsi bishimiye ibyo kurya.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités ont apprécié la nourriture.",
+                "en": "The guests enjoyed the meal."
+              },
+              "similarityFr": 0.9258,
+              "similarityEn": 0.9108,
+              "score": 0.9108
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Vos explications sur le café sont claires.",
+            "en": "Your explanations about coffee are clear."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ibyo usobanura ku birebana n'ikawa birumvikana.",
+              "rw": "Ibyo usobanura ku birebana n'ikawa birumvikana.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce que vous dites au sujet du café est logique.",
+                "en": "What you mean about coffee is understandable."
+              },
+              "similarityFr": 0.7734,
+              "similarityEn": 0.8217,
+              "score": 0.7734
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ibisobanuro byawe ku birebana n'ikawa birasobanutse neza.",
+              "rw": "Ibisobanuro byawe ku birebana n'ikawa birasobanutse neza.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Votre définition du café est claire.",
+                "en": "Your definition of coffee is clear."
+              },
+              "similarityFr": 0.9124,
+              "similarityEn": 0.9394,
+              "score": 0.9124
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont aimé voir la vraie vie de la ferme.",
+            "en": "Visitors liked seeing real farm life."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bakundaga kubona ubuzima nyakuri bwo mu isambu.",
+              "rw": "Abashyitsi bakundaga kubona ubuzima nyakuri bwo mu isambu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs avaient l'habitude de voir la vraie vie à la ferme.",
+                "en": "Visitors enjoyed real life on the farm."
+              },
+              "similarityFr": 0.9278,
+              "similarityEn": 0.9427,
+              "score": 0.9278
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bishimiye kubona imibereho nyakuri y'ubuhinzi.",
+              "rw": "Abashyitsi bishimiye kubona imibereho nyakuri y'ubuhinzi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ont été ravis de voir la vraie vie agricole.",
+                "en": "Visitors were delighted to see the real farm life."
+              },
+              "similarityFr": 0.8622,
+              "similarityEn": 0.9128,
+              "score": 0.8622
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont aimé le paysage.",
+            "en": "Visitors liked the landscape."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bakundaga aho hantu.",
+              "rw": "Abashyitsi bakundaga aho hantu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "C'était un endroit très agréable pour les visiteurs.",
+                "en": "Visitors loved this place."
+              },
+              "similarityFr": 0.7817,
+              "similarityEn": 0.7608,
+              "score": 0.7608
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bashimishijwe n'aho hantu.",
+              "rw": "Abashyitsi bashimishijwe n'aho hantu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs s'y sont intéressés.",
+                "en": "Visitors were impressed with the place."
+              },
+              "similarityFr": 0.6312,
+              "similarityEn": 0.7272,
+              "score": 0.6312
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Le prix est juste pour ce que les visiteurs reçoivent.",
+            "en": "The price is fair for what visitors get."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Igiciro cy'ibyo abashyitsi bahabwa kirakwiriye.",
+              "rw": "Igiciro cy'ibyo abashyitsi bahabwa kirakwiriye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le prix de ce qu'on donne aux invités est raisonnable.",
+                "en": "The price of what guests receive is reasonable."
+              },
+              "similarityFr": 0.6052,
+              "similarityEn": 0.7747,
+              "score": 0.6052
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Igiciro ni cyiza ku byo abashyitsi bahawe.",
+              "rw": "Igiciro ni cyiza ku byo abashyitsi bahawe.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le prix est bon pour ce que les invités ont reçu.",
+                "en": "The price is good for what the guests received."
+              },
+              "similarityFr": 0.7771,
+              "similarityEn": 0.7337,
+              "score": 0.7337
+            }
+          ],
+          "chosen": "fr",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "La visite vaut son prix.",
+            "en": "The visit is worth its price."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Urwo ruzinduko rufite agaciro.",
+              "rw": "Urwo ruzinduko rufite agaciro.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Cette visite est précieuse.",
+                "en": "That visit is worthwhile."
+              },
+              "similarityFr": 0.7615,
+              "similarityEn": 0.8334,
+              "score": 0.7615
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urwo ruzinduko rufite agaciro.",
+              "rw": "Urwo ruzinduko rufite agaciro.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Cette visite est précieuse.",
+                "en": "That visit is worthwhile."
+              },
+              "similarityFr": 0.7615,
+              "similarityEn": 0.8334,
+              "score": 0.7615
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs veulent acheter votre café.",
+            "en": "Visitors want to buy your coffee."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bifuza kugura ikawa yawe.",
+              "rw": "Abashyitsi bifuza kugura ikawa yawe.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités veulent acheter votre café.",
+                "en": "Guests want to buy your coffee."
+              },
+              "similarityFr": 0.9782,
+              "similarityEn": 0.9705,
+              "score": 0.9705
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bashaka kugura ikawa yawe.",
+              "rw": "Abashyitsi bashaka kugura ikawa yawe.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités veulent acheter votre café.",
+                "en": "Guests want to buy your coffee."
+              },
+              "similarityFr": 0.9782,
+              "similarityEn": 0.9705,
+              "score": 0.9705
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P10",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs veulent revenir et parler de vous à leurs amis.",
+            "en": "Visitors want to come back and tell their friends about you."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bifuza kugaruka bakabwira incuti zabo ibyawe.",
+              "rw": "Abashyitsi bifuza kugaruka bakabwira incuti zabo ibyawe.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités veulent revenir et parler de toi à leurs amis.",
+                "en": "Guests want to come back and tell their friends about you."
+              },
+              "similarityFr": 0.929,
+              "similarityEn": 0.9093,
+              "score": 0.9093
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bifuza kugaruka bakabwira incuti zabo ibyawe.",
+              "rw": "Abashyitsi bifuza kugaruka bakabwira incuti zabo ibyawe.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités veulent revenir et parler de toi à leurs amis.",
+                "en": "Guests want to come back and tell their friends about you."
+              },
+              "similarityFr": 0.929,
+              "similarityEn": 0.9093,
+              "score": 0.9093
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:P11",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs sont très contents.",
+            "en": "Visitors are very happy."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi barishimye cyane.",
+              "rw": "Abashyitsi barishimye cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités sont très contents.",
+                "en": "The guests were thrilled."
+              },
+              "similarityFr": 0.8574,
+              "similarityEn": 0.8323,
+              "score": 0.8323
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi barishimye cyane.",
+              "rw": "Abashyitsi barishimye cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités sont très contents.",
+                "en": "The guests were thrilled."
+              },
+              "similarityFr": 0.8574,
+              "similarityEn": 0.8323,
+              "score": 0.8323
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N1",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Le chemin jusqu'à la ferme est trop long ou difficile.",
+            "en": "The road to the farm is too long or difficult."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Inzira igana ku isambu irareshya cyane cyangwa ikaba igoye cyane.",
+              "rw": "Inzira igana ku isambu irareshya cyane cyangwa ikaba igoye cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le chemin vers la ferme est trop long ou trop difficile.",
+                "en": "The road to the farm is either too long or too difficult."
+              },
+              "similarityFr": 0.9934,
+              "similarityEn": 0.9912,
+              "score": 0.9912
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Inzira igana ku isambu ni ndende cyane cyangwa iragoye.",
+              "rw": "Inzira igana ku isambu ni ndende cyane cyangwa iragoye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le chemin vers la ferme est trop long ou trop difficile.",
+                "en": "The road to the farm is either too long or too difficult."
+              },
+              "similarityFr": 0.9934,
+              "similarityEn": 0.9912,
+              "score": 0.9912
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N2",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Le prix n'est pas clair pour les visiteurs.",
+            "en": "The price is not clear to visitors."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Igiciro cyayo ntikizwi neza n'abashyitsi.",
+              "rw": "Igiciro cyayo ntikizwi neza n'abashyitsi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le prix est incertain pour les visiteurs.",
+                "en": "The price is not well known to visitors."
+              },
+              "similarityFr": 0.875,
+              "similarityEn": 0.9385,
+              "score": 0.875
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Igiciro cy'ibyo bintu ntikizwi neza ku bashyitsi.",
+              "rw": "Igiciro cy'ibyo bintu ntikizwi neza ku bashyitsi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le prix de ces produits est incertain pour les visiteurs.",
+                "en": "The price of such items is unclear to guests."
+              },
+              "similarityFr": 0.7514,
+              "similarityEn": 0.7734,
+              "score": 0.7514
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N3",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "La visite est trop longue.",
+            "en": "The visit is too long."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Urugendo ni rurerure cyane.",
+              "rw": "Urugendo ni rurerure cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le voyage est très long.",
+                "en": "The journey is very long."
+              },
+              "similarityFr": 0.7915,
+              "similarityEn": 0.7249,
+              "score": 0.7249
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urugendo ni rurerure cyane.",
+              "rw": "Urugendo ni rurerure cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le voyage est très long.",
+                "en": "The journey is very long."
+              },
+              "similarityFr": 0.7915,
+              "similarityEn": 0.7249,
+              "score": 0.7249
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "La visite dure trop longtemps.",
+            "en": "The visit lasts too long."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Urwo ruzinduko rwamaze igihe kirekire cyane.",
+              "rw": "Urwo ruzinduko rwamaze igihe kirekire cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Cette visite a duré très longtemps.",
+                "en": "The visit took a very long time."
+              },
+              "similarityFr": 0.8715,
+              "similarityEn": 0.8626,
+              "score": 0.8626
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urugendo rufata igihe kirekire cyane.",
+              "rw": "Urugendo rufata igihe kirekire cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le voyage prend beaucoup de temps.",
+                "en": "The journey takes a very long time."
+              },
+              "similarityFr": 0.7487,
+              "similarityEn": 0.8123,
+              "score": 0.7487
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N4",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "La visite est trop courte.",
+            "en": "The visit is too short."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Urwo ruzinduko ni rurerure cyane.",
+              "rw": "Urwo ruzinduko ni rurerure cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce voyage est très long.",
+                "en": "The trip is a long one."
+              },
+              "similarityFr": 0.4425,
+              "similarityEn": 0.5028,
+              "score": 0.4425
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urugendo ni rurerure cyane.",
+              "rw": "Urugendo ni rurerure cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le voyage est très long.",
+                "en": "The journey is very long."
+              },
+              "similarityFr": 0.4077,
+              "similarityEn": 0.4047,
+              "score": 0.4047
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "La visite ne dure pas assez.",
+            "en": "The visit does not last long enough."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Urwo ruzinduko ntiruzamara igihe gihagije.",
+              "rw": "Urwo ruzinduko ntiruzamara igihe gihagije.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Cette visite ne durera pas longtemps.",
+                "en": "The visit will not be long enough."
+              },
+              "similarityFr": 0.8187,
+              "similarityEn": 0.9476,
+              "score": 0.8187
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Urwo ruzinduko ntiruzamara igihe gihagije.",
+              "rw": "Urwo ruzinduko ntiruzamara igihe gihagije.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Cette visite ne durera pas longtemps.",
+                "en": "The visit will not be long enough."
+              },
+              "similarityFr": 0.8187,
+              "similarityEn": 0.9476,
+              "score": 0.8187
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N5",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ont du mal à vous comprendre.",
+            "en": "Visitors find it hard to understand you."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi biragoye kukumva.",
+              "rw": "Abashyitsi biragoye kukumva.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ont du mal à comprendre.",
+                "en": "It is difficult for visitors to understand."
+              },
+              "similarityFr": 0.9337,
+              "similarityEn": 0.893,
+              "score": 0.893
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi biragoye kukumva.",
+              "rw": "Abashyitsi biragoye kukumva.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ont du mal à comprendre.",
+                "en": "It is difficult for visitors to understand."
+              },
+              "similarityFr": 0.9337,
+              "similarityEn": 0.893,
+              "score": 0.893
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N6",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Il n'y a pas assez à manger.",
+            "en": "There is not enough food."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Nta byokurya bihagije.",
+              "rw": "Nta byokurya bihagije.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas assez à manger.",
+                "en": "There is not enough food."
+              },
+              "similarityFr": 1.0,
+              "similarityEn": 1.0,
+              "score": 1.0
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta byokurya bihagije.",
+              "rw": "Nta byokurya bihagije.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas assez à manger.",
+                "en": "There is not enough food."
+              },
+              "similarityFr": 1.0,
+              "similarityEn": 1.0,
+              "score": 1.0
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N7",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les toilettes manquent ou sont sales.",
+            "en": "Toilets are missing or dirty."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Inzu y'isuku irimo ubusa cyangwa irimo umwanda.",
+              "rw": "Inzu y'isuku irimo ubusa cyangwa irimo umwanda.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Une maison propre est vide ou sale.",
+                "en": "A clean room is empty or dirty."
+              },
+              "similarityFr": 0.4038,
+              "similarityEn": 0.4671,
+              "score": 0.4038
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Inzu z'ubwiherero zibuze cyangwa zisigaye zanduye.",
+              "rw": "Inzu z'ubwiherero zibuze cyangwa zisigaye zanduye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les maisons d'hébergement sont manquantes ou contaminées.",
+                "en": "The shelters are missing or have become contaminated."
+              },
+              "similarityFr": 0.4766,
+              "similarityEn": 0.5244,
+              "score": 0.4766
+            }
+          ],
+          "chosen": "fr",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Les toilettes ne sont pas propres.",
+            "en": "The toilets are not clean."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Inzu y'isuku si isukuye.",
+              "rw": "Inzu y'isuku si isukuye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "La salle de bain n'est pas propre.",
+                "en": "The toilet is not clean."
+              },
+              "similarityFr": 0.9077,
+              "similarityEn": 0.859,
+              "score": 0.859
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Inzu y'isuku si isukuye.",
+              "rw": "Inzu y'isuku si isukuye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "La salle de bain n'est pas propre.",
+                "en": "The toilet is not clean."
+              },
+              "similarityFr": 0.9077,
+              "similarityEn": 0.859,
+              "score": 0.859
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N8",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs manquent d'eau, d'ombre ou de pause.",
+            "en": "Visitors lack water, shade or a break."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi baba badafite amazi, igicucu cyangwa ikiruhuko.",
+              "rw": "Abashyitsi baba badafite amazi, igicucu cyangwa ikiruhuko.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs n'ont pas d'eau, d'ombre ou de repos.",
+                "en": "Guests have no water, shade, or rest."
+              },
+              "similarityFr": 0.7852,
+              "similarityEn": 0.7095,
+              "score": 0.7095
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi nta mazi bafite, nta mwijima bafite, nta n'ikiruhuko bafite.",
+              "rw": "Abashyitsi nta mazi bafite, nta mwijima bafite, nta n'ikiruhuko bafite.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ils n'ont pas d'eau, ils n'ont pas d'obscurité, ils n'ont pas de repos.",
+                "en": "Guests have no water, no darkness, and no rest."
+              },
+              "similarityFr": 0.4954,
+              "similarityEn": 0.6215,
+              "score": 0.4954
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Les visiteurs ont soif.",
+            "en": "Visitors are thirsty."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bafite inyota.",
+              "rw": "Abashyitsi bafite inyota.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités ont soif.",
+                "en": "The guests are thirsty."
+              },
+              "similarityFr": 0.8874,
+              "similarityEn": 0.8671,
+              "score": 0.8671
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bafite inyota.",
+              "rw": "Abashyitsi bafite inyota.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités ont soif.",
+                "en": "The guests are thirsty."
+              },
+              "similarityFr": 0.8874,
+              "similarityEn": 0.8671,
+              "score": 0.8671
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N9",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs attendent trop longtemps.",
+            "en": "Visitors wait too long."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi bategereje igihe kirekire cyane.",
+              "rw": "Abashyitsi bategereje igihe kirekire cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités attendent très longtemps.",
+                "en": "The guests waited a very long time."
+              },
+              "similarityFr": 0.8106,
+              "similarityEn": 0.78,
+              "score": 0.78
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi bategereje igihe kirekire cyane.",
+              "rw": "Abashyitsi bategereje igihe kirekire cyane.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les invités attendent très longtemps.",
+                "en": "The guests waited a very long time."
+              },
+              "similarityFr": 0.8106,
+              "similarityEn": 0.78,
+              "score": 0.78
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "finding:N10",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les visiteurs ne peuvent pas acheter de café.",
+            "en": "Visitors cannot buy coffee."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Abashyitsi ntibashobora kugura ikawa.",
+              "rw": "Abashyitsi ntibashobora kugura ikawa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ne peuvent pas acheter de café.",
+                "en": "Guests cannot buy coffee."
+              },
+              "similarityFr": 1.0,
+              "similarityEn": 0.9457,
+              "score": 0.9457
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Abashyitsi ntibashobora kugura ikawa.",
+              "rw": "Abashyitsi ntibashobora kugura ikawa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les visiteurs ne peuvent pas acheter de café.",
+                "en": "Guests cannot buy coffee."
+              },
+              "similarityFr": 1.0,
+              "similarityEn": 0.9457,
+              "score": 0.9457
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:volume",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Ce mois-ci : {n} messages de visiteurs.",
+            "en": "This month: {n} messages from visitors."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Muri uku kwezi: Ubutumwa 17 bwatanzwe n'abashyitsi.",
+              "rw": "Muri uku kwezi: Ubutumwa {n} bwatanzwe n'abashyitsi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce mois- ci: 17 messages de visiteurs.",
+                "en": "This month: 17 messages from guests."
+              },
+              "similarityFr": 0.993,
+              "similarityEn": 0.9298,
+              "score": 0.9298
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Muri uku kwezi: Ubutumwa 17 bw'abashyitsi.",
+              "rw": "Muri uku kwezi: Ubutumwa {n} bw'abashyitsi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce mois-ci: 17 messages de visiteurs.",
+                "en": "This month: 17 guest messages."
+              },
+              "similarityFr": 0.9942,
+              "similarityEn": 0.8845,
+              "score": 0.8845
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:keep",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "À garder ({k} sur {n})",
+            "en": "Keep this ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Jya ugumana iyi (13 ku 17)",
+              "rw": "Jya ugumana iyi ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Restez à l'écoute (13 à 17)",
+                "en": "Keep it up (13 to 17)"
+              },
+              "similarityFr": 0.6151,
+              "similarityEn": 0.7947,
+              "score": 0.6151
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Kwirinda (13 ku 17)",
+              "rw": "Kwirinda ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "La précaution (13 à 17)",
+                "en": "Self-control (13 to 17)"
+              },
+              "similarityFr": 0.6202,
+              "similarityEn": 0.3831,
+              "score": 0.3831
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Ce qui plaît ({k} sur {n})",
+            "en": "What visitors like ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ibyo abashyitsi bakunda (13 ku 17)",
+              "rw": "Ibyo abashyitsi bakunda ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce que les invités aiment (13 à 17)",
+                "en": "What guests like (13 out of 17)"
+              },
+              "similarityFr": 0.7516,
+              "similarityEn": 0.8234,
+              "score": 0.7516
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ibishimisha (13 ku 17)",
+              "rw": "Ibishimisha ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les plaisirs (13 à 17)",
+                "en": "Pleasures (13 to 17)"
+              },
+              "similarityFr": 0.7362,
+              "similarityEn": 0.4995,
+              "score": 0.4995
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:fix",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "À corriger d'abord ({k} sur {n})",
+            "en": "Fix first ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Gushyira ibintu mu buryo bwa mbere (13 kuri 17)",
+              "rw": "Gushyira ibintu mu buryo bwa mbere ({k} kuri {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les priorités (13 sur 17)",
+                "en": "Putting things first (13 of 17)"
+              },
+              "similarityFr": 0.5698,
+              "similarityEn": 0.5839,
+              "score": 0.5698
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ugomba kubanza gukosorwa (13 ku 17)",
+              "rw": "Ugomba kubanza gukosorwa ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il faut d'abord être corrigé (13 à 17)",
+                "en": "You must first be corrected (13/17)"
+              },
+              "similarityFr": 0.9096,
+              "similarityEn": 0.6426,
+              "score": 0.6426
+            }
+          ],
+          "chosen": "fr",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Problème principal ({k} sur {n})",
+            "en": "Main problem ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ikibazo cy'ingenzi (13 kuri 17)",
+              "rw": "Ikibazo cy'ingenzi ({k} kuri {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "La question la plus importante (13 à 17)",
+                "en": "The Key Question (13 out of 17)"
+              },
+              "similarityFr": 0.7488,
+              "similarityEn": 0.5984,
+              "score": 0.5984
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ikibazo cy'ingenzi (13 ku 17)",
+              "rw": "Ikibazo cy'ingenzi ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Une question importante (13 à 17)",
+                "en": "The Key Question (13 to 17)"
+              },
+              "similarityFr": 0.7383,
+              "similarityEn": 0.5932,
+              "score": 0.5932
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 3,
+          "source": {
+            "fr": "À améliorer ({k} sur {n})",
+            "en": "To improve ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Kugira ngo ugire icyo ugeraho (13 ku 17)",
+              "rw": "Kugira ngo ugire icyo ugeraho ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Pour réussir (13 à 17)",
+                "en": "How to Succeed (13 to 17)"
+              },
+              "similarityFr": 0.7146,
+              "similarityEn": 0.6006,
+              "score": 0.6006
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ibyo wakora kugira ngo ugire imibereho myiza (13 ku 17)",
+              "rw": "Ibyo wakora kugira ngo ugire imibereho myiza ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Comment réussir sa vie (13 à 17)",
+                "en": "How to improve your life (13 to 17)"
+              },
+              "similarityFr": 0.5032,
+              "similarityEn": 0.6821,
+              "score": 0.5032
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 4,
+          "source": {
+            "fr": "Ce qui ne plaît pas aux visiteurs ({k} sur {n})",
+            "en": "What visitors do not like ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ibyo abashyitsi badakunda (13 ku 17)",
+              "rw": "Ibyo abashyitsi badakunda ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce que les étrangers n'aiment pas (13 à 17)",
+                "en": "What guests don't like (13 to 17)"
+              },
+              "similarityFr": 0.6984,
+              "similarityEn": 0.8174,
+              "score": 0.6984
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ibyo abashyitsi banga (13 ku 17)",
+              "rw": "Ibyo abashyitsi banga ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce que les invités rejettent (13 à 17)",
+                "en": "What guests hate (13 to 17)"
+              },
+              "similarityFr": 0.7897,
+              "similarityEn": 0.72,
+              "score": 0.72
+            }
+          ],
+          "chosen": "fr",
+          "passed": false
+        },
+        {
+          "attempt": 5,
+          "source": {
+            "fr": "Le plus gros problème ({k} sur {n})",
+            "en": "The biggest problem ({k} out of {n})"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ikibazo gikomeye kurusha ibindi (13 kuri 17)",
+              "rw": "Ikibazo gikomeye kurusha ibindi ({k} kuri {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le problème le plus grave (13 sur 17)",
+                "en": "The greatest challenge (13 out of 17)"
+              },
+              "similarityFr": 0.9553,
+              "similarityEn": 0.701,
+              "score": 0.701
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ikibazo gikomeye kurusha ibindi (13 ku 17)",
+              "rw": "Ikibazo gikomeye kurusha ibindi ({k} ku {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le problème le plus grave (13 à 17)",
+                "en": "The most important issue (13 out of 17)"
+              },
+              "similarityFr": 0.943,
+              "similarityEn": 0.7636,
+              "score": 0.7636
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:fix_streak",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Le plus gros problème ({k} sur {n}), depuis {x} mois",
+            "en": "The biggest problem ({k} out of {n}), for {x} months"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ikibazo gikomeye kurusha ibindi (13 kuri 17), mu gihe cy'amezi 14",
+              "rw": "Ikibazo gikomeye kurusha ibindi ({k} kuri {n}), mu gihe cy'amezi {x}",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le problème le plus grave (13 sur 17), pendant 14 mois",
+                "en": "The biggest problem (13 out of 17) in 14 months"
+              },
+              "similarityFr": 0.954,
+              "similarityEn": 0.98,
+              "score": 0.954
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ikibazo gikomeye kurusha ibindi mu mezi 14 ashize (13 kuri 17)",
+              "rw": "Ikibazo gikomeye kurusha ibindi mu mezi {x} ashize ({k} kuri {n})",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le problème le plus grave au cours des 14 derniers mois (13 sur 17)",
+                "en": "The biggest problem in the last 14 months (13 out of 17)"
+              },
+              "similarityFr": 0.9264,
+              "similarityEn": 0.9252,
+              "score": 0.9252
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:nothing_urgent",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Rien d'urgent à corriger.",
+            "en": "Nothing urgent to fix."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Nta kintu gihutirwa cyo gukosora.",
+              "rw": "Nta kintu gihutirwa cyo gukosora.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas d'urgence à corriger.",
+                "en": "There is no urgency to correct."
+              },
+              "similarityFr": 0.7827,
+              "similarityEn": 0.6053,
+              "score": 0.6053
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta kintu gihutirwa cyo gukosora.",
+              "rw": "Nta kintu gihutirwa cyo gukosora.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas d'urgence à corriger.",
+                "en": "There is no urgency to correct."
+              },
+              "similarityFr": 0.7827,
+              "similarityEn": 0.6053,
+              "score": 0.6053
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Pas de problème urgent.",
+            "en": "No urgent problem."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Nta kibazo cyihutirwa.",
+              "rw": "Nta kibazo cyihutirwa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas d'urgence.",
+                "en": "There is no urgency."
+              },
+              "similarityFr": 0.728,
+              "similarityEn": 0.6534,
+              "score": 0.6534
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta kibazo gihutirwa.",
+              "rw": "Nta kibazo gihutirwa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas d'urgence.",
+                "en": "There is no urgency."
+              },
+              "similarityFr": 0.728,
+              "similarityEn": 0.6534,
+              "score": 0.6534
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 3,
+          "source": {
+            "fr": "Pas de gros problème ce mois-ci.",
+            "en": "No big problem this month."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Muri uku kwezi nta kibazo gikomeye.",
+              "rw": "Muri uku kwezi nta kibazo gikomeye.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Ce mois-ci, il n'y a pas de problème majeur.",
+                "en": "This month is not a big deal."
+              },
+              "similarityFr": 0.945,
+              "similarityEn": 0.6443,
+              "score": 0.6443
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta kibazo gikomeye muri uku kwezi.",
+              "rw": "Nta kibazo gikomeye muri uku kwezi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas de problème majeur ce mois-ci.",
+                "en": "There are no major problems this month."
+              },
+              "similarityFr": 0.9408,
+              "similarityEn": 0.8848,
+              "score": 0.8848
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:unknown_topic",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ces messages.",
+            "en": "An unknown topic comes back from {k} visitors: ask a person to read these messages."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Hari igitekerezo kitari cyamenyekanye cyatanzwe n'abashyitsi 13: usabe umuntu gusoma ubwo butumwa.",
+              "rw": "Hari igitekerezo kitari cyamenyekanye cyatanzwe n'abashyitsi {k}: usabe umuntu gusoma ubwo butumwa.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Une suggestion inconnue a été faite par 13 invités: demandez à quelqu'un de lire le message.",
+                "en": "An unknown suggestion was made by 13 guests: Ask someone to read the message."
+              },
+              "similarityFr": 0.8127,
+              "similarityEn": 0.8053,
+              "score": 0.8053
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Hari igitekerezo cyihariye cyagarutse ku basura 13: usabe umuntu gusoma izo message.",
+              "rw": "Hari igitekerezo cyihariye cyagarutse ku basura {k}: usabe umuntu gusoma izo message.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Une suggestion spéciale a été donnée aux 13 visiteurs: demandez à quelqu'un de lire ces messages.",
+                "en": "A special suggestion came back to 13 visitors: Ask someone to read the messages."
+              },
+              "similarityFr": 0.8678,
+              "similarityEn": 0.88,
+              "score": 0.8678
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:not_understood",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "{p} messages n'ont pas été compris : demandez à une personne.",
+            "en": "{p} messages were not understood: ask a person."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ubutumwa 15 ntibwasobanukiwe: baza umuntu.",
+              "rw": "Ubutumwa {p} ntibwasobanukiwe: baza umuntu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le message 15 n'a pas été compris: demandez à quelqu'un.",
+                "en": "Message 15 was misunderstood: ask someone."
+              },
+              "similarityFr": 0.8599,
+              "similarityEn": 0.8297,
+              "score": 0.8297
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ubutumwa 15 ntibusobanukiwe: baza umuntu.",
+              "rw": "Ubutumwa {p} ntibusobanukiwe: baza umuntu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "15 messages incompréhensibles: demandez à quelqu'un.",
+                "en": "Message 15 is incomprehensible: ask someone."
+              },
+              "similarityFr": 0.8482,
+              "similarityEn": 0.7638,
+              "score": 0.7638
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "template:no_feedback",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Pas de retour ce mois-ci.",
+            "en": "No feedback this month."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Muri uku kwezi nta kintu na kimwe kizasubirwamo.",
+              "rw": "Muri uku kwezi nta kintu na kimwe kizasubirwamo.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Rien ne sera répété ce mois-ci.",
+                "en": "Nothing will be repeated this month."
+              },
+              "similarityFr": 0.6168,
+              "similarityEn": 0.4911,
+              "score": 0.4911
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta kugaruka muri uku kwezi.",
+              "rw": "Nta kugaruka muri uku kwezi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas de retour ce mois-ci.",
+                "en": "There is no return this month."
+              },
+              "similarityFr": 0.8325,
+              "similarityEn": 0.716,
+              "score": 0.716
+            }
+          ],
+          "chosen": "fr",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Aucun message de visiteur ce mois-ci.",
+            "en": "No message from visitors this month."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Muri uku kwezi nta butumwa bwavuye ku bashyitsi.",
+              "rw": "Muri uku kwezi nta butumwa bwavuye ku bashyitsi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Aucun message n'a été envoyé par les invités ce mois-ci.",
+                "en": "There were no messages from visitors this month."
+              },
+              "similarityFr": 0.81,
+              "similarityEn": 0.8788,
+              "score": 0.81
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Nta butumwa bw'umushyitsi muri uku kwezi.",
+              "rw": "Nta butumwa bw'umushyitsi muri uku kwezi.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Il n'y a pas de message d'invité ce mois-ci.",
+                "en": "There are no guest messages this month."
+              },
+              "similarityFr": 0.8938,
+              "similarityEn": 0.8234,
+              "score": 0.8234
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

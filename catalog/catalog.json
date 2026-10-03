@@ -5,12 +5,23 @@
     "examples": "synthetic",
     "kinyarwanda": {
       "disclaimer": "Machine translation, not validated by a Kinyarwanda speaker / Traduction automatique, non validée par un locuteur",
-      "mtModel": null,
-      "similarityModel": null,
-      "ttsModel": null,
-      "ttsLicense": null,
-      "floresReference": null,
-      "acceptThreshold": null
+      "mtModel": "facebook/nllb-200-distilled-600M",
+      "similarityModel": "Xenova/paraphrase-multilingual-MiniLM-L12-v2 (onnx/model_quantized.onnx)",
+      "ttsModel": "facebook/mms-tts-kin",
+      "ttsLicense": "CC-BY-NC 4.0",
+      "floresReference": {
+        "metric": "chrF++ eng_Latn->kin_Latn, FLORES-200",
+        "value": 44.0,
+        "source": "https://dl.fbaipublicfiles.com/large_objects/nllb/models/nllb_200_dense_distill_600m/metrics.csv (linked as 'metrics' from https://huggingface.co/facebook/nllb-200-distilled-600M), row eng_Latn-kin_Latn,44",
+        "otherDirections": {
+          "kin_Latn->eng_Latn (same file)": 51.3,
+          "fra_Latn->kin_Latn": "not published for the 600M model (the file lists only some directions); NLLB-200 MoE 54.5B reports 46.2 chrF++ (nllb_200_moe_54b/metrics.csv); our own measure on FLORES-200 devtest: catalog/flores-check.json"
+        }
+      },
+      "acceptThreshold": 0.75,
+      "scoring": "min(cos(source_fr, back_fr), cos(source_en, back_en)); back = kin→fra and kin→eng with the same NLLB model",
+      "slotProtection": "numeric slots replaced by guard numbers {\"n\": \"17\", \"k\": \"13\", \"x\": \"14\", \"p\": \"15\"} before translation, required exactly once after, then restored; {finding} is never translated",
+      "audioFormat": "mp3, mono, 16 kHz, 24 kbit/s; VITS seed 1234"
     }
   },
   "languages": [
@@ -28,19 +39,108 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Noor welcomed us so warmly.",
+          "We felt really welcome from the moment we arrived.",
+          "Such a kind and friendly host, she greeted us like family.",
+          "The welcome was lovely, everyone was smiling.",
+          "Thank you for the warm hospitality.",
+          "Honestly the people were so nice to us, we felt at home right away.",
+          "great welcome!!",
+          "The family received us with so much kindness, it really touched us.",
+          "Very friendly reception at the farm."
+        ],
+        "fr": [
+          "Noor nous a accueillis très chaleureusement.",
+          "On s'est sentis bienvenus dès notre arrivée.",
+          "Un accueil adorable, toute la famille souriait.",
+          "Merci pour votre gentillesse et votre hospitalité.",
+          "L'hôte était vraiment accueillante, on se sentait comme à la maison.",
+          "super accueil",
+          "La famille nous a reçus avec beaucoup de chaleur, ça nous a touchés.",
+          "Des gens très gentils et très accueillants.",
+          "On a été reçus comme des amis, c'était très chaleureux."
+        ],
+        "de": [
+          "Noor hat uns sehr herzlich empfangen.",
+          "Wir haben uns vom ersten Moment an willkommen gefühlt.",
+          "Die Familie war unglaublich gastfreundlich.",
+          "Ein so warmherziger Empfang, alle haben gelächelt.",
+          "Danke für die tolle Gastfreundschaft.",
+          "Sehr freundliche Gastgeberin, wir fühlten uns wie zu Hause.",
+          "herzlicher empfang!",
+          "Man hat uns wie Freunde aufgenommen, das hat uns wirklich berührt.",
+          "Die Leute auf der Farm waren total nett zu uns."
+        ],
+        "es": [
+          "Noor nos recibió con muchísimo cariño.",
+          "Nos sentimos bienvenidos desde que llegamos.",
+          "Una acogida muy cálida, toda la familia sonriendo.",
+          "Gracias por la hospitalidad, fueron muy amables.",
+          "La anfitriona fue encantadora, nos sentimos como en casa.",
+          "muy buena acogida",
+          "La familia nos recibió como amigos y eso nos emocionó.",
+          "Gente muy amable y acogedora.",
+          "El recibimiento fue precioso, muy cercano."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "welcome",
+          "hospitality",
+          "friendly",
+          "kind",
+          "warm",
+          "host"
+        ],
+        "fr": [
+          "accueil",
+          "accueillant",
+          "hospitalité",
+          "chaleureu",
+          "gentil",
+          "bienvenu"
+        ],
+        "de": [
+          "empfang",
+          "empfangen",
+          "gastfreundlich",
+          "herzlich",
+          "willkommen",
+          "freundlich"
+        ],
+        "es": [
+          "acogida",
+          "recibi",
+          "hospitalidad",
+          "amable",
+          "bienvenid",
+          "cálid"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bumvaga bakiriwe neza.",
+        "source": {
+          "fr": "Les visiteurs ont été bien accueillis.",
+          "en": "Visitors felt welcome."
+        },
+        "backTranslation": {
+          "fr": "Les visiteurs ont été bien accueillis.",
+          "en": "The visitors felt welcomed."
+        },
+        "similarity": 0.9806,
+        "similarityDetail": {
+          "fr": 1.0,
+          "en": 0.9806
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P1.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P2",
@@ -50,19 +150,107 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Walking through the coffee plants was fascinating.",
+          "I loved seeing the coffee trees up close in the field.",
+          "The tour of the plantation was really interesting.",
+          "Seeing the red cherries on the bushes was amazing.",
+          "The walk in the fields, the coffee on the slope, the beans and maize below, all very interesting.",
+          "nice field tour",
+          "We enjoyed the visit of the coffee plot a lot.",
+          "It was great to see where the coffee actually grows.",
+          "The part where we went among the coffee trees was my favourite."
+        ],
+        "fr": [
+          "La balade au milieu des caféiers était passionnante.",
+          "J'ai adoré voir les plants de café de près dans le champ.",
+          "La visite de la plantation était vraiment intéressante.",
+          "Voir les cerises rouges sur les caféiers, c'était génial.",
+          "Le tour des champs, le café en haut et le maïs en bas, très intéressant.",
+          "visite des champs top",
+          "On a beaucoup aimé la visite de la parcelle de café.",
+          "C'était super de voir où pousse vraiment le café.",
+          "Le moment dans les caféiers, c'était mon préféré."
+        ],
+        "de": [
+          "Der Rundgang durch die Kaffeepflanzen war faszinierend.",
+          "Ich fand es toll, die Kaffeesträucher auf dem Feld aus der Nähe zu sehen.",
+          "Die Führung über die Plantage war sehr interessant.",
+          "Die roten Kaffeekirschen an den Sträuchern zu sehen war großartig.",
+          "Der Gang über die Felder, oben der Kaffee, unten Mais und Bohnen, wirklich spannend.",
+          "schöne feldführung",
+          "Der Besuch im Kaffeegarten hat uns sehr gefallen.",
+          "Es war super zu sehen, wo der Kaffee wirklich wächst.",
+          "Der Teil zwischen den Kaffeebäumen war mein Lieblingsmoment."
+        ],
+        "es": [
+          "El paseo entre los cafetos fue fascinante.",
+          "Me encantó ver las plantas de café de cerca en el campo.",
+          "La visita a la plantación fue muy interesante.",
+          "Ver las cerezas rojas en los arbustos fue increíble.",
+          "El recorrido por los campos, el café arriba y el maíz abajo, muy interesante.",
+          "buen recorrido por el campo",
+          "Nos gustó mucho visitar la parcela de café.",
+          "Fue genial ver dónde crece de verdad el café.",
+          "La parte entre los cafetales fue mi favorita."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "field",
+          "plantation",
+          "coffee trees",
+          "coffee plants",
+          "bushes",
+          "plot"
+        ],
+        "fr": [
+          "champ",
+          "plantation",
+          "caféier",
+          "plants de café",
+          "parcelle"
+        ],
+        "de": [
+          "feld",
+          "plantage",
+          "kaffeesträuch",
+          "kaffeepflanzen",
+          "kaffeebäum",
+          "kaffeegarten"
+        ],
+        "es": [
+          "campo",
+          "plantación",
+          "cafeto",
+          "cafetal",
+          "plantas de café",
+          "parcela"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bakundaga gusura umurima w'ikawa.",
+        "source": {
+          "fr": "La visite du champ de café a plu.",
+          "en": "Visitors liked the visit of the coffee field."
+        },
+        "backTranslation": {
+          "fr": "Les visiteurs se rendaient souvent dans les champs de café.",
+          "en": "Guests often visited the coffee plantation."
+        },
+        "similarity": 0.8146,
+        "similarityDetail": {
+          "fr": 0.8146,
+          "en": 0.8206
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P2.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P3",
@@ -72,19 +260,103 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Roasting the beans ourselves was the highlight.",
+          "The coffee tasting was excellent.",
+          "I loved roasting coffee over the fire with Noor.",
+          "That cup of freshly roasted coffee was the best I've ever had.",
+          "The smell when the beans were roasting, wonderful.",
+          "loved the tasting",
+          "We really enjoyed grinding and tasting the coffee at the end.",
+          "The roasting session was so much fun.",
+          "Tasting her own coffee straight from the pan was special."
+        ],
+        "fr": [
+          "Torréfier les grains nous-mêmes, c'était le meilleur moment.",
+          "La dégustation de café était excellente.",
+          "J'ai adoré griller le café sur le feu avec Noor.",
+          "Ce café fraîchement torréfié, le meilleur de ma vie.",
+          "L'odeur des grains en train de griller, magnifique.",
+          "dégustation géniale",
+          "On a adoré moudre et goûter le café à la fin.",
+          "La torréfaction était vraiment amusante.",
+          "Goûter son propre café juste sorti de la poêle, c'était spécial."
+        ],
+        "de": [
+          "Die Bohnen selbst zu rösten war das Highlight.",
+          "Die Kaffeeverkostung war ausgezeichnet.",
+          "Ich fand es toll, mit Noor Kaffee über dem Feuer zu rösten.",
+          "Der frisch geröstete Kaffee war der beste, den ich je getrunken habe.",
+          "Der Duft beim Rösten der Bohnen, herrlich.",
+          "tolle verkostung",
+          "Das Mahlen und Probieren am Ende hat uns sehr gefallen.",
+          "Das Rösten hat richtig Spaß gemacht.",
+          "Ihren eigenen Kaffee direkt aus der Pfanne zu probieren war etwas Besonderes."
+        ],
+        "es": [
+          "Tostar los granos nosotros mismos fue lo mejor.",
+          "La cata de café fue excelente.",
+          "Me encantó tostar el café al fuego con Noor.",
+          "Ese café recién tostado fue el mejor de mi vida.",
+          "El olor de los granos tostándose, maravilloso.",
+          "la degustación genial",
+          "Nos encantó moler y probar el café al final.",
+          "El tostado fue muy divertido.",
+          "Probar su propio café recién salido de la sartén fue especial."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "roast",
+          "tasting",
+          "taste",
+          "grind",
+          "cup"
+        ],
+        "fr": [
+          "torréf",
+          "dégustation",
+          "goûter",
+          "griller",
+          "moudre"
+        ],
+        "de": [
+          "röst",
+          "verkostung",
+          "probieren",
+          "mahlen"
+        ],
+        "es": [
+          "tost",
+          "cata",
+          "degustación",
+          "probar",
+          "moler"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
+        "source": {
+          "fr": "Les visiteurs ont aimé griller et goûter le café.",
+          "en": "Visitors liked roasting and tasting the coffee."
+        },
+        "backTranslation": {
+          "fr": "Les invités appréciaient cuisiner et déguster du café.",
+          "en": "Guests enjoyed cooking and tasting coffee."
+        },
+        "similarity": 0.8576,
+        "similarityDetail": {
+          "fr": 0.9092,
+          "en": 0.8576
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P3.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P4",
@@ -94,19 +366,107 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The lunch was delicious.",
+          "We loved the meal Noor cooked for us.",
+          "The beans and plantains were so tasty.",
+          "Great food, generous and homemade.",
+          "Lunch with the family was one of the best parts, the food was amazing.",
+          "yummy lunch",
+          "The meal was simple but really good.",
+          "Thank you for the delicious food.",
+          "I'd come back just for that lunch."
+        ],
+        "fr": [
+          "Le repas était délicieux.",
+          "On a adoré le déjeuner préparé par Noor.",
+          "Les haricots et les bananes plantains étaient excellents.",
+          "Très bonne cuisine maison et copieuse.",
+          "Le repas en famille, un des meilleurs moments, c'était vraiment bon.",
+          "repas trop bon",
+          "Un repas simple mais vraiment savoureux.",
+          "Merci pour ce bon déjeuner.",
+          "Je reviendrais rien que pour le repas."
+        ],
+        "de": [
+          "Das Mittagessen war köstlich.",
+          "Das Essen, das Noor für uns gekocht hat, war super.",
+          "Die Bohnen und Kochbananen waren sehr lecker.",
+          "Tolles Essen, reichlich und hausgemacht.",
+          "Das Essen mit der Familie war einer der schönsten Momente, sehr lecker.",
+          "leckeres essen",
+          "Einfaches Essen, aber richtig gut.",
+          "Danke für das leckere Mittagessen.",
+          "Allein für das Essen würde ich wiederkommen."
+        ],
+        "es": [
+          "La comida estaba deliciosa.",
+          "Nos encantó el almuerzo que cocinó Noor.",
+          "Los frijoles y los plátanos estaban riquísimos.",
+          "Muy buena comida casera y abundante.",
+          "Comer con la familia fue de lo mejor, la comida increíble.",
+          "almuerzo muy rico",
+          "Una comida sencilla pero muy sabrosa.",
+          "Gracias por la comida tan rica.",
+          "Volvería solo por ese almuerzo."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "lunch",
+          "meal",
+          "food",
+          "delicious",
+          "tasty",
+          "cooked"
+        ],
+        "fr": [
+          "repas",
+          "déjeuner",
+          "cuisine",
+          "délicieux",
+          "savoureu",
+          "bon repas"
+        ],
+        "de": [
+          "essen",
+          "mittagessen",
+          "lecker",
+          "köstlich",
+          "gekocht"
+        ],
+        "es": [
+          "comida",
+          "almuerzo",
+          "delicios",
+          "rico",
+          "sabros",
+          "cocin"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bishimiye ibyo kurya.",
+        "source": {
+          "fr": "Les visiteurs ont aimé le repas.",
+          "en": "Visitors liked the meal."
+        },
+        "backTranslation": {
+          "fr": "Les invités ont apprécié la nourriture.",
+          "en": "The guests enjoyed the meal."
+        },
+        "similarity": 0.9108,
+        "similarityDetail": {
+          "fr": 0.9258,
+          "en": 0.9108
+        },
+        "translatedFrom": "fr",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P4.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P5",
@@ -116,19 +476,104 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Noor explained every step of coffee making very clearly.",
+          "I finally understand how coffee goes from cherry to cup.",
+          "The explanations about the farm were clear and easy to follow.",
+          "We learned so much about how the cooperative works.",
+          "She showed us the drying and washing and explained why each step matters.",
+          "very informative",
+          "Really clear explanations, even the kids understood.",
+          "Learned a lot about growing coffee.",
+          "Everything about the farm and the harvest was explained well."
+        ],
+        "fr": [
+          "Noor a expliqué chaque étape du café très clairement.",
+          "Je comprends enfin comment on passe de la cerise à la tasse.",
+          "Les explications sur la ferme étaient claires et faciles à suivre.",
+          "On a appris plein de choses sur le fonctionnement de la coopérative.",
+          "Elle nous a montré le lavage et le séchage en expliquant à quoi sert chaque étape.",
+          "très instructif",
+          "Des explications vraiment claires, même les enfants ont compris.",
+          "J'ai appris beaucoup sur la culture du café.",
+          "Tout était bien expliqué sur la ferme et la récolte."
+        ],
+        "de": [
+          "Noor hat jeden Schritt der Kaffeeherstellung sehr klar erklärt.",
+          "Jetzt verstehe ich endlich, wie aus der Kirsche Kaffee wird.",
+          "Die Erklärungen zur Farm waren klar und leicht verständlich.",
+          "Wir haben viel darüber gelernt, wie die Kooperative funktioniert.",
+          "Sie hat uns Waschen und Trocknen gezeigt und erklärt, wofür jeder Schritt gut ist.",
+          "sehr lehrreich",
+          "Wirklich verständliche Erklärungen, sogar die Kinder haben alles verstanden.",
+          "Ich habe viel über den Kaffeeanbau gelernt.",
+          "Alles über die Farm und die Ernte wurde gut erklärt."
+        ],
+        "es": [
+          "Noor explicó cada paso del café con mucha claridad.",
+          "Por fin entiendo cómo se pasa de la cereza a la taza.",
+          "Las explicaciones sobre la finca fueron claras y fáciles de seguir.",
+          "Aprendimos mucho sobre cómo funciona la cooperativa.",
+          "Nos enseñó el lavado y el secado y explicó para qué sirve cada paso.",
+          "muy instructivo",
+          "Explicaciones muy claras, hasta los niños lo entendieron.",
+          "Aprendí muchísimo sobre el cultivo del café.",
+          "Todo sobre la finca y la cosecha estuvo bien explicado."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "explain",
+          "learned",
+          "informative",
+          "understand how",
+          "clear"
+        ],
+        "fr": [
+          "expliqu",
+          "appris",
+          "instructif",
+          "comprends",
+          "clair"
+        ],
+        "de": [
+          "erklär",
+          "gelernt",
+          "lehrreich",
+          "verstehe",
+          "verständlich"
+        ],
+        "es": [
+          "explic",
+          "aprend",
+          "instructivo",
+          "entiendo",
+          "clar"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Ibisobanuro byawe ku birebana n'ikawa birasobanutse neza.",
+        "source": {
+          "fr": "Vos explications sur le café sont claires.",
+          "en": "Your explanations about coffee are clear."
+        },
+        "backTranslation": {
+          "fr": "Votre définition du café est claire.",
+          "en": "Your definition of coffee is clear."
+        },
+        "similarity": 0.9124,
+        "similarityDetail": {
+          "fr": 0.9124,
+          "en": 0.9394
+        },
+        "translatedFrom": "fr",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P5.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P6",
@@ -138,19 +583,106 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "It felt so authentic, nothing staged for tourists.",
+          "We got to see real everyday life on the farm.",
+          "A genuine experience, not a tourist trap.",
+          "Helping with the chores and meeting the kids made it feel real.",
+          "Seeing how a farming family really lives was eye-opening and very authentic.",
+          "so authentic",
+          "This was real rural life, not a show.",
+          "Loved sharing a day of farm life with them.",
+          "It felt like we were part of the family's daily routine."
+        ],
+        "fr": [
+          "C'était très authentique, rien de fait pour les touristes.",
+          "On a vu la vraie vie de tous les jours à la ferme.",
+          "Une expérience vraie, pas un piège à touristes.",
+          "Aider aux tâches et rencontrer les enfants, ça rendait tout très réel.",
+          "Voir comment vit vraiment une famille d'agriculteurs, c'était authentique et marquant.",
+          "trop authentique",
+          "C'était la vraie vie rurale, pas un spectacle.",
+          "J'ai adoré partager une journée de la vie de la ferme.",
+          "On avait l'impression de faire partie du quotidien de la famille."
+        ],
+        "de": [
+          "Es war so authentisch, nichts für Touristen inszeniert.",
+          "Wir haben das echte Alltagsleben auf dem Hof gesehen.",
+          "Ein echtes Erlebnis, keine Touristenfalle.",
+          "Bei der Arbeit mitzuhelfen und die Kinder kennenzulernen machte es echt.",
+          "Zu sehen, wie eine Bauernfamilie wirklich lebt, war sehr authentisch und beeindruckend.",
+          "total authentisch",
+          "Das war echtes Landleben, keine Show.",
+          "Ich habe es geliebt, einen Tag Hofleben mit ihnen zu teilen.",
+          "Wir fühlten uns wie ein Teil des Familienalltags."
+        ],
+        "es": [
+          "Fue muy auténtico, nada montado para turistas.",
+          "Vimos la vida real de cada día en la finca.",
+          "Una experiencia genuina, no una trampa para turistas.",
+          "Ayudar con las tareas y conocer a los niños lo hizo muy real.",
+          "Ver cómo vive de verdad una familia campesina fue muy auténtico y nos marcó.",
+          "súper auténtico",
+          "Era la vida rural de verdad, no un espectáculo.",
+          "Me encantó compartir un día de la vida en la granja.",
+          "Sentimos que éramos parte del día a día de la familia."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "authentic",
+          "genuine",
+          "real life",
+          "daily life",
+          "farm life",
+          "everyday"
+        ],
+        "fr": [
+          "authentique",
+          "vraie vie",
+          "quotidien",
+          "vie de la ferme",
+          "vrai"
+        ],
+        "de": [
+          "authentisch",
+          "echt",
+          "alltag",
+          "landleben",
+          "hofleben"
+        ],
+        "es": [
+          "auténtic",
+          "genuin",
+          "vida real",
+          "día a día",
+          "vida rural",
+          "de verdad"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bakundaga kubona ubuzima nyakuri bwo mu isambu.",
+        "source": {
+          "fr": "Les visiteurs ont aimé voir la vraie vie de la ferme.",
+          "en": "Visitors liked seeing real farm life."
+        },
+        "backTranslation": {
+          "fr": "Les visiteurs avaient l'habitude de voir la vraie vie à la ferme.",
+          "en": "Visitors enjoyed real life on the farm."
+        },
+        "similarity": 0.9278,
+        "similarityDetail": {
+          "fr": 0.9278,
+          "en": 0.9427
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P6.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P7",
@@ -160,19 +692,108 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The view over the hills was breathtaking.",
+          "Such a beautiful landscape.",
+          "The setting of the farm on the hillside is stunning.",
+          "Green hills everywhere, the scenery was incredible.",
+          "From the top of the coffee field you can see the whole valley, absolutely gorgeous.",
+          "amazing views",
+          "Very peaceful place, lovely surroundings.",
+          "The mist on the hills in the morning was magical.",
+          "What a beautiful spot."
+        ],
+        "fr": [
+          "La vue sur les collines était à couper le souffle.",
+          "Quel paysage magnifique.",
+          "Le cadre de la ferme à flanc de colline est superbe.",
+          "Des collines vertes partout, le décor était incroyable.",
+          "Du haut du champ de café on voit toute la vallée, c'est splendide.",
+          "vue magnifique",
+          "Un endroit très paisible, un cadre superbe.",
+          "La brume sur les collines le matin, c'était magique.",
+          "Quel bel endroit."
+        ],
+        "de": [
+          "Der Blick über die Hügel war atemberaubend.",
+          "Was für eine wunderschöne Landschaft.",
+          "Die Lage der Farm am Hang ist traumhaft.",
+          "Überall grüne Hügel, die Kulisse war unglaublich.",
+          "Von oben am Kaffeefeld sieht man das ganze Tal, einfach herrlich.",
+          "tolle aussicht",
+          "Ein sehr ruhiger Ort mit schöner Umgebung.",
+          "Der Nebel über den Hügeln am Morgen war magisch.",
+          "Was für ein schöner Ort."
+        ],
+        "es": [
+          "La vista sobre las colinas era impresionante.",
+          "Qué paisaje tan bonito.",
+          "El entorno de la finca en la ladera es precioso.",
+          "Colinas verdes por todas partes, el paisaje era increíble.",
+          "Desde arriba del cafetal se ve todo el valle, una maravilla.",
+          "vistas increíbles",
+          "Un lugar muy tranquilo, un entorno precioso.",
+          "La niebla sobre las colinas por la mañana fue mágica.",
+          "Qué sitio tan bonito."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "view",
+          "landscape",
+          "scenery",
+          "hills",
+          "beautiful",
+          "setting"
+        ],
+        "fr": [
+          "vue",
+          "paysage",
+          "collines",
+          "cadre",
+          "magnifique",
+          "décor"
+        ],
+        "de": [
+          "aussicht",
+          "blick",
+          "landschaft",
+          "hügel",
+          "kulisse",
+          "umgebung"
+        ],
+        "es": [
+          "vista",
+          "paisaje",
+          "colinas",
+          "entorno",
+          "precioso",
+          "bonito"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bakundaga aho hantu.",
+        "source": {
+          "fr": "Les visiteurs ont aimé le paysage.",
+          "en": "Visitors liked the landscape."
+        },
+        "backTranslation": {
+          "fr": "C'était un endroit très agréable pour les visiteurs.",
+          "en": "Visitors loved this place."
+        },
+        "similarity": 0.7608,
+        "similarityDetail": {
+          "fr": 0.7817,
+          "en": 0.7608
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P7.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P8",
@@ -182,19 +803,106 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Great value for money.",
+          "Totally worth the price.",
+          "Very reasonable price for everything we got.",
+          "For what we paid, it was excellent value.",
+          "Honestly cheap for a whole morning with lunch and tasting included.",
+          "worth every franc",
+          "Fair price, we'd happily have paid more.",
+          "Good value compared to the big tours.",
+          "The price was more than fair."
+        ],
+        "fr": [
+          "Très bon rapport qualité-prix.",
+          "Ça valait largement le prix.",
+          "Un prix très raisonnable pour tout ce qu'on a eu.",
+          "Pour ce qu'on a payé, c'était vraiment une bonne affaire.",
+          "Franchement pas cher pour une matinée entière avec repas et dégustation.",
+          "vaut chaque franc",
+          "Prix juste, on aurait volontiers payé plus.",
+          "Bon rapport qualité-prix comparé aux grands circuits.",
+          "Le tarif était plus que correct."
+        ],
+        "de": [
+          "Sehr gutes Preis-Leistungs-Verhältnis.",
+          "Absolut den Preis wert.",
+          "Ein sehr fairer Preis für alles, was wir bekommen haben.",
+          "Für das, was wir bezahlt haben, war es top.",
+          "Ehrlich gesagt günstig für einen ganzen Vormittag mit Essen und Verkostung.",
+          "jeden franc wert",
+          "Fairer Preis, wir hätten gern mehr bezahlt.",
+          "Viel besser im Preis als die großen Touren.",
+          "Der Preis war mehr als angemessen."
+        ],
+        "es": [
+          "Muy buena relación calidad-precio.",
+          "Valió totalmente lo que costó.",
+          "Un precio muy razonable para todo lo que recibimos.",
+          "Por lo que pagamos, fue una ganga.",
+          "Sinceramente barato para una mañana entera con comida y cata incluidas.",
+          "vale cada franco",
+          "Precio justo, habríamos pagado más con gusto.",
+          "Buena relación calidad-precio comparado con los grandes tours.",
+          "El precio fue más que correcto."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "value",
+          "worth",
+          "reasonable",
+          "fair price",
+          "cheap"
+        ],
+        "fr": [
+          "rapport qualité",
+          "vaut",
+          "valait",
+          "raisonnable",
+          "pas cher",
+          "prix juste"
+        ],
+        "de": [
+          "preis-leistung",
+          "wert",
+          "fair",
+          "günstig",
+          "angemessen"
+        ],
+        "es": [
+          "calidad-precio",
+          "vale",
+          "valió",
+          "razonable",
+          "barato",
+          "precio justo"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Urwo ruzinduko rufite agaciro.",
+        "source": {
+          "fr": "La visite vaut son prix.",
+          "en": "The visit is worth its price."
+        },
+        "backTranslation": {
+          "fr": "Cette visite est précieuse.",
+          "en": "That visit is worthwhile."
+        },
+        "similarity": 0.7615,
+        "similarityDetail": {
+          "fr": 0.7615,
+          "en": 0.8334
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P8.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P9",
@@ -204,19 +912,102 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "I'd love to buy some of her coffee.",
+          "Can we order coffee from the farm?",
+          "I want to take a bag of this coffee home.",
+          "Please sell your coffee, I would buy several kilos.",
+          "I wish I could buy beans from Noor to bring back to my friends.",
+          "want to buy coffee!",
+          "Where can I buy this coffee?",
+          "I'd buy her roasted coffee in a heartbeat.",
+          "We would like to purchase a few packets before we leave."
+        ],
+        "fr": [
+          "J'aimerais beaucoup acheter de son café.",
+          "Est-ce qu'on peut commander du café de la ferme ?",
+          "Je veux rapporter un sachet de ce café à la maison.",
+          "Vendez votre café, j'en achèterais plusieurs kilos.",
+          "J'aimerais acheter des grains à Noor pour en ramener à mes amis.",
+          "envie d'acheter du café",
+          "Où est-ce qu'on peut acheter ce café ?",
+          "J'achèterais son café torréfié sans hésiter.",
+          "On voudrait acheter quelques paquets avant de partir."
+        ],
+        "de": [
+          "Ich würde sehr gern etwas von ihrem Kaffee kaufen.",
+          "Kann man Kaffee von der Farm bestellen?",
+          "Ich möchte eine Tüte von diesem Kaffee mit nach Hause nehmen.",
+          "Bitte verkauft euren Kaffee, ich würde mehrere Kilo nehmen.",
+          "Ich würde Noor gern Bohnen abkaufen, um sie meinen Freunden mitzubringen.",
+          "will kaffee kaufen!",
+          "Wo kann ich diesen Kaffee kaufen?",
+          "Ihren gerösteten Kaffee würde ich sofort kaufen.",
+          "Wir würden gern ein paar Päckchen kaufen, bevor wir fahren."
+        ],
+        "es": [
+          "Me encantaría comprar un poco de su café.",
+          "¿Se puede pedir café de la finca?",
+          "Quiero llevarme una bolsa de este café a casa.",
+          "Vendan su café, yo compraría varios kilos.",
+          "Me gustaría comprarle granos a Noor para llevar a mis amigos.",
+          "quiero comprar café",
+          "¿Dónde puedo comprar este café?",
+          "Compraría su café tostado sin dudarlo.",
+          "Nos gustaría comprar unos paquetes antes de irnos."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "buy coffee",
+          "buy some",
+          "purchase",
+          "order coffee",
+          "take a bag",
+          "buy her"
+        ],
+        "fr": [
+          "acheter",
+          "achèterais",
+          "commander du café",
+          "rapporter un sachet"
+        ],
+        "de": [
+          "kaufen",
+          "bestellen",
+          "mitnehmen",
+          "abkaufen"
+        ],
+        "es": [
+          "comprar",
+          "compraría",
+          "pedir café",
+          "llevarme"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bifuza kugura ikawa yawe.",
+        "source": {
+          "fr": "Les visiteurs veulent acheter votre café.",
+          "en": "Visitors want to buy your coffee."
+        },
+        "backTranslation": {
+          "fr": "Les invités veulent acheter votre café.",
+          "en": "Guests want to buy your coffee."
+        },
+        "similarity": 0.9705,
+        "similarityDetail": {
+          "fr": 0.9782,
+          "en": 0.9705
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P9.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P10",
@@ -226,19 +1017,102 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "We will definitely come back.",
+          "I'll recommend this farm to all my friends.",
+          "We'd love to return next year with the kids.",
+          "I'm telling everyone back home to visit.",
+          "If we ever come back to the country, we'll book this visit again for sure.",
+          "will recommend!",
+          "A must-do, I'd recommend it to anyone travelling here.",
+          "Hope to come back during the harvest.",
+          "We'll send our friends your way."
+        ],
+        "fr": [
+          "On reviendra, c'est sûr.",
+          "Je vais recommander cette ferme à tous mes amis.",
+          "On aimerait revenir l'année prochaine avec les enfants.",
+          "Je vais dire à tout le monde chez moi de venir.",
+          "Si on revient dans le pays, on refera cette visite sans hésiter.",
+          "je recommande !",
+          "À faire absolument, je la conseille à tous les voyageurs.",
+          "J'espère revenir pendant la récolte.",
+          "On vous enverra nos amis."
+        ],
+        "de": [
+          "Wir kommen auf jeden Fall wieder.",
+          "Ich werde diese Farm allen meinen Freunden empfehlen.",
+          "Wir würden nächstes Jahr gern mit den Kindern wiederkommen.",
+          "Ich erzähle zu Hause allen, dass sie herkommen sollen.",
+          "Wenn wir wieder im Land sind, buchen wir diesen Besuch auf jeden Fall noch einmal.",
+          "klare empfehlung!",
+          "Ein Muss, ich empfehle es jedem, der hier reist.",
+          "Ich hoffe, zur Erntezeit wiederzukommen.",
+          "Wir schicken euch unsere Freunde vorbei."
+        ],
+        "es": [
+          "Volveremos seguro.",
+          "Voy a recomendar esta finca a todos mis amigos.",
+          "Nos encantaría volver el año que viene con los niños.",
+          "Le diré a todo el mundo en casa que venga.",
+          "Si volvemos al país, repetiremos esta visita sin duda.",
+          "¡lo recomiendo!",
+          "Imprescindible, se lo recomendaría a cualquiera que viaje por aquí.",
+          "Espero volver durante la cosecha.",
+          "Les mandaremos a nuestros amigos."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "come back",
+          "return",
+          "recommend",
+          "again",
+          "must-do"
+        ],
+        "fr": [
+          "reviendr",
+          "revenir",
+          "recommand",
+          "conseille",
+          "refera"
+        ],
+        "de": [
+          "wiederkommen",
+          "kommen wieder",
+          "empfehl",
+          "noch einmal"
+        ],
+        "es": [
+          "volver",
+          "volveremos",
+          "recomend",
+          "repetir"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bifuza kugaruka bakabwira incuti zabo ibyawe.",
+        "source": {
+          "fr": "Les visiteurs veulent revenir et parler de vous à leurs amis.",
+          "en": "Visitors want to come back and tell their friends about you."
+        },
+        "backTranslation": {
+          "fr": "Les invités veulent revenir et parler de toi à leurs amis.",
+          "en": "Guests want to come back and tell their friends about you."
+        },
+        "similarity": 0.9093,
+        "similarityDetail": {
+          "fr": 0.929,
+          "en": 0.9093
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P10.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "P11",
@@ -248,19 +1122,108 @@
       },
       "polarity": "positive",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "Thank you, it was great!",
+          "We had a wonderful time.",
+          "Amazing day, thanks so much.",
+          "Really enjoyed everything.",
+          "Thanks for everything, it was one of the best days of our trip.",
+          "perfect, thank you",
+          "What a lovely experience overall.",
+          "It was super, thanks a lot.",
+          "Everything was great, thank you Noor."
+        ],
+        "fr": [
+          "Merci, c'était super !",
+          "On a passé un moment merveilleux.",
+          "Journée géniale, merci beaucoup.",
+          "On a vraiment tout aimé.",
+          "Merci pour tout, une des plus belles journées de notre voyage.",
+          "parfait, merci",
+          "Quelle belle expérience dans l'ensemble.",
+          "C'était top, merci mille fois.",
+          "Tout était génial, merci Noor."
+        ],
+        "de": [
+          "Danke, es war super!",
+          "Wir hatten eine wunderbare Zeit.",
+          "Toller Tag, vielen Dank.",
+          "Uns hat wirklich alles gefallen.",
+          "Danke für alles, einer der schönsten Tage unserer Reise.",
+          "perfekt, danke",
+          "Insgesamt ein wunderschönes Erlebnis.",
+          "Es war klasse, vielen Dank.",
+          "Alles war großartig, danke Noor."
+        ],
+        "es": [
+          "¡Gracias, fue genial!",
+          "Lo pasamos de maravilla.",
+          "Un día increíble, muchas gracias.",
+          "Nos gustó todo de verdad.",
+          "Gracias por todo, uno de los mejores días del viaje.",
+          "perfecto, gracias",
+          "Qué experiencia tan bonita en general.",
+          "Fue estupendo, mil gracias.",
+          "Todo estuvo genial, gracias Noor."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "thank",
+          "great",
+          "wonderful",
+          "amazing",
+          "perfect",
+          "lovely"
+        ],
+        "fr": [
+          "merci",
+          "super",
+          "génial",
+          "merveilleu",
+          "parfait",
+          "top"
+        ],
+        "de": [
+          "danke",
+          "super",
+          "toll",
+          "wunderbar",
+          "perfekt",
+          "großartig"
+        ],
+        "es": [
+          "gracias",
+          "genial",
+          "maravill",
+          "increíble",
+          "perfecto",
+          "estupendo"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi barishimye cyane.",
+        "source": {
+          "fr": "Les visiteurs sont très contents.",
+          "en": "Visitors are very happy."
+        },
+        "backTranslation": {
+          "fr": "Les invités sont très contents.",
+          "en": "The guests were thrilled."
+        },
+        "similarity": 0.8323,
+        "similarityDetail": {
+          "fr": 0.8574,
+          "en": 0.8323
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-P11.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N1",
@@ -270,19 +1233,116 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The path to the farm was far too long.",
+          "The road up there is really rough, our car barely made it.",
+          "It was very hard to find the farm, no signs at all.",
+          "The walk up from the main road was steep and exhausting.",
+          "Getting there took ages on a muddy dirt track, not easy with older people.",
+          "access is difficult",
+          "The trail to the farm is slippery and dangerous after rain.",
+          "Too far from town, the drive was long.",
+          "We got lost twice on the way to the farm."
+        ],
+        "fr": [
+          "Le chemin pour arriver à la ferme était beaucoup trop long.",
+          "La route pour monter est en très mauvais état, la voiture a eu du mal.",
+          "La ferme est très difficile à trouver, aucun panneau.",
+          "La montée depuis la route principale est raide et épuisante.",
+          "Il faut des heures sur une piste boueuse pour y arriver, pas facile avec des personnes âgées.",
+          "accès compliqué",
+          "Le sentier jusqu'à la ferme est glissant et dangereux après la pluie.",
+          "Trop loin de la ville, le trajet était long.",
+          "On s'est perdus deux fois en route vers la ferme."
+        ],
+        "de": [
+          "Der Weg zur Farm war viel zu lang.",
+          "Die Straße dort hinauf ist sehr schlecht, unser Auto kam kaum hoch.",
+          "Die Farm war sehr schwer zu finden, gar keine Schilder.",
+          "Der Aufstieg von der Hauptstraße war steil und anstrengend.",
+          "Die Anfahrt über eine schlammige Piste dauerte ewig, mit älteren Leuten nicht einfach.",
+          "anfahrt schwierig",
+          "Der Pfad zur Farm ist nach Regen rutschig und gefährlich.",
+          "Zu weit weg von der Stadt, die Fahrt war lang.",
+          "Wir haben uns auf dem Weg zur Farm zweimal verfahren."
+        ],
+        "es": [
+          "El camino hasta la finca era demasiado largo.",
+          "La carretera para subir está fatal, el coche casi no llega.",
+          "Fue muy difícil encontrar la finca, no hay ninguna señal.",
+          "La subida desde la carretera principal es empinada y agotadora.",
+          "Llegar llevó horas por una pista de barro, nada fácil con personas mayores.",
+          "acceso difícil",
+          "El sendero a la finca resbala y es peligroso después de llover.",
+          "Demasiado lejos del pueblo, el trayecto fue largo.",
+          "Nos perdimos dos veces de camino a la finca."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "path",
+          "road",
+          "access",
+          "way there",
+          "steep",
+          "far",
+          "lost",
+          "track"
+        ],
+        "fr": [
+          "chemin",
+          "route",
+          "accès",
+          "trajet",
+          "montée",
+          "loin",
+          "perdus",
+          "piste"
+        ],
+        "de": [
+          "weg",
+          "straße",
+          "anfahrt",
+          "zufahrt",
+          "steil",
+          "weit",
+          "verfahren",
+          "piste"
+        ],
+        "es": [
+          "camino",
+          "carretera",
+          "acceso",
+          "trayecto",
+          "subida",
+          "lejos",
+          "perdimos",
+          "pista"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Inzira igana ku isambu irareshya cyane cyangwa ikaba igoye cyane.",
+        "source": {
+          "fr": "Le chemin jusqu'à la ferme est trop long ou difficile.",
+          "en": "The road to the farm is too long or difficult."
+        },
+        "backTranslation": {
+          "fr": "Le chemin vers la ferme est trop long ou trop difficile.",
+          "en": "The road to the farm is either too long or too difficult."
+        },
+        "similarity": 0.9912,
+        "similarityDetail": {
+          "fr": 0.9934,
+          "en": 0.9912
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N1.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N2",
@@ -292,19 +1352,107 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The price wasn't clear before we came.",
+          "Nobody told us the cost until the end.",
+          "We only found out about the extra fee for lunch afterwards.",
+          "It was confusing what was included in the price.",
+          "The guide quoted one price and then at the end we were asked for more, which felt awkward.",
+          "prices unclear",
+          "Please tell visitors the price in advance.",
+          "We didn't know how much to pay or who to pay.",
+          "Hidden costs at the end, a written price list would help."
+        ],
+        "fr": [
+          "Le prix n'était pas clair avant de venir.",
+          "Personne ne nous a dit combien ça coûtait avant la fin.",
+          "On a découvert après coup le supplément pour le repas.",
+          "On ne savait pas trop ce qui était compris dans le prix.",
+          "Le guide avait annoncé un prix et à la fin on nous a demandé plus, c'était gênant.",
+          "prix pas clairs",
+          "Merci d'annoncer le tarif à l'avance.",
+          "On ne savait pas combien payer ni à qui.",
+          "Des frais cachés à la fin, une liste de prix écrite aiderait."
+        ],
+        "de": [
+          "Der Preis war vorher nicht klar.",
+          "Niemand hat uns bis zum Schluss gesagt, was es kostet.",
+          "Vom Aufpreis fürs Mittagessen haben wir erst hinterher erfahren.",
+          "Es war unklar, was im Preis enthalten ist.",
+          "Der Guide nannte einen Preis und am Ende sollten wir mehr zahlen, das war unangenehm.",
+          "preise unklar",
+          "Bitte sagt den Besuchern den Preis im Voraus.",
+          "Wir wussten nicht, wie viel wir wem zahlen sollten.",
+          "Versteckte Kosten am Ende, eine schriftliche Preisliste wäre gut."
+        ],
+        "es": [
+          "El precio no estaba claro antes de venir.",
+          "Nadie nos dijo cuánto costaba hasta el final.",
+          "Nos enteramos después del suplemento por la comida.",
+          "No quedaba claro qué incluía el precio.",
+          "El guía dijo un precio y al final nos pidieron más, fue incómodo.",
+          "precios poco claros",
+          "Por favor, digan el precio por adelantado.",
+          "No sabíamos cuánto pagar ni a quién.",
+          "Costes ocultos al final, una lista de precios por escrito ayudaría."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "price",
+          "cost",
+          "fee",
+          "pay",
+          "included",
+          "hidden"
+        ],
+        "fr": [
+          "prix",
+          "coût",
+          "tarif",
+          "supplément",
+          "payer",
+          "frais"
+        ],
+        "de": [
+          "preis",
+          "kosten",
+          "aufpreis",
+          "zahlen",
+          "enthalten"
+        ],
+        "es": [
+          "precio",
+          "costaba",
+          "coste",
+          "suplemento",
+          "pagar",
+          "incluía"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Igiciro cyayo ntikizwi neza n'abashyitsi.",
+        "source": {
+          "fr": "Le prix n'est pas clair pour les visiteurs.",
+          "en": "The price is not clear to visitors."
+        },
+        "backTranslation": {
+          "fr": "Le prix est incertain pour les visiteurs.",
+          "en": "The price is not well known to visitors."
+        },
+        "similarity": 0.875,
+        "similarityDetail": {
+          "fr": 0.875,
+          "en": 0.9385
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N2.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N3",
@@ -314,19 +1462,108 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The visit was too long.",
+          "The tour dragged on, three hours was too much.",
+          "It went on and on, the kids got bored halfway.",
+          "A bit long, it could easily be shortened by an hour.",
+          "We spent far too much time at each stop and by the end we were exhausted and just wanted to leave.",
+          "way too long",
+          "The whole thing lasted longer than we expected, it became tiring.",
+          "Some parts felt endless.",
+          "Make the tour shorter, it's too long for most people."
+        ],
+        "fr": [
+          "La visite était trop longue.",
+          "Ça traînait en longueur, trois heures c'était trop.",
+          "Ça n'en finissait pas, les enfants s'ennuyaient à mi-parcours.",
+          "Un peu long, on pourrait facilement raccourcir d'une heure.",
+          "On est restés beaucoup trop longtemps à chaque étape, à la fin on était épuisés et on voulait partir.",
+          "beaucoup trop long",
+          "L'ensemble a duré plus longtemps que prévu, c'est devenu fatigant.",
+          "Certains moments semblaient interminables.",
+          "Raccourcissez la visite, elle est trop longue pour la plupart des gens."
+        ],
+        "de": [
+          "Die Führung war zu lang.",
+          "Es hat sich gezogen, drei Stunden waren zu viel.",
+          "Es hörte gar nicht auf, die Kinder haben sich nach der Hälfte gelangweilt.",
+          "Etwas lang, man könnte locker eine Stunde kürzen.",
+          "Wir waren an jeder Station viel zu lange und am Ende waren wir erschöpft und wollten nur noch gehen.",
+          "viel zu lang",
+          "Das Ganze dauerte länger als erwartet und wurde anstrengend.",
+          "Manche Teile kamen mir endlos vor.",
+          "Macht die Tour kürzer, sie ist für die meisten zu lang."
+        ],
+        "es": [
+          "La visita fue demasiado larga.",
+          "Se hizo eterna, tres horas era demasiado.",
+          "No se acababa nunca, los niños se aburrieron a mitad.",
+          "Un poco larga, se podría acortar una hora fácilmente.",
+          "Estuvimos demasiado tiempo en cada parada y al final estábamos agotados y solo queríamos irnos.",
+          "demasiado larga",
+          "Todo duró más de lo que esperábamos y se volvió cansado.",
+          "Algunas partes parecían interminables.",
+          "Acorten el recorrido, es demasiado largo para la mayoría."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "too long",
+          "dragged",
+          "endless",
+          "bored",
+          "shorter",
+          "lasted"
+        ],
+        "fr": [
+          "trop long",
+          "longueur",
+          "interminable",
+          "ennuy",
+          "raccourci",
+          "duré"
+        ],
+        "de": [
+          "zu lang",
+          "gezogen",
+          "endlos",
+          "gelangweilt",
+          "kürzer",
+          "dauerte"
+        ],
+        "es": [
+          "demasiado larga",
+          "eterna",
+          "interminable",
+          "aburr",
+          "acort",
+          "duró"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Urwo ruzinduko rwamaze igihe kirekire cyane.",
+        "source": {
+          "fr": "La visite dure trop longtemps.",
+          "en": "The visit lasts too long."
+        },
+        "backTranslation": {
+          "fr": "Cette visite a duré très longtemps.",
+          "en": "The visit took a very long time."
+        },
+        "similarity": 0.8626,
+        "similarityDetail": {
+          "fr": 0.8715,
+          "en": 0.8626
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N3.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N4",
@@ -336,19 +1573,108 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "The visit was too short.",
+          "It was over too quickly, we wanted more time.",
+          "We felt rushed, only one hour is not enough.",
+          "I wish we could have stayed longer in the fields.",
+          "It all went so fast that we didn't have time to ask questions or enjoy the place properly.",
+          "too short!",
+          "Too quick, I'd happily pay for a longer version.",
+          "Over before it really started.",
+          "Not enough time at the farm."
+        ],
+        "fr": [
+          "La visite était trop courte.",
+          "C'est passé trop vite, on aurait voulu plus de temps.",
+          "On s'est sentis pressés, une heure ce n'est pas assez.",
+          "J'aurais aimé rester plus longtemps dans les champs.",
+          "Tout est allé si vite qu'on n'a pas eu le temps de poser des questions ni de profiter de l'endroit.",
+          "trop court !",
+          "Trop rapide, je paierais volontiers pour une version plus longue.",
+          "Fini avant d'avoir vraiment commencé.",
+          "Pas assez de temps à la ferme."
+        ],
+        "de": [
+          "Die Führung war zu kurz.",
+          "Es war viel zu schnell vorbei, wir hätten gern mehr Zeit gehabt.",
+          "Wir fühlten uns gehetzt, eine Stunde reicht nicht.",
+          "Ich wäre gern länger auf den Feldern geblieben.",
+          "Alles ging so schnell, dass wir keine Zeit hatten, Fragen zu stellen oder den Ort zu genießen.",
+          "zu kurz!",
+          "Zu schnell, ich würde gern für eine längere Variante zahlen.",
+          "Vorbei, bevor es richtig angefangen hat.",
+          "Zu wenig Zeit auf der Farm."
+        ],
+        "es": [
+          "La visita fue demasiado corta.",
+          "Se pasó muy rápido, queríamos más tiempo.",
+          "Fuimos con prisas, una hora no es suficiente.",
+          "Me habría gustado quedarme más tiempo en los campos.",
+          "Todo fue tan rápido que no tuvimos tiempo de hacer preguntas ni de disfrutar del lugar.",
+          "¡muy corta!",
+          "Demasiado rápido, pagaría con gusto por una versión más larga.",
+          "Se acabó antes de empezar de verdad.",
+          "Poco tiempo en la finca."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "too short",
+          "too quick",
+          "rushed",
+          "more time",
+          "stayed longer",
+          "not enough time"
+        ],
+        "fr": [
+          "trop court",
+          "trop vite",
+          "pressés",
+          "plus de temps",
+          "plus longtemps",
+          "pas assez de temps"
+        ],
+        "de": [
+          "zu kurz",
+          "zu schnell",
+          "gehetzt",
+          "mehr zeit",
+          "länger",
+          "zu wenig zeit"
+        ],
+        "es": [
+          "demasiado corta",
+          "muy corta",
+          "rápido",
+          "prisas",
+          "más tiempo",
+          "poco tiempo"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Urwo ruzinduko ntiruzamara igihe gihagije.",
+        "source": {
+          "fr": "La visite ne dure pas assez.",
+          "en": "The visit does not last long enough."
+        },
+        "backTranslation": {
+          "fr": "Cette visite ne durera pas longtemps.",
+          "en": "The visit will not be long enough."
+        },
+        "similarity": 0.8187,
+        "similarityDetail": {
+          "fr": 0.8187,
+          "en": 0.9476
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N4.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N5",
@@ -358,19 +1684,104 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "It was hard to understand each other.",
+          "We missed a lot because of the language barrier.",
+          "The translation was difficult to follow.",
+          "Sometimes we couldn't understand what Noor was saying.",
+          "Without anyone speaking English well, a lot of the explanations got lost in translation.",
+          "language barrier",
+          "Communication was tricky, we often didn't understand the answers to our questions.",
+          "Hard to communicate.",
+          "Some written info in English would help us understand."
+        ],
+        "fr": [
+          "C'était difficile de se comprendre.",
+          "On a raté beaucoup de choses à cause de la langue.",
+          "La traduction était difficile à suivre.",
+          "Parfois on ne comprenait pas ce que disait Noor.",
+          "Sans personne qui parle bien français, beaucoup d'explications se perdaient dans la traduction.",
+          "barrière de la langue",
+          "La communication était compliquée, souvent on ne comprenait pas les réponses à nos questions.",
+          "Difficile de communiquer.",
+          "Un petit texte en français nous aiderait à comprendre."
+        ],
+        "de": [
+          "Es war schwer, sich zu verständigen.",
+          "Wegen der Sprachbarriere haben wir viel verpasst.",
+          "Der Übersetzung war schwer zu folgen.",
+          "Manchmal haben wir nicht verstanden, was Noor gesagt hat.",
+          "Da niemand gut Deutsch oder Englisch sprach, ging viel bei der Übersetzung verloren.",
+          "sprachbarriere",
+          "Die Verständigung war schwierig, die Antworten auf unsere Fragen haben wir oft nicht verstanden.",
+          "Schwierige Kommunikation.",
+          "Ein paar schriftliche Infos auf Englisch würden beim Verstehen helfen."
+        ],
+        "es": [
+          "Fue difícil entendernos.",
+          "Nos perdimos mucho por el idioma.",
+          "La traducción era difícil de seguir.",
+          "A veces no entendíamos lo que decía Noor.",
+          "Sin nadie que hablara bien español o inglés, muchas explicaciones se perdían en la traducción.",
+          "barrera del idioma",
+          "La comunicación fue complicada, muchas veces no entendíamos las respuestas a nuestras preguntas.",
+          "Difícil comunicarse.",
+          "Algo escrito en inglés nos ayudaría a entender."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "understand",
+          "language",
+          "translation",
+          "communicat",
+          "english"
+        ],
+        "fr": [
+          "comprendre",
+          "comprenait",
+          "langue",
+          "traduction",
+          "communiquer"
+        ],
+        "de": [
+          "verständig",
+          "verstanden",
+          "sprach",
+          "übersetzung",
+          "kommunikation"
+        ],
+        "es": [
+          "entender",
+          "entendíamos",
+          "idioma",
+          "traducción",
+          "comunica"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi biragoye kukumva.",
+        "source": {
+          "fr": "Les visiteurs ont du mal à vous comprendre.",
+          "en": "Visitors find it hard to understand you."
+        },
+        "backTranslation": {
+          "fr": "Les visiteurs ont du mal à comprendre.",
+          "en": "It is difficult for visitors to understand."
+        },
+        "similarity": 0.893,
+        "similarityDetail": {
+          "fr": 0.9337,
+          "en": 0.893
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N5.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N6",
@@ -380,19 +1791,105 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "There was no meal, we were starving.",
+          "Lunch was really small for the price.",
+          "We expected food but nothing was offered.",
+          "Not enough to eat after such a long morning.",
+          "We were hungry after the walk and there was only a little snack, a proper meal would be nice.",
+          "no lunch?",
+          "The portions were tiny, we were still hungry.",
+          "Some food would have been welcome.",
+          "Please offer something to eat."
+        ],
+        "fr": [
+          "Il n'y avait pas de repas, on mourait de faim.",
+          "Le déjeuner était vraiment maigre pour le prix.",
+          "On s'attendait à manger mais rien n'était prévu.",
+          "Pas assez à manger après une si longue matinée.",
+          "On avait faim après la marche et il n'y avait qu'un petit en-cas, un vrai repas serait bien.",
+          "pas de repas ?",
+          "Les portions étaient minuscules, on avait encore faim.",
+          "Un peu de nourriture aurait été bienvenu.",
+          "Proposez quelque chose à manger s'il vous plaît."
+        ],
+        "de": [
+          "Es gab kein Essen, wir hatten riesigen Hunger.",
+          "Das Mittagessen war für den Preis sehr dürftig.",
+          "Wir hatten mit Essen gerechnet, aber es gab nichts.",
+          "Nach so einem langen Vormittag zu wenig zu essen.",
+          "Nach dem Rundgang hatten wir Hunger und es gab nur einen kleinen Snack, eine richtige Mahlzeit wäre schön.",
+          "kein essen?",
+          "Die Portionen waren winzig, wir waren immer noch hungrig.",
+          "Etwas zu essen wäre willkommen gewesen.",
+          "Bitte bietet etwas zu essen an."
+        ],
+        "es": [
+          "No hubo comida, nos moríamos de hambre.",
+          "El almuerzo fue muy escaso para el precio.",
+          "Esperábamos comer pero no había nada.",
+          "Poca comida después de una mañana tan larga.",
+          "Teníamos hambre después de la caminata y solo hubo un pequeño tentempié, una comida de verdad estaría bien.",
+          "¿no hay comida?",
+          "Las raciones eran diminutas, seguíamos con hambre.",
+          "Algo de comer se habría agradecido.",
+          "Por favor, ofrezcan algo de comer."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "no meal",
+          "hungry",
+          "starving",
+          "no lunch",
+          "portions",
+          "something to eat"
+        ],
+        "fr": [
+          "pas de repas",
+          "faim",
+          "maigre",
+          "portions",
+          "à manger"
+        ],
+        "de": [
+          "kein essen",
+          "hunger",
+          "dürftig",
+          "portionen",
+          "zu essen"
+        ],
+        "es": [
+          "no hubo comida",
+          "hambre",
+          "escaso",
+          "raciones",
+          "de comer"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Nta byokurya bihagije.",
+        "source": {
+          "fr": "Il n'y a pas assez à manger.",
+          "en": "There is not enough food."
+        },
+        "backTranslation": {
+          "fr": "Il n'y a pas assez à manger.",
+          "en": "There is not enough food."
+        },
+        "similarity": 1.0,
+        "similarityDetail": {
+          "fr": 1.0,
+          "en": 1.0
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N6.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N7",
@@ -402,19 +1899,108 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "There were no toilets.",
+          "The toilet was quite dirty.",
+          "We couldn't wash our hands before eating.",
+          "A clean bathroom would make a big difference.",
+          "The latrine was hard to use and there was no soap or water to wash hands afterwards.",
+          "toilets??",
+          "Hygiene could be better, especially around the food.",
+          "Please add a place to wash hands.",
+          "Basic toilets would be appreciated."
+        ],
+        "fr": [
+          "Il n'y avait pas de toilettes.",
+          "Les toilettes étaient assez sales.",
+          "On n'a pas pu se laver les mains avant de manger.",
+          "Des toilettes propres feraient une grande différence.",
+          "Les latrines étaient difficiles à utiliser et il n'y avait ni savon ni eau pour se laver les mains.",
+          "toilettes ??",
+          "L'hygiène pourrait être meilleure, surtout autour de la nourriture.",
+          "Ajoutez un endroit pour se laver les mains.",
+          "Des toilettes, même simples, seraient appréciées."
+        ],
+        "de": [
+          "Es gab keine Toiletten.",
+          "Die Toilette war ziemlich schmutzig.",
+          "Wir konnten uns vor dem Essen nicht die Hände waschen.",
+          "Ein sauberes WC würde viel ausmachen.",
+          "Die Latrine war schwer zu benutzen und es gab weder Seife noch Wasser zum Händewaschen.",
+          "toiletten??",
+          "Die Hygiene könnte besser sein, vor allem beim Essen.",
+          "Bitte eine Möglichkeit zum Händewaschen einrichten.",
+          "Eine einfache Toilette wäre schön."
+        ],
+        "es": [
+          "No había baño.",
+          "El baño estaba bastante sucio.",
+          "No pudimos lavarnos las manos antes de comer.",
+          "Un baño limpio marcaría la diferencia.",
+          "La letrina era difícil de usar y no había jabón ni agua para lavarse las manos.",
+          "¿¿baños??",
+          "La higiene podría mejorar, sobre todo con la comida.",
+          "Pongan un sitio para lavarse las manos.",
+          "Unos baños básicos se agradecerían."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "toilet",
+          "bathroom",
+          "latrine",
+          "hygiene",
+          "wash our hands",
+          "soap"
+        ],
+        "fr": [
+          "toilettes",
+          "latrines",
+          "hygiène",
+          "laver les mains",
+          "savon",
+          "sale"
+        ],
+        "de": [
+          "toilette",
+          "wc",
+          "latrine",
+          "hygiene",
+          "händewaschen",
+          "seife"
+        ],
+        "es": [
+          "baño",
+          "letrina",
+          "higiene",
+          "lavarnos las manos",
+          "jabón",
+          "sucio"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Inzu y'isuku si isukuye.",
+        "source": {
+          "fr": "Les toilettes ne sont pas propres.",
+          "en": "The toilets are not clean."
+        },
+        "backTranslation": {
+          "fr": "La salle de bain n'est pas propre.",
+          "en": "The toilet is not clean."
+        },
+        "similarity": 0.859,
+        "similarityDetail": {
+          "fr": 0.9077,
+          "en": 0.859
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N7.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N8",
@@ -424,19 +2010,108 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "We ran out of water, it was so hot.",
+          "There was no shade in the field, the sun was brutal.",
+          "We needed a break, there was nowhere to sit.",
+          "Please offer drinking water to visitors.",
+          "Standing in the full sun for an hour without water or a rest was really hard for us.",
+          "need water and shade",
+          "A short pause in the shade with something to drink would help.",
+          "So thirsty during the tour.",
+          "No rest stop at all, my mother was exhausted."
+        ],
+        "fr": [
+          "On n'avait plus d'eau, il faisait très chaud.",
+          "Pas d'ombre dans le champ, le soleil tapait fort.",
+          "On avait besoin d'une pause, il n'y avait nulle part où s'asseoir.",
+          "Proposez de l'eau à boire aux visiteurs.",
+          "Rester une heure en plein soleil sans eau ni pause, c'était vraiment dur pour nous.",
+          "besoin d'eau et d'ombre",
+          "Une petite pause à l'ombre avec à boire, ce serait bien.",
+          "Tellement soif pendant la visite.",
+          "Aucune pause, ma mère était épuisée."
+        ],
+        "de": [
+          "Uns ist das Wasser ausgegangen, es war so heiß.",
+          "Auf dem Feld gab es keinen Schatten, die Sonne war brutal.",
+          "Wir brauchten eine Pause, aber es gab nirgends einen Sitzplatz.",
+          "Bitte bietet den Besuchern Trinkwasser an.",
+          "Eine Stunde in der prallen Sonne ohne Wasser und ohne Pause war wirklich hart für uns.",
+          "wasser und schatten fehlen",
+          "Eine kurze Pause im Schatten mit etwas zu trinken wäre gut.",
+          "So durstig während der Führung.",
+          "Gar keine Pause, meine Mutter war erschöpft."
+        ],
+        "es": [
+          "Nos quedamos sin agua, hacía mucho calor.",
+          "No había sombra en el campo, el sol pegaba fuerte.",
+          "Necesitábamos un descanso y no había dónde sentarse.",
+          "Ofrezcan agua para beber a los visitantes.",
+          "Estar una hora a pleno sol sin agua ni descanso fue muy duro para nosotros.",
+          "falta agua y sombra",
+          "Una pausa corta a la sombra con algo de beber estaría bien.",
+          "Muchísima sed durante la visita.",
+          "Ninguna pausa, mi madre acabó agotada."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "water",
+          "shade",
+          "thirsty",
+          "sun",
+          "break",
+          "rest"
+        ],
+        "fr": [
+          "eau",
+          "ombre",
+          "soif",
+          "soleil",
+          "pause",
+          "s'asseoir"
+        ],
+        "de": [
+          "wasser",
+          "schatten",
+          "durst",
+          "sonne",
+          "pause",
+          "sitzplatz"
+        ],
+        "es": [
+          "agua",
+          "sombra",
+          "sed",
+          "sol",
+          "descanso",
+          "pausa"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bafite inyota.",
+        "source": {
+          "fr": "Les visiteurs ont soif.",
+          "en": "Visitors are thirsty."
+        },
+        "backTranslation": {
+          "fr": "Les invités ont soif.",
+          "en": "The guests are thirsty."
+        },
+        "similarity": 0.8671,
+        "similarityDetail": {
+          "fr": 0.8874,
+          "en": 0.8671
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N8.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N9",
@@ -446,19 +2121,106 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "We had to wait a long time before it started.",
+          "The tour started an hour late.",
+          "Nobody was there when we arrived at the agreed time.",
+          "We waited forty minutes for the guide.",
+          "We were told nine o'clock but nothing happened until after ten and nobody explained why.",
+          "long wait",
+          "Please stick to the schedule.",
+          "Lots of waiting around between activities.",
+          "The timing was not respected at all."
+        ],
+        "fr": [
+          "On a dû attendre longtemps avant que ça commence.",
+          "La visite a commencé avec une heure de retard.",
+          "Personne n'était là à l'heure convenue.",
+          "On a attendu le guide quarante minutes.",
+          "On nous avait dit neuf heures mais rien n'a commencé avant dix heures passées, sans explication.",
+          "longue attente",
+          "Merci de respecter les horaires.",
+          "Beaucoup d'attente entre les activités.",
+          "Les horaires n'ont pas du tout été respectés."
+        ],
+        "de": [
+          "Wir mussten lange warten, bis es losging.",
+          "Die Führung begann eine Stunde zu spät.",
+          "Zur vereinbarten Zeit war niemand da.",
+          "Wir haben vierzig Minuten auf den Guide gewartet.",
+          "Uns wurde neun Uhr gesagt, aber vor zehn passierte nichts, und niemand hat erklärt, warum.",
+          "lange wartezeit",
+          "Bitte haltet euch an die Uhrzeiten.",
+          "Viel Herumstehen und Warten zwischen den Programmpunkten.",
+          "Die Zeiten wurden überhaupt nicht eingehalten."
+        ],
+        "es": [
+          "Tuvimos que esperar mucho antes de empezar.",
+          "La visita empezó con una hora de retraso.",
+          "No había nadie a la hora acordada.",
+          "Esperamos al guía cuarenta minutos.",
+          "Nos dijeron a las nueve pero nada empezó hasta pasadas las diez, sin ninguna explicación.",
+          "mucha espera",
+          "Por favor, respeten los horarios.",
+          "Mucho tiempo esperando entre actividades.",
+          "No se respetó el horario para nada."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "wait",
+          "late",
+          "schedule",
+          "on time",
+          "agreed time",
+          "timing"
+        ],
+        "fr": [
+          "attend",
+          "retard",
+          "horaire",
+          "à l'heure",
+          "heure convenue"
+        ],
+        "de": [
+          "warten",
+          "gewartet",
+          "zu spät",
+          "uhrzeit",
+          "vereinbarten zeit",
+          "zeiten"
+        ],
+        "es": [
+          "esper",
+          "retraso",
+          "horario",
+          "hora acordada",
+          "tarde"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi bategereje igihe kirekire cyane.",
+        "source": {
+          "fr": "Les visiteurs attendent trop longtemps.",
+          "en": "Visitors wait too long."
+        },
+        "backTranslation": {
+          "fr": "Les invités attendent très longtemps.",
+          "en": "The guests waited a very long time."
+        },
+        "similarity": 0.78,
+        "similarityDetail": {
+          "fr": 0.8106,
+          "en": 0.78
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N9.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     },
     {
       "id": "N10",
@@ -468,19 +2230,104 @@
       },
       "polarity": "negative",
       "examples": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "We couldn't buy any coffee at the end, which was a shame.",
+          "There was nothing to buy, no coffee, no souvenirs.",
+          "I wanted to bring coffee home but none was for sale.",
+          "No shop or souvenir corner on the farm.",
+          "We asked to buy a bag of beans but they said it all goes to the cooperative, so we left empty-handed.",
+          "nothing for sale",
+          "They didn't accept cards or mobile payment, so we couldn't buy the coffee.",
+          "Shame there were no souvenirs.",
+          "No coffee available to take away."
+        ],
+        "fr": [
+          "On n'a pas pu acheter de café à la fin, dommage.",
+          "Il n'y avait rien à acheter, ni café ni souvenir.",
+          "Je voulais rapporter du café mais il n'y en avait pas à vendre.",
+          "Pas de boutique ni de coin souvenirs à la ferme.",
+          "On a demandé à acheter un sachet de grains mais tout part à la coopérative, on est repartis les mains vides.",
+          "rien à vendre",
+          "Ni carte ni paiement mobile acceptés, donc impossible d'acheter le café.",
+          "Dommage qu'il n'y ait pas de souvenirs.",
+          "Aucun café à emporter."
+        ],
+        "de": [
+          "Wir konnten am Ende keinen Kaffee kaufen, schade.",
+          "Es gab nichts zu kaufen, keinen Kaffee, keine Souvenirs.",
+          "Ich wollte Kaffee mitnehmen, aber es wurde keiner verkauft.",
+          "Kein Laden und keine Souvenirecke auf der Farm.",
+          "Wir wollten eine Tüte Bohnen kaufen, aber alles geht an die Kooperative, also sind wir mit leeren Händen gegangen.",
+          "nichts zu kaufen",
+          "Keine Karten- oder Handyzahlung, deshalb konnten wir den Kaffee nicht kaufen.",
+          "Schade, dass es keine Souvenirs gab.",
+          "Kein Kaffee zum Mitnehmen erhältlich."
+        ],
+        "es": [
+          "No pudimos comprar café al final, una pena.",
+          "No había nada para comprar, ni café ni recuerdos.",
+          "Quería llevarme café pero no había para vender.",
+          "No hay tienda ni rincón de recuerdos en la finca.",
+          "Pedimos comprar una bolsa de granos pero todo va a la cooperativa, así que nos fuimos con las manos vacías.",
+          "nada a la venta",
+          "No aceptaban tarjeta ni pago por móvil, así que no pudimos comprar el café.",
+          "Una pena que no hubiera recuerdos.",
+          "No había café para llevar."
+        ]
       },
       "examplesSynthetic": true,
       "keywords": {
-        "en": [],
-        "fr": [],
-        "de": [],
-        "es": []
+        "en": [
+          "couldn't buy",
+          "nothing to buy",
+          "for sale",
+          "souvenir",
+          "shop"
+        ],
+        "fr": [
+          "pas pu acheter",
+          "rien à acheter",
+          "à vendre",
+          "souvenir",
+          "boutique"
+        ],
+        "de": [
+          "nicht kaufen",
+          "nichts zu kaufen",
+          "verkauft",
+          "souvenir",
+          "laden"
+        ],
+        "es": [
+          "no pudimos comprar",
+          "nada para comprar",
+          "a la venta",
+          "recuerdos",
+          "tienda"
+        ]
       },
-      "kinyarwanda": null
+      "kinyarwanda": {
+        "rw": "Abashyitsi ntibashobora kugura ikawa.",
+        "source": {
+          "fr": "Les visiteurs ne peuvent pas acheter de café.",
+          "en": "Visitors cannot buy coffee."
+        },
+        "backTranslation": {
+          "fr": "Les visiteurs ne peuvent pas acheter de café.",
+          "en": "Guests cannot buy coffee."
+        },
+        "similarity": 0.9457,
+        "similarityDetail": {
+          "fr": 1.0,
+          "en": 0.9457
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": "audio/finding-N10.mp3",
+        "status": "machine_translated_unvalidated"
+      }
     }
   ],
   "templates": [
@@ -490,16 +2337,31 @@
         "n"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Muri uku kwezi: Ubutumwa {n} bwatanzwe n'abashyitsi.",
         "source": {
-          "fr": "Ce mois-ci : {n} retours.",
-          "en": "This month: {n} feedback messages."
+          "fr": "Ce mois-ci : {n} messages de visiteurs.",
+          "en": "This month: {n} messages from visitors."
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Ce mois- ci: 17 messages de visiteurs.",
+          "en": "This month: 17 messages from guests."
+        },
+        "similarity": 0.9298,
+        "similarityDetail": {
+          "fr": 0.993,
+          "en": 0.9298
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-volume-0.mp3",
+        "audio/template-volume-1.mp3"
+      ]
     },
     {
       "id": "keep",
@@ -509,16 +2371,33 @@
         "n"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Ibyo abashyitsi bakunda ({k} ku {n}): {finding}",
         "source": {
-          "fr": "À garder : {finding} ({k} sur {n}).",
-          "en": "Keep doing: {finding} ({k} out of {n})."
+          "fr": "Ce qui plaît ({k} sur {n}) : {finding}",
+          "en": "What visitors like ({k} out of {n}): {finding}"
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Ce que les invités aiment (13 à 17)",
+          "en": "What guests like (13 out of 17)"
+        },
+        "similarity": 0.7516,
+        "similarityDetail": {
+          "fr": 0.7516,
+          "en": 0.8234
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-keep-0.mp3",
+        "audio/template-keep-1.mp3",
+        null,
+        null
+      ]
     },
     {
       "id": "fix",
@@ -528,16 +2407,33 @@
         "n"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Ikibazo gikomeye kurusha ibindi ({k} ku {n}): {finding}",
         "source": {
-          "fr": "À corriger en priorité : {finding} ({k} sur {n}).",
-          "en": "Fix first: {finding} ({k} out of {n})."
+          "fr": "Le plus gros problème ({k} sur {n}) : {finding}",
+          "en": "The biggest problem ({k} out of {n}): {finding}"
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Le problème le plus grave (13 à 17)",
+          "en": "The most important issue (13 out of 17)"
+        },
+        "similarity": 0.7636,
+        "similarityDetail": {
+          "fr": 0.943,
+          "en": 0.7636
+        },
+        "translatedFrom": "fr",
+        "attempts": 5,
+        "chosenAttempt": 5,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-fix-0.mp3",
+        "audio/template-fix-1.mp3",
+        null,
+        null
+      ]
     },
     {
       "id": "fix_streak",
@@ -548,31 +2444,63 @@
         "x"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Ikibazo gikomeye kurusha ibindi ({k} kuri {n}), mu gihe cy'amezi {x}: {finding}",
         "source": {
-          "fr": "À corriger en priorité : {finding} ({k} sur {n}), {x}e mois de suite.",
-          "en": "Fix first: {finding} ({k} out of {n}), month {x} in a row."
+          "fr": "Le plus gros problème ({k} sur {n}), depuis {x} mois : {finding}",
+          "en": "The biggest problem ({k} out of {n}), for {x} months: {finding}"
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Le problème le plus grave (13 sur 17), pendant 14 mois",
+          "en": "The biggest problem (13 out of 17) in 14 months"
+        },
+        "similarity": 0.954,
+        "similarityDetail": {
+          "fr": 0.954,
+          "en": 0.98
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-fix_streak-0.mp3",
+        "audio/template-fix_streak-1.mp3",
+        "audio/template-fix_streak-2.mp3",
+        null,
+        null
+      ]
     },
     {
       "id": "nothing_urgent",
       "slots": [],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Nta kibazo gikomeye muri uku kwezi.",
         "source": {
-          "fr": "Rien d'urgent à corriger.",
-          "en": "Nothing urgent to fix."
+          "fr": "Pas de gros problème ce mois-ci.",
+          "en": "No big problem this month."
         },
-        "backTranslation": {},
-        "similarity": null,
-        "audio": null,
+        "backTranslation": {
+          "fr": "Il n'y a pas de problème majeur ce mois-ci.",
+          "en": "There are no major problems this month."
+        },
+        "similarity": 0.8848,
+        "similarityDetail": {
+          "fr": 0.9408,
+          "en": 0.8848
+        },
+        "translatedFrom": "fr",
+        "attempts": 3,
+        "chosenAttempt": 3,
+        "backTranslationCheck": "passed",
+        "audio": "audio/template-nothing_urgent-0.mp3",
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-nothing_urgent-0.mp3"
+      ]
     },
     {
       "id": "unknown_topic",
@@ -580,16 +2508,31 @@
         "k"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Hari igitekerezo cyihariye cyagarutse ku basura {k}: usabe umuntu gusoma izo message.",
         "source": {
-          "fr": "Un sujet que l'outil ne connaît pas revient chez {k} visiteurs : demandez à une personne de lire ces remarques.",
-          "en": "A topic the tool does not know comes back from {k} visitors: ask a person to read these remarks."
+          "fr": "Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ces messages.",
+          "en": "An unknown topic comes back from {k} visitors: ask a person to read these messages."
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Une suggestion spéciale a été donnée aux 13 visiteurs: demandez à quelqu'un de lire ces messages.",
+          "en": "A special suggestion came back to 13 visitors: Ask someone to read the messages."
+        },
+        "similarity": 0.8678,
+        "similarityDetail": {
+          "fr": 0.8678,
+          "en": 0.88
+        },
+        "translatedFrom": "fr",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-unknown_topic-0.mp3",
+        "audio/template-unknown_topic-1.mp3"
+      ]
     },
     {
       "id": "not_understood",
@@ -597,31 +2540,254 @@
         "p"
       ],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Ubutumwa {p} ntibwasobanukiwe: baza umuntu.",
         "source": {
-          "fr": "{p} remarques pas comprises : demandez à une personne.",
-          "en": "{p} remarks not understood: ask a person."
+          "fr": "{p} messages n'ont pas été compris : demandez à une personne.",
+          "en": "{p} messages were not understood: ask a person."
         },
-        "backTranslation": {},
-        "similarity": null,
+        "backTranslation": {
+          "fr": "Le message 15 n'a pas été compris: demandez à quelqu'un.",
+          "en": "Message 15 was misunderstood: ask someone."
+        },
+        "similarity": 0.8297,
+        "similarityDetail": {
+          "fr": 0.8599,
+          "en": 0.8297
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-not_understood-0.mp3",
+        "audio/template-not_understood-1.mp3"
+      ]
     },
     {
       "id": "no_feedback",
       "slots": [],
       "kinyarwanda": {
-        "rw": "",
+        "rw": "Nta butumwa bw'umushyitsi muri uku kwezi.",
         "source": {
-          "fr": "Pas de retour ce mois-ci.",
-          "en": "No feedback this month."
+          "fr": "Aucun message de visiteur ce mois-ci.",
+          "en": "No message from visitors this month."
         },
-        "backTranslation": {},
-        "similarity": null,
-        "audio": null,
+        "backTranslation": {
+          "fr": "Il n'y a pas de message d'invité ce mois-ci.",
+          "en": "There are no guest messages this month."
+        },
+        "similarity": 0.8234,
+        "similarityDetail": {
+          "fr": 0.8938,
+          "en": 0.8234
+        },
+        "translatedFrom": "fr",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": "audio/template-no_feedback-0.mp3",
         "status": "machine_translated_unvalidated"
-      }
+      },
+      "audioParts": [
+        "audio/template-no_feedback-0.mp3"
+      ]
     }
-  ]
+  ],
+  "numbers": {
+    "0": {
+      "rw": "zeru",
+      "audio": "audio/num-0.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "1": {
+      "rw": "rimwe",
+      "audio": "audio/num-1.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "2": {
+      "rw": "kabiri",
+      "audio": "audio/num-2.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "3": {
+      "rw": "gatatu",
+      "audio": "audio/num-3.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "4": {
+      "rw": "kane",
+      "audio": "audio/num-4.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "5": {
+      "rw": "gatanu",
+      "audio": "audio/num-5.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "6": {
+      "rw": "gatandatu",
+      "audio": "audio/num-6.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "7": {
+      "rw": "karindwi",
+      "audio": "audio/num-7.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "8": {
+      "rw": "umunani",
+      "audio": "audio/num-8.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "9": {
+      "rw": "icyenda",
+      "audio": "audio/num-9.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "10": {
+      "rw": "icumi",
+      "audio": "audio/num-10.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "11": {
+      "rw": "cumi na rimwe",
+      "audio": "audio/num-11.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "12": {
+      "rw": "cumi na kabiri",
+      "audio": "audio/num-12.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "13": {
+      "rw": "cumi na gatatu",
+      "audio": "audio/num-13.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "14": {
+      "rw": "cumi na kane",
+      "audio": "audio/num-14.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "15": {
+      "rw": "cumi na gatanu",
+      "audio": "audio/num-15.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "16": {
+      "rw": "cumi na gatandatu",
+      "audio": "audio/num-16.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "17": {
+      "rw": "cumi na karindwi",
+      "audio": "audio/num-17.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "18": {
+      "rw": "cumi n'umunani",
+      "audio": "audio/num-18.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "19": {
+      "rw": "cumi n'icyenda",
+      "audio": "audio/num-19.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "20": {
+      "rw": "makumyabiri",
+      "audio": "audio/num-20.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "21": {
+      "rw": "makumyabiri na rimwe",
+      "audio": "audio/num-21.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "22": {
+      "rw": "makumyabiri na kabiri",
+      "audio": "audio/num-22.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "23": {
+      "rw": "makumyabiri na gatatu",
+      "audio": "audio/num-23.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "24": {
+      "rw": "makumyabiri na kane",
+      "audio": "audio/num-24.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "25": {
+      "rw": "makumyabiri na gatanu",
+      "audio": "audio/num-25.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "26": {
+      "rw": "makumyabiri na gatandatu",
+      "audio": "audio/num-26.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "27": {
+      "rw": "makumyabiri na karindwi",
+      "audio": "audio/num-27.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "28": {
+      "rw": "makumyabiri n'umunani",
+      "audio": "audio/num-28.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "29": {
+      "rw": "makumyabiri n'icyenda",
+      "audio": "audio/num-29.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "30": {
+      "rw": "mirongo itatu",
+      "audio": "audio/num-30.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    },
+    "31": {
+      "rw": "mirongo itatu na rimwe",
+      "audio": "audio/num-31.mp3",
+      "source": "counting form, hand-written from public references",
+      "status": "machine_translated_unvalidated"
+    }
+  }
 }
