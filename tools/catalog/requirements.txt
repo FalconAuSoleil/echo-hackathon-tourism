@@ -1,0 +1,7 @@
+# Outillage du catalogue kinyarwanda (build uniquement). En plus de tools/requirements.txt :
+#   .venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch
+#   .venv/bin/pip install -r tools/requirements.txt -r tools/catalog/requirements.txt
+onnxruntime      # même fichier ONNX de similarité que l'app (models/Xenova/paraphrase-multilingual-MiniLM-L12-v2)
+tokenizers
+jsonschema       # validate_catalog.py
+sacrebleu        # flores_check.py (chrF++)

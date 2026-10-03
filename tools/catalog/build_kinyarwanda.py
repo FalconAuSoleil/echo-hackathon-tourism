@@ -91,7 +91,7 @@ class Translator:
     def __init__(self) -> None:
         import torch
         from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-        torch.set_num_threads(os.cpu_count() or 4)
+        torch.set_num_threads(int(os.environ.get("ECHO_TORCH_THREADS", os.cpu_count() or 4)))
         self.torch = torch
         self.tok = AutoTokenizer.from_pretrained(MT_MODEL)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(MT_MODEL).eval()

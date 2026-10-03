@@ -12,16 +12,21 @@ generated at runtime: the Kinyarwanda was produced **once**, offline, by `tools/
 | `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 9 synthetic example phrasings × 4 visitor languages (756 in total), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
 | `audio/*.mp3` | 68 pre-generated clips (MMS-TTS kin, mono 16 kHz 24 kbit/s, ~360 KiB in total): 21 finding sentences, 15 fixed parts of templates, 32 numbers. `audio/manifest.json` lists text, spoken text and duration of each clip. |
 | `translation-log.json` | Every translation attempt: source (fr, en), raw NLLB output, back-translations, similarity scores, slot check, which attempt was kept. |
-| `flores-check.json` | Our own chrF++ measure of the same NLLB model on FLORES-200 devtest (eng→kin and fra→kin), if the check was run (see below). |
+| `flores-check.json` | (not produced yet) our own chrF++ measure of the same NLLB model on FLORES-200 devtest, written by `tools/catalog/flores_check.py`. |
 
 ## Findings and examples
 
-Example phrasings are written to be natural visitor speech, short and long, with typos-free casual forms
-("great welcome!!", "toilets??") as well as long sentences. They are kept clearly distinct between findings:
+Example phrasings are written to be natural visitor speech, short and long, with casual lowercase
+fragments ("great welcome!!", "toilets??") as well as long sentences. They are kept clearly distinct between findings:
 N1 is the **way to the farm** (road, steep climb, hard to find), N3 the **visit lasting too long**, N4 the visit
 **too short / rushed**, N8 **thirst, sun, no break** during the visit, N9 **waiting / late start**, N2 **prices
 unclear or told late** (not "too expensive"), N6 **meal missing or too small** vs P4 meal enjoyed, N10 **could not
-buy** vs P9 **wants to buy**. They are strictly separate from the evaluation set (`eval/data/feedback.jsonl`).
+buy** vs P9 **wants to buy**. They are strictly separate from the evaluation set (`eval/data/feedback.jsonl`; `eval/data/check_disjoint.py`
+passes). Distinctness check with the app's MiniLM (`tools/catalog/check_examples.py`): for 98.0 % of the 756
+examples the nearest other example belongs to the same finding; the 15 exceptions are mostly two-word fragments
+("tolle verkostung" ~ "tolle aussicht", "Die Führung war zu kurz." ~ "… zu lang." at 0.74), which is why core
+needs its negation and margin rules and the evaluation calibrates the threshold. Negative findings may be phrased
+with a negation ("there was no shade"); no example is a polarity-inverted phrasing of its finding (core rule).
 The authored source of truth is `tools/catalog/examples_positive.py`, `examples_negative.py` and `keywords.py`;
 `build_kinyarwanda.py --stages content` copies them into `catalog.json`.
 
@@ -121,7 +126,8 @@ The metrics file does not name the split; the NLLB paper (NLLB Team et al., "No 
 Human-Centered Machine Translation", arXiv:2207.04672, 2022) reports FLORES-200 **devtest** results.
 `tools/catalog/flores_check.py` re-measures eng→kin and fra→kin for the 600M model on FLORES-200 devtest
 (FLORES-200, CC-BY-SA 4.0, https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz) and writes
-`flores-check.json`; see `docs/PROGRESS.md` for whether it has been run.
+`flores-check.json`. **Not run yet**: on this shared CPU (load ~38 from parallel jobs) NLLB took 25–230 s per
+FLORES sentence, so 2 × 1012 sentences did not fit; only the published figures above are reported.
 
 ## Licences
 
@@ -137,13 +143,17 @@ Human-Centered Machine Translation", arXiv:2207.04672, 2022) reports FLORES-200 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install --index-url https://download.pytorch.org/whl/cpu torch
-.venv/bin/pip install -r tools/requirements.txt          # + onnxruntime jsonschema sacrebleu
+.venv/bin/pip install -r tools/requirements.txt -r tools/catalog/requirements.txt
 pnpm models:download                                    # the MiniLM ONNX file used for scoring
 .venv/bin/python tools/catalog/build_kinyarwanda.py     # content + translate (~15 min CPU) + audio (~2 min)
 .venv/bin/python tools/catalog/build_kinyarwanda.py --stages translate --only template:fix   # redo one sentence
 .venv/bin/python tools/catalog/validate_catalog.py      # JSON Schema + SPEC 5 rules + audio files
 .venv/bin/python tools/catalog/test_catalog.py          # unit tests of slot protection and the validator
+.venv/bin/python tools/catalog/check_examples.py        # nearest-neighbour distinctness of the examples
 .venv/bin/python tools/catalog/flores_check.py          # optional: chrF++ on FLORES-200 devtest (long)
 ```
 Models are cached in `tools/cache/hf` (git-ignored). Changing the catalog for another activity (SPEC 11.9) means
 editing the three authored Python files and re-running the script.
+
+Built with: torch 2.14.1+cpu, transformers 5.18.0, onnxruntime 1.30.0, tokenizers 0.23.2, ffmpeg 6.1.1
+(WSL2, 8 CPUs, no GPU), 2026-10-03/04.

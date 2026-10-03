@@ -191,3 +191,55 @@ es 0.24), language right on 79/80; demo takes WER 0–0.22, all languages right.
 
 **Remains**: nothing blocking for this task. Running levels 2/3 and the comparison is the evaluation agent's
 (`pnpm eval`). No real human voices or real reviews (limitation documented).
+
+## 2026-10-04 — catalog and Kinyarwanda (catalog agent, SPEC 5)
+
+**Built**
+- `catalog/catalog.json`: 21 findings with 9 synthetic example phrasings × en/fr/de/es (756, `examplesSynthetic: true`),
+  keyword lists per finding and language (no-AI baseline), the Kinyarwanda sentence of each finding, 8 recap
+  templates, spoken numbers 0–31. Authored sources: `tools/catalog/examples_positive.py`, `examples_negative.py`,
+  `keywords.py`, `sources.py` (fr/en sources with simpler fallback candidates, number words).
+- `tools/catalog/build_kinyarwanda.py` (stages content / translate / audio, `--only` to redo one sentence):
+  NLLB-200 distilled 600M from both the en and fr source → kin_Latn; back-translation kin→fra and kin→eng;
+  score = min of the two cosines with the app's own MiniLM ONNX q8 file (onnxruntime in Python, same pooling);
+  numeric slots protected by guard numbers 17/13/14/15 (must survive exactly once, no stray digit) then restored;
+  `{finding}` never translated (prefix templates); threshold 0.75, simplify-and-retry over authored candidates;
+  every attempt in `catalog/translation-log.json`. Result: 29 sentences, all ≥ 0.75 (min 0.75, mean 0.87),
+  9 needed a retry. Two templates (`fix`, `nothing_urgent`) failed after the first pass: simpler candidates added and
+  re-run. Back-translation drifts a speaker should check are listed in `catalog/README.md`.
+- 68 MMS-TTS kin clips in `catalog/audio/` (mp3 mono 16 kHz 24 kbit/s, 362 KiB, seed 1234): 21 findings, 15 fixed
+  template parts (`templates[].audioParts`, the core contract: one entry per fixed part around the slots, null when
+  empty), 32 numbers (`numbers["n"].audio`). `audio/manifest.json` lists each clip's text. Concatenation checked with
+  ffmpeg (keep-line, 6.3 s). MMS-TTS kin licence verified on the model card: CC-BY-NC 4.0.
+- FLORES-200 reference recorded in `catalog/README.md` and `provenance.kinyarwanda.floresReference`: eng→kin chrF++
+  **44.0** for nllb-200-distilled-600M (its metrics.csv, linked from the model card); fra→kin is not published for this
+  model (MoE 54.5B: 46.2, cited as such).
+- `tools/catalog/validate_catalog.py` (JSON Schema + SPEC 5 rules + audio files), `test_catalog.py` (15 unit tests:
+  slot guards, segment split, number words, validator negative cases), `check_examples.py` (nearest-neighbour
+  distinctness: 98.0 % of examples closest to their own finding), `flores_check.py`, `requirements.txt`.
+
+**How to run**: see `catalog/README.md` § Rebuild and validate. Quick checks:
+`.venv/bin/python tools/catalog/validate_catalog.py && .venv/bin/python tools/catalog/test_catalog.py`.
+`pnpm test` (118) and `pnpm typecheck` pass with the new catalog; `eval/data/check_disjoint.py` passes.
+
+**Deviations / decisions**
+- Template wording changed from the scaffold sources so the translation survives: `keep` = "What visitors like
+  ({k} out of {n}): {finding}", `fix` = "The biggest problem ({k} out of {n}): {finding}", `fix_streak` adds
+  "for {x} months" (instead of "{x}th month in a row", which NLLB turned into an ordinal word), `volume` = "This
+  month: {n} messages from visitors", `nothing_urgent` = "No big problem this month.", `no_feedback` = "No message
+  from visitors this month.", `not_understood` = "{p} messages were not understood: ask a person." `{finding}` is
+  always at the end of the line, after a colon.
+- Finding sentences are short descriptive sentences ("Visitors felt welcome."), not the labels, so the inserted
+  phrase reads as a sentence in Kinyarwanda.
+- Added fields (schema allows them): `similarityDetail`, `translatedFrom`, `chosenAttempt`, `backTranslationCheck`
+  on each sentence; `templates[].audioParts`; `provenance.kinyarwanda.scoring/slotProtection/audioFormat`;
+  `numbers[].source/status`. A future speaker validation sets `status: "speaker_validated"` + `validatedBy`.
+- Numbers are hand-written counting forms (public references cited), not machine translated; no noun-class
+  agreement; values > 31 have no clip (core reports `missingAudio`, digits still shown).
+- Back-translation uses the same NLLB model, so errors can cancel out; the score is a filter, not a validation.
+
+**Remains**
+- Speaker validation of the 29 sentences and 68 clips: impossible here → `docs/MANUAL_TESTS.md` (procedure).
+- Our own FLORES-200 devtest chrF++ measure (`tools/catalog/flores_check.py`) not run: the shared CPU was saturated
+  by parallel jobs (25–230 s per sentence). Only published figures are reported.
+- `tools/README.md` still lists `kinyarwanda/ (to write)`: the tool lives in `tools/catalog/` (README not mine to edit).
