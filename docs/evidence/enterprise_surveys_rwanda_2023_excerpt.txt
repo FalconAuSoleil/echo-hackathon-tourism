@@ -1,0 +1,55 @@
+World Bank Enterprise Surveys, Rwanda 2023 Country Profile — verbatim excerpts (pdftotext -layout)
+Source: https://www.enterprisesurveys.org/content/dam/enterprisesurveys/documents/country/Rwanda-2023.pdf (accessed 2026-10-03)
+Microdata catalog: https://microdata.worldbank.org/index.php/catalog/6468 (RWA_2023_WBES_v01_M; microdata not downloaded)
+
+efficiently. Such conditions strengthen incentives for       This document summarizes the results of the Enterprise
+firms to innovate and to increase productivity — key         Survey for Rwanda. Business owners and top managers in
+factors for sustainable development. A more productive       598 firms were interviewed between May 2023 and
+private sector, in turn, expands employment and              February 2024. Figure 2 provides a description of the
+contributes taxes necessary for public investment in         sample breakdown across the three survey design
+health, education, and other services. Questions             categories: business sector, firm size, and location.
+
+trade, finance, regulations, taxes and business licensing,   Figure 1: Sectors of the economy covered by the
+corruption, management practices, and informality,           Enterprise Surveys
+access to finance, innovation, labor, and perceptions                   Excluded                        Included
+about obstacles to doing business.                           SECTORS                        SECTORS
+                                                               Agriculture                    Manufacturing (all subsectors)
+The ES are conducted by the World Bank and its partners        Fishing                        Construction
+                                                               Mining                         Motor vehicles sales and
+across all geographic regions and cover small, medium,         Public utilities               repair
+and large firms. The size of the firm is determined by the     Financial intermediation       Wholesale
+number of employees: 5 to 19 (small), 20 to 99 (medium),       Public administration          Retail
+and 100 or more (large). Firms with less than five             Education, health and social   Hotels and restaurants
+                                                               work                           Storage, transportation, and
+employees are ineligible for the survey. Firms that are
+                                                                                              communications
+100% state-owned are also ineligible.                                                         IT
+                                                             ADDITIONAL CRITERIA              ADDITIONAL CRITERIA
+The surveys are administered to a representative sample1       • < 5 employees                  • 5+ employees
+of firms in the non-agricultural, formal, private economy.     • Informal firms                 • Formal (registered) firms
+Sector coverage is defined consistently across all             • 100% state-owned firms         • Minimum of 1% private
+economies and includes the entire manufacturing sector                                             ownership
+...
+                                                                                                               Sub-Saharan      Low
+                                                                      All Firms   Small     Medium    Large       Africa      Income
+ Firm Characteristics
+Informality
+Percent of firms competing against unregistered or informal firms               41.4         48.1           30.2        16.0                  62.5               63.5
+Percent of firms formally registered when they started operations
+Biggest Obstacle
+Access to finance                                                               28.8         30.0           27.9        16.4                  26.4               25.0
+Access to land                                                                  15.2         14.9           15.1        21.8                   4.7                5.1
+Business licenses and permits                                                    2.8          1.7            5.0         3.9                   1.7                1.6
+Corruption                                                                       0.5          0.0            0.0        13.4                   7.9                8.6
+Courts                                                                           0.5          0.0            1.8         0.0                   0.5                0.4
+Crime, theft and disorder                                                        4.1          5.9            0.5         0.0                   4.3                4.2
+Customs and trade regulations                                                    2.5          2.5            1.5        10.4                   4.5                4.7
+Electricity                                                                      3.3          2.2            4.6        11.9                  12.3               12.9
+Inadequately educated workforce                                                  5.2          4.9            6.5         1.0                   2.6                1.6
+Labor regulations                                                                3.6          4.0            2.9         3.1                   1.5                1.3
+Political instability                                                            2.2          2.8            1.3         0.0                   8.5               11.6
+Practices of the informal sector                                                 8.7          9.1            8.1         5.6                  10.0                8.1
+Tax administration                                                               4.1          3.5            5.9         1.0                   3.9                3.7
+Tax rates                                                                       15.5         15.7           16.0         8.2                   8.3                8.3
+Transportation                                                                   2.8          2.8            2.9         3.3                   2.6                3.0
+* These indicators are computed only for the manufacturing sector

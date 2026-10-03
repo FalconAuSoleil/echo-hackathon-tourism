@@ -1,0 +1,114 @@
+GSMA, The Mobile Gender Gap Report 2025 and 2026 — verbatim excerpts (pdftotext -layout). Report copyright GSMA; quoted for citation only.
+2026: https://www.gsma.com/wp-content/uploads/2026/07/The-Mobile-Gender-Gap-Report-2026.pdf (accessed 2026-10-03)
+2025: https://www.gsma.com/wp-content/uploads/2025/12/The-Mobile-Gender-Gap-Report-2025.pdf (accessed 2026-10-03)
+
+=== 2025 report, Figure 2 (GSMA Consumer Survey 2024), Rwanda row: value above the label = men, below = women; columns = mobile ownership | gap | smartphone ownership | gap | mobile internet adoption | gap
+                                     MOBILE OWNERSHIP (%)                                  GENDER GAP       SMARTPHONE OWNERSHIP (%)                        GENDER GAP                                  MOBILE INTERNET ADOPTION (%)            GENDER GAP
+
+                                                                    72%                                                   37%                                                                                    36%
+                          Rwanda                                                                18%                                                              37%                       Rwanda                                                   35%
+
+=== 2025 report, Figure 8 (types of handsets, % of all adults 18+; row above label = men, below = women; columns Basic phone | Feature phone | Smartphone; remainder to 100% = no handset)
+                                                          Men       20%                  16%                         37%
+                       Rwanda
+
+
+
+
+                                                        Women          20%               16%                23%
+     Source: GSMA Consumer Survey, 2024                                                            Basic phone               Feature phone      Smartphone
+     Base: Total population aged 18+
+     The total percentage of handset owners does not exactly match the percentage of mobile owners in Figure 2.
+     Figure 2 captures people who have sole or main use of a SIM card whereas Figure 8 represents people who                      Internet-enabled phone
+     have sole or main use of a handset.
+     Respondents are categorised according to the most advanced device they own and can only be included in one category.
+     For example, smartphone owners that also own a basic or feature phone are counted only as smartphone owners.
+     n=493 to 982 for women and n=483 to 1,234 for men
+31                                                                                                                                                           31
+
+=== 2025 report, text
+                                                             proportion of smartphone owners are not
+     Across LMICs, 61% of women and 71% of men               using mobile internet, especially women. In
+     now own a smartphone. This means that while             Ethiopia, Nigeria and Rwanda, around 20% of
+     almost 1.5 billion women own a smartphone,              female smartphone owners and around 10% of
+     there are still 945 million who do not, and 230         male smartphone owners are not using mobile
+     million fewer women own a smartphone than               internet, despite almost all of them being aware
+     men (see Figure 7). While this is an increase from      of it. In India, there is also a relatively high
+4.   The difference was greatest in Rwanda, where 77% of female internet users access it exclusively via mobile, compared to 63% of men.
+
+=== 2025 report, survey coverage footnote
+
+     53.	Six countries were surveyed by the GSMA in 2017, 2018, 2019, 2020, 2021, 2022, 2023 and 2024: Kenya, Nigeria, Bangladesh, India, Pakistan and Guatemala. Two
+          countries were surveyed by the GSMA in 2017, 2018, 2019, 2021, 2022, 2023 and 2024: Indonesia and Mexico. One country was surveyed by the GSMA in 2019,
+          2021, 2022, 2023 and 2024: Senegal. One country was surveyed in 2017, 2021, 2022, 2023 and 2024: Egypt. One country was surveyed by the GSMA in 2022,
+          2023 and 2024: Ethiopia. One country was surveyed by the GSMA in 2019, 2023 and 2024: Uganda. One country was surveyed in 2017 and 2024: Philippines.
+          One country was surveyed in 2018 and 2024: Tanzania. One country was surveyed only in 2024: Rwanda. One country was surveyed in 2017, 2021 and 2022:
+          Ghana. Two countries were surveyed by the GSMA in 2017, 2018, 2019 and 2020: Algeria and Mozambique. Three countries were surveyed by the GSMA in 2017,
+          2018 and 2019: Brazil, Myanmar and South Africa. Four countries were surveyed by the GSMA in 2017 and 2018: Argentina, Dominican Republic, China, Côte
+
+=== 2026 report (GSMA Consumer Survey 2025, 14 LMICs, Sept-Nov 2025)
+                                                                                  14 LMICs
+                                                                                  These face-to-face, nationally
+          Updated data on gender                                                  representative surveys were
+          gaps in mobile ownership,                                               conducted between September and
+          smartphone ownership and                                                November 2025. Analysis of other
+          mobile internet adoption in                                             research and data from the GSMA,
+          LMICs and how these figures                                             as well as other organisations that
+          have changed over time.                                                 investigate and track the mobile
+                                                                                  gender gap, also inform the findings
+                                                                                  of this report.
+
+1.5 billion women own a smartphone, there are still       In some survey countries, a surprisingly high
+approximately 840 million who do not, and 210 million     proportion of smartphone owners are not using
+fewer women who own a smartphone compared                 mobile internet. This is especially true for women:
+to men (see Figure 9). Women’s rate of growth in          in four countries, around one in five women who
+smartphone ownership increased slightly in 2025           own a smartphone are not using mobile internet.
+compared to 2024, while men’s slowed. In 2024,            The countries with the highest proportion of women
+around 90 million women and 115 million men acquired      smartphone owners who do not use mobile internet
+a smartphone, while around 100 million women and 80       are Ethiopia (27%), Bangladesh (24%), Nigeria
+million men acquired one in 2025.                         (19%), Uganda (17%) and Sri Lanka (10%). These
+                                                          are also the countries with the highest proportion
+Gender gaps in smartphone ownership are widest            of male smartphone owners who do not use mobile
+in South Asia at 33%, followed by Sub-Saharan             internet, but the rates are lower for these men than
+Africa at 22%. This gender gap has remained largely       for their female counterparts. Some women who own
+unchanged across the regions, except for South            smartphones are not even aware of mobile internet.
+Asia, where a narrowing over the past year has been       In Ethiopia, 10% of women smartphone owners are
+driven primarily by Pakistan, where women’s rate of       not aware of mobile internet, compared to 5% of men
+smartphone ownership increased from 30% to 40%            smartphone owners.
+and men’s stayed relatively stagnant, and India, where
+women’s rate of smartphone ownership increased
+from 36% to 44% and men’s from 58% to 65%.
+
+Gender gaps in smartphone ownership vary across
+survey countries and are widest in Bangladesh
+(40%), Ethiopia (34%), India (33%), Pakistan (30%)
+and Uganda (26%). These are also the five survey
+
+This report is based on an analysis of the results of face-to-face surveys conducted by the GSMA in 14 LMICs
+between September and November of 2025. This is supplemented by 2017–2024 GSMA survey results from
+17 additional countries,55 as well as third-party survey results that cover another 14 countries.
+
+55.	Six countries were surveyed by the GSMA in 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024 and 2025: Bangladesh, India, Pakistan, Kenya, Nigeria and Guatemala. Two countries were
+     surveyed by the GSMA in 2017, 2018, 2019, 2021, 2022, 2023, 2024 and 2025: Indonesia and Mexico. One country was surveyed by the GSMA in 2019, 2021, 2022, 2023, 2024 and 2025:
+     Senegal. One country was surveyed in 2017, 2021, 2022, 2023, 2024 and 2025: Egypt. One country was surveyed by the GSMA in 2022, 2023, 2024 and 2025: Ethiopia. One country was
+     surveyed by the GSMA in 2019, 2023, 2024 and 2025: Uganda. One country was surveyed in 2017 and 2024: Philippines. One country was surveyed in 2018 and 2024: Tanzania. One
+     country was surveyed only in 2024: Rwanda. One country was surveyed only in 2025: Sri Lanka. One country was surveyed in 2017, 2021, 2022 and 2025: Ghana. Two countries were
+     surveyed by the GSMA in 2017, 2018, 2019 and 2020: Algeria and Mozambique. Three countries were surveyed by the GSMA in 2017, 2018 and 2019: Myanmar, South Africa and Brazil.
+     Four countries were surveyed by the GSMA in 2017 and 2018: China, Côte d’Ivoire, Argentina and Dominican Republic. Five countries were surveyed by the GSMA only in 2017: Thailand,
+
+=== 2026 report, Figure 9 (regional map). Sub-Saharan Africa block reads: 34% = women who own a smartphone, 22% = gender gap in smartphone ownership, 230m = women who do not own a smartphone
+         71%
+                                                                     Sub-Saharan
+                                                                           Africa                                                             110m
+                                                                                                           48%
+                                                                            34%
+         1%                                                                                                 33%
+                                                                            22%
+        70m                                                                                                350m                 Gender gap
+
+=== 2026 report, text on SSA mobile internet gap
+progress in Sub-Saharan Africa and South Asia in
+2025. The gender gap in mobile internet adoption has
+narrowed in Sub-Saharan Africa from 30% in 2024 to
+26% in 2025, continuing a positive trend observed for
+the past two years. In South Asia, it decreased from

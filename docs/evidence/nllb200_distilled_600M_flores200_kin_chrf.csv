@@ -1,0 +1,4 @@
+# Source: https://tinyurl.com/nllb200densedst600mmetrics -> https://dl.fbaipublicfiles.com/large_objects/nllb/models/nllb_200_dense_distill_600m/metrics.csv (linked from the facebook/nllb-200-distilled-600M model card), accessed 2026-10-03
+direction,chrf++
+eng_Latn-kin_Latn,44
+kin_Latn-eng_Latn,51.3

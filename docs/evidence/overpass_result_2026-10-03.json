@@ -1,0 +1,274 @@
+{
+ "run_date": "2026-10-03",
+ "endpoint": "https://overpass-api.de/api/interpreter",
+ "radius_m": 15000,
+ "areas": {
+  "Huye": {
+   "center": [
+    -2.596,
+    29.739
+   ],
+   "counts": {
+    "tourism_any": 41,
+    "tourism_attraction_or_viewpoint": 6,
+    "tourism_accommodation": 35,
+    "farm_tourism_tagged": 0,
+    "coffee_named_or_tagged": 14,
+    "washing_station_named": 5,
+    "coffee_tour_named": 0,
+    "landuse_farmland_or_orchard": 7
+   },
+   "names": {
+    "tourism_any": [
+     "(no name) [tourism=guest_house]",
+     "(no name) [tourism=hostel]",
+     "(no name) [tourism=motel]",
+     "(no name) [tourism=museum]",
+     "Arboretum Office [tourism=attraction]",
+     "Cana Notre Dame des Anges [tourism=guest_house]",
+     "Casa hotel [tourism=hotel]",
+     "Centre d’Accueil Mater Boni Consilii [tourism=guest_house]",
+     "Eglise Ste. Therese [tourism=attraction]",
+     "Emmaus Hostel [tourism=hostel]",
+     "Ethnographic Museum [tourism=museum]",
+     "Four Steps (Le Petit Prince) [tourism=hotel]",
+     "Galileo [tourism=hotel]",
+     "HOPE HOUSE [tourism=hotel]",
+     "Heroes Motel [tourism=hotel]",
+     "Hotel Barthos [tourism=hotel]",
+     "Hotel Credo [amenity=restaurant,tourism=hotel]",
+     "Hotel Maisons-Sifa [tourism=hotel]",
+     "Hotel Mont Huye [tourism=hotel]",
+     "Huye Conference Center Ltd. [tourism=hotel]",
+     "Huye Mountain Coffee [tourism=attraction]",
+     "Hôtel Beaux Arts [tourism=hotel]",
+     "Hôtel Faucon [tourism=hotel]",
+     "Irebero Boutique Hotel [tourism=hotel]",
+     "Light House Hotel [tourism=hotel]",
+     "Logements Barthos [tourism=hostel]",
+     "Motel Eden Garden [tourism=motel]",
+     "Mu Gisaza lodge [tourism=guest_house]",
+     "Mère du Verbe [amenity=school,tourism=hostel]",
+     "Mère du Verbe [tourism=guest_house]",
+     "Procure [tourism=guest_house]",
+     "Seventh Day Adventist Church [tourism=attraction]",
+     "Shalom Guest House [tourism=guest_house]",
+     "St Vincent [tourism=hotel]",
+     "Twiga Hotel [tourism=hotel]",
+     "VietteA [tourism=hostel]",
+     "VietteB [tourism=hostel]",
+     "VietteC [tourism=hostel]"
+    ],
+    "tourism_attraction_or_viewpoint": [
+     "(no name) [tourism=museum]",
+     "Arboretum Office [tourism=attraction]",
+     "Eglise Ste. Therese [tourism=attraction]",
+     "Ethnographic Museum [tourism=museum]",
+     "Huye Mountain Coffee [tourism=attraction]",
+     "Seventh Day Adventist Church [tourism=attraction]"
+    ],
+    "tourism_accommodation": [
+     "(no name) [tourism=guest_house]",
+     "(no name) [tourism=hostel]",
+     "(no name) [tourism=motel]",
+     "Cana Notre Dame des Anges [tourism=guest_house]",
+     "Casa hotel [tourism=hotel]",
+     "Centre d’Accueil Mater Boni Consilii [tourism=guest_house]",
+     "Emmaus Hostel [tourism=hostel]",
+     "Four Steps (Le Petit Prince) [tourism=hotel]",
+     "Galileo [tourism=hotel]",
+     "HOPE HOUSE [tourism=hotel]",
+     "Heroes Motel [tourism=hotel]",
+     "Hotel Barthos [tourism=hotel]",
+     "Hotel Credo [amenity=restaurant,tourism=hotel]",
+     "Hotel Maisons-Sifa [tourism=hotel]",
+     "Hotel Mont Huye [tourism=hotel]",
+     "Huye Conference Center Ltd. [tourism=hotel]",
+     "Hôtel Beaux Arts [tourism=hotel]",
+     "Hôtel Faucon [tourism=hotel]",
+     "Irebero Boutique Hotel [tourism=hotel]",
+     "Light House Hotel [tourism=hotel]",
+     "Logements Barthos [tourism=hostel]",
+     "Motel Eden Garden [tourism=motel]",
+     "Mu Gisaza lodge [tourism=guest_house]",
+     "Mère du Verbe [amenity=school,tourism=hostel]",
+     "Mère du Verbe [tourism=guest_house]",
+     "Procure [tourism=guest_house]",
+     "Shalom Guest House [tourism=guest_house]",
+     "St Vincent [tourism=hotel]",
+     "Twiga Hotel [tourism=hotel]",
+     "VietteA [tourism=hostel]",
+     "VietteB [tourism=hostel]",
+     "VietteC [tourism=hostel]"
+    ],
+    "farm_tourism_tagged": [],
+    "coffee_named_or_tagged": [
+     "Café Connexion [amenity=cafe]",
+     "Cyarumbo Coffee Washing Station []",
+     "Huye Mountain Coffee [tourism=attraction]",
+     "Maraba Coffee Co-operative []",
+     "National Speciality Coffee Quality Laboratory & Training Centre []",
+     "Nehemiah's Best Coffee [amenity=cafe]",
+     "Simbi coffee washing station [landuse=industrial]"
+    ],
+    "washing_station_named": [
+     "Cyarumbo Coffee Washing Station []",
+     "Simbi coffee washing station [landuse=industrial]"
+    ],
+    "coffee_tour_named": [],
+    "landuse_farmland_or_orchard": [
+     "(no name) [landuse=farmland]",
+     "(no name) [landuse=farmyard]",
+     "(no name) [landuse=orchard]"
+    ]
+   },
+   "queries": {
+    "tourism_any": "[out:json][timeout:180];(nwr[\"tourism\"](around:15000,-2.596,29.739););out tags center;",
+    "tourism_attraction_or_viewpoint": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(attraction|viewpoint|museum|artwork|gallery)$\"](around:15000,-2.596,29.739););out tags center;",
+    "tourism_accommodation": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(hotel|guest_house|hostel|motel|camp_site|chalet|apartment)$\"](around:15000,-2.596,29.739););out tags center;",
+    "farm_tourism_tagged": "[out:json][timeout:180];(nwr[\"tourism\"][\"farm\"](around:15000,-2.596,29.739);nwr[\"agritourism\"](around:15000,-2.596,29.739);nwr[\"tourism\"=\"farm\"](around:15000,-2.596,29.739);nwr[\"farm\"=\"tourism\"](around:15000,-2.596,29.739);nwr[\"tourism\"][\"landuse\"=\"farmyard\"](around:15000,-2.596,29.739););out tags center;",
+    "coffee_named_or_tagged": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee|[Cc]afé|[Kk]awa\"](around:15000,-2.596,29.739);nwr[\"produce\"~\"coffee\"](around:15000,-2.596,29.739);nwr[\"product\"~\"coffee\"](around:15000,-2.596,29.739);nwr[\"crop\"~\"coffee\"](around:15000,-2.596,29.739);nwr[\"cuisine\"=\"coffee_shop\"](around:15000,-2.596,29.739););out tags center;",
+    "washing_station_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Ww]ashing [Ss]tation|CWS\"](around:15000,-2.596,29.739););out tags center;",
+    "coffee_tour_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee.*([Tt]our|[Ee]xperience)|[Tt]our.*[Cc]offee\"](around:15000,-2.596,29.739);nwr[\"description\"~\"[Cc]offee [Tt]our\"](around:15000,-2.596,29.739););out tags center;",
+    "landuse_farmland_or_orchard": "[out:json][timeout:180];(nwr[\"landuse\"~\"^(farmland|orchard|plantation|farmyard)$\"](around:15000,-2.596,29.739););out tags center;"
+   }
+  },
+  "Nyamasheke": {
+   "center": [
+    -2.34,
+    29.09
+   ],
+   "counts": {
+    "tourism_any": 20,
+    "tourism_attraction_or_viewpoint": 2,
+    "tourism_accommodation": 14,
+    "farm_tourism_tagged": 0,
+    "coffee_named_or_tagged": 2,
+    "washing_station_named": 2,
+    "coffee_tour_named": 0,
+    "landuse_farmland_or_orchard": 165
+   },
+   "names": {
+    "tourism_any": [
+     "(no name) [tourism=information]",
+     "(no name) [tourism=yes]",
+     "Church Guesthouse [tourism=guest_house]",
+     "Congomani Guest house [tourism=guest_house]",
+     "Eco-lodges [tourism=hotel]",
+     "Gisakura Family Hostel [tourism=hostel]",
+     "Gisakura Family Hostel [tourism=hotel]",
+     "Gisakura Guesthouse [tourism=hotel]",
+     "Gisakura Ranger Station [tourism=information]",
+     "Gisakura Tea Estate [tourism=attraction]",
+     "Ibigabiro Resort [tourism=motel]",
+     "Ishara Beach Motel [tourism=guest_house]",
+     "Ituze lodge [tourism=hotel]",
+     "Ken Barham Guesthouse [tourism=guest_house]",
+     "Keza Nyungwe Guesthouse [tourism=guest_house]",
+     "La planète guest house [tourism=hotel]",
+     "Nyungwe Cultural Village Cooperative [tourism=artwork]",
+     "Nyungwe Top View Hill Hotel [tourism=hotel]",
+     "One&Only Nyungwe House [tourism=hotel]"
+    ],
+    "tourism_attraction_or_viewpoint": [
+     "Gisakura Tea Estate [tourism=attraction]",
+     "Nyungwe Cultural Village Cooperative [tourism=artwork]"
+    ],
+    "tourism_accommodation": [
+     "Church Guesthouse [tourism=guest_house]",
+     "Congomani Guest house [tourism=guest_house]",
+     "Eco-lodges [tourism=hotel]",
+     "Gisakura Family Hostel [tourism=hostel]",
+     "Gisakura Family Hostel [tourism=hotel]",
+     "Gisakura Guesthouse [tourism=hotel]",
+     "Ibigabiro Resort [tourism=motel]",
+     "Ishara Beach Motel [tourism=guest_house]",
+     "Ituze lodge [tourism=hotel]",
+     "Ken Barham Guesthouse [tourism=guest_house]",
+     "Keza Nyungwe Guesthouse [tourism=guest_house]",
+     "La planète guest house [tourism=hotel]",
+     "Nyungwe Top View Hill Hotel [tourism=hotel]",
+     "One&Only Nyungwe House [tourism=hotel]"
+    ],
+    "farm_tourism_tagged": [],
+    "coffee_named_or_tagged": [
+     "Muraho Coffee Washing Station []",
+     "Nyungwe High Coffee Washing Station []"
+    ],
+    "washing_station_named": [
+     "Muraho Coffee Washing Station []",
+     "Nyungwe High Coffee Washing Station []"
+    ],
+    "coffee_tour_named": [],
+    "landuse_farmland_or_orchard": [
+     "(no name) [landuse=farmland]",
+     "(no name) [landuse=farmyard]",
+     "(no name) [landuse=orchard]",
+     "Île Kinyabalanga [landuse=farmland]"
+    ]
+   },
+   "queries": {
+    "tourism_any": "[out:json][timeout:180];(nwr[\"tourism\"](around:15000,-2.34,29.09););out tags center;",
+    "tourism_attraction_or_viewpoint": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(attraction|viewpoint|museum|artwork|gallery)$\"](around:15000,-2.34,29.09););out tags center;",
+    "tourism_accommodation": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(hotel|guest_house|hostel|motel|camp_site|chalet|apartment)$\"](around:15000,-2.34,29.09););out tags center;",
+    "farm_tourism_tagged": "[out:json][timeout:180];(nwr[\"tourism\"][\"farm\"](around:15000,-2.34,29.09);nwr[\"agritourism\"](around:15000,-2.34,29.09);nwr[\"tourism\"=\"farm\"](around:15000,-2.34,29.09);nwr[\"farm\"=\"tourism\"](around:15000,-2.34,29.09);nwr[\"tourism\"][\"landuse\"=\"farmyard\"](around:15000,-2.34,29.09););out tags center;",
+    "coffee_named_or_tagged": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee|[Cc]afé|[Kk]awa\"](around:15000,-2.34,29.09);nwr[\"produce\"~\"coffee\"](around:15000,-2.34,29.09);nwr[\"product\"~\"coffee\"](around:15000,-2.34,29.09);nwr[\"crop\"~\"coffee\"](around:15000,-2.34,29.09);nwr[\"cuisine\"=\"coffee_shop\"](around:15000,-2.34,29.09););out tags center;",
+    "washing_station_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Ww]ashing [Ss]tation|CWS\"](around:15000,-2.34,29.09););out tags center;",
+    "coffee_tour_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee.*([Tt]our|[Ee]xperience)|[Tt]our.*[Cc]offee\"](around:15000,-2.34,29.09);nwr[\"description\"~\"[Cc]offee [Tt]our\"](around:15000,-2.34,29.09););out tags center;",
+    "landuse_farmland_or_orchard": "[out:json][timeout:180];(nwr[\"landuse\"~\"^(farmland|orchard|plantation|farmyard)$\"](around:15000,-2.34,29.09););out tags center;"
+   }
+  },
+  "Gakenke": {
+   "center": [
+    -1.688,
+    29.788
+   ],
+   "counts": {
+    "tourism_any": 5,
+    "tourism_attraction_or_viewpoint": 2,
+    "tourism_accommodation": 3,
+    "farm_tourism_tagged": 0,
+    "coffee_named_or_tagged": 0,
+    "washing_station_named": 0,
+    "coffee_tour_named": 0,
+    "landuse_farmland_or_orchard": 118
+   },
+   "names": {
+    "tourism_any": [
+     "(no name) [tourism=guest_house]",
+     "BGE [tourism=camp_site]",
+     "Sind Gérard Urwibutso Enterprises guest house [tourism=guest_house]",
+     "View of Nyabarongo and Mukungwe river [tourism=viewpoint]",
+     "ibuye rya bagenge [tourism=attraction]"
+    ],
+    "tourism_attraction_or_viewpoint": [
+     "View of Nyabarongo and Mukungwe river [tourism=viewpoint]",
+     "ibuye rya bagenge [tourism=attraction]"
+    ],
+    "tourism_accommodation": [
+     "(no name) [tourism=guest_house]",
+     "BGE [tourism=camp_site]",
+     "Sind Gérard Urwibutso Enterprises guest house [tourism=guest_house]"
+    ],
+    "farm_tourism_tagged": [],
+    "coffee_named_or_tagged": [],
+    "washing_station_named": [],
+    "coffee_tour_named": [],
+    "landuse_farmland_or_orchard": [
+     "(no name) [landuse=farmland]",
+     "(no name) [landuse=orchard]"
+    ]
+   },
+   "queries": {
+    "tourism_any": "[out:json][timeout:180];(nwr[\"tourism\"](around:15000,-1.688,29.788););out tags center;",
+    "tourism_attraction_or_viewpoint": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(attraction|viewpoint|museum|artwork|gallery)$\"](around:15000,-1.688,29.788););out tags center;",
+    "tourism_accommodation": "[out:json][timeout:180];(nwr[\"tourism\"~\"^(hotel|guest_house|hostel|motel|camp_site|chalet|apartment)$\"](around:15000,-1.688,29.788););out tags center;",
+    "farm_tourism_tagged": "[out:json][timeout:180];(nwr[\"tourism\"][\"farm\"](around:15000,-1.688,29.788);nwr[\"agritourism\"](around:15000,-1.688,29.788);nwr[\"tourism\"=\"farm\"](around:15000,-1.688,29.788);nwr[\"farm\"=\"tourism\"](around:15000,-1.688,29.788);nwr[\"tourism\"][\"landuse\"=\"farmyard\"](around:15000,-1.688,29.788););out tags center;",
+    "coffee_named_or_tagged": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee|[Cc]afé|[Kk]awa\"](around:15000,-1.688,29.788);nwr[\"produce\"~\"coffee\"](around:15000,-1.688,29.788);nwr[\"product\"~\"coffee\"](around:15000,-1.688,29.788);nwr[\"crop\"~\"coffee\"](around:15000,-1.688,29.788);nwr[\"cuisine\"=\"coffee_shop\"](around:15000,-1.688,29.788););out tags center;",
+    "washing_station_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Ww]ashing [Ss]tation|CWS\"](around:15000,-1.688,29.788););out tags center;",
+    "coffee_tour_named": "[out:json][timeout:180];(nwr[\"name\"~\"[Cc]offee.*([Tt]our|[Ee]xperience)|[Tt]our.*[Cc]offee\"](around:15000,-1.688,29.788);nwr[\"description\"~\"[Cc]offee [Tt]our\"](around:15000,-1.688,29.788););out tags center;",
+    "landuse_farmland_or_orchard": "[out:json][timeout:180];(nwr[\"landuse\"~\"^(farmland|orchard|plantation|farmyard)$\"](around:15000,-1.688,29.788););out tags center;"
+   }
+  }
+ }
+}
