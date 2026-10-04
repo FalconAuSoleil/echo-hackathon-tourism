@@ -267,12 +267,15 @@ export function unknownTopics(analyses: readonly MessageAnalysis[], feedbacks: R
     const f = describe(analyses, cfg);
     return { clusterThreshold: cfg.offListClusterThreshold, fullCorpusDetected: f.detected, fullCorpusFalseAlerts: f.falseAlerts, ...sims(cfg, 200) };
   });
+  // Le réglage livré réutilise le tirage de son mode (avant : un tirage séparé, donc un autre taux pour le même réglage).
+  const offListOnly = byMode("off_list");
+  const offListAndUnsure = byMode("off_list_and_unsure");
   return {
     clusterThreshold: config.offListClusterThreshold,
     minVisitors: config.offListMinVisitors,
-    shipped: byMode(config.unknownTopicSources),
-    offListOnly: byMode("off_list"),
-    offListAndUnsure: byMode("off_list_and_unsure"),
+    shipped: config.unknownTopicSources === "off_list" ? offListOnly : offListAndUnsure,
+    offListOnly,
+    offListAndUnsure,
     pickingMessages: pickingStatus,
     sensitivity,
   };

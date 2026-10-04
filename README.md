@@ -82,7 +82,8 @@ We report X < Y as measured, and it needs its context to be read correctly:
 - **Echo routes the rest to a person:** 34 % of remarks are flagged "not sure — ask a person" instead of being
   guessed. Remarks counted right or flagged for a person: Echo 88 %, blind keywords 80 % (keywords have no such flag).
 - End to end on synthetic audio with outdoor noise (10 dB SNR): Echo captures 43 % with 9 % wrong; blind keywords 65 %
-  with 30 % wrong (original lists 69 % / 33 %).
+  with 30 % wrong (original lists 69 % / 33 %). These 80 audio messages include 39 from the calibration half; on the 41
+  held-out ones only, Echo captures 51 % with 7.1 % wrong (2 of 28 accepted answers, small sample).
 - **Before the latest change** (catalog of 756 examples, threshold 0.84) Echo captured 48 % with 6 % wrong on the
   same held-out half. With 1,260 examples and a new threshold rule (§5.3), both decided on the calibration half only,
   it captures 53 % with 6.5 % wrong: 8 more remarks, a gain within the 95 % intervals ([§5.6](#56-echo-vs-keywords-summary)).
@@ -348,7 +349,9 @@ Keywords = the blind lists (headline baseline); the last column gives the origin
 | **10 dB SNR** | 17.5 % | 100 % | 12 | **42.9 %** | **8.7 %** | 0.60 | 40.8 % | 64.8 % | 30.3 % | 69.2 % / 33.0 % |
 | 5 dB SNR | 23.9 % | 97 % | 14 | 31.9 % | 8.3 % | 0.50 | 42.5 % | 61.5 % | 32.3 % | 65.9 % / 32.4 % |
 
-Loss vs text: about −12 points of capture at 10 dB. The error among accepted answers is between 6 % and 10 % on audio
+Loss vs text: about −12 points of capture at 10 dB. All rows use the same 80 messages, 39 of which are from the
+calibration half the thresholds were tuned on; on the 41 held-out messages only, Echo at 10 dB captures 51.1 % with
+7.1 % wrong (2 of 28 accepted; `echoTestSubset` in level3.json). The error among accepted answers is between 6 % and 10 % on audio
 (and 10.2 %, 6 of 59, on the text of these 80 messages, 39 of which are from the calibration half): above the 8 %
 bound of the calibration rule at 20, 10 and 5 dB and on that text (only clean speech stays under it), and about a
 third of the keyword error everywhere.
@@ -383,7 +386,10 @@ seeing the numbers; the table lets the reader apply another.
 | Clustered chunks | Picking flagged in realistic months (6–7 visitors, 500 simulated months) | Months with a false alert (500) |
 |---|---:|---:|
 | Off-list only (literal SPEC 4.5) | 0 % | 0 % |
-| **Off-list + below-threshold "not sure" (shipped)** | **98 %** | **0.4 %** |
+| **Off-list + below-threshold "not sure" (shipped)** | **98 %** | **0.4 % to 1.0 %** |
+
+`level2.json` holds two 500-month draws of the same shipped setting (`offListAndUnsure`: 0.4 %, 2 months; `shipped`:
+1.0 %, 5 months); the difference is Monte Carlo noise, so both are given. The evaluation code now reuses one draw for both (from the next level-2 run).
 
 The three picking remarks land in "not sure" (close to "field visit"), so the literal off-list-only rule never fires;
 the shipped rule also clusters below-threshold "not sure" chunks. This choice and the cluster threshold (0.57) were
@@ -403,7 +409,7 @@ feedbacks, 0 for the same text a month later.
 | Says "not sure" instead of guessing | yes (34 % of remarks) | never | never | *yes (41 %)* |
 | Cancelling negations handled (of 13) | **85 %** (11) | 15 % (2) | 0 % (0) | *85 %* |
 | Off-list feedbacks given a finding | **0/15** | 7/15 | 5/15 | *0/15* |
-| Audio 10 dB: captured / error among accepted | 43 % / **9 %** | 65 % / 30 % | 69 % / 33 % | *35 % / 3 %* |
+| Audio 10 dB: captured / error among accepted (80 messages, 39 from the calibration half) | 43 % / **9 %** | 65 % / 30 % | 69 % / 33 % | *35 % / 3 %* |
 
 **Why two keyword baselines.** The original lists were written by the same agent that wrote the synthetic corpus, so
 they can reuse its exact wording; that flatters keyword matching. The blind lists were written afterwards in one pass,

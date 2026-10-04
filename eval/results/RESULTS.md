@@ -24,13 +24,15 @@ another finding are not captured. Measured on the held-out half of the SYNTHETIC
 | Off-list feedbacks given a finding anyway | 0/15 | 7/15 | 5/15 |
 | Remarks flagged "not sure — ask a person" instead | 34 % | 0 % (no such state) | 0 % |
 | Remarks either counted right or flagged "not sure — ask a person" | 88 % | 80 % (no such flag) | 88 % |
-| Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices): captured / wrong | 43 % / 9 % | 65 % / 30 % | 69 % / 33 % |
+| Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices; 80 messages, 39 of them from the calibration half): captured / wrong | 43 % / 9 % | 65 % / 30 % | 69 % / 33 % |
 
 95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but more than one counted answer in
 four is wrong (negations such as "the walk was not too long" count as complaints, a "delicious coffee" counts as a meal, …),
-and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate under the
+and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate on text under the
 8 % bound of the calibration rule, and routes the rest to a person. The host acts on the counts, so a wrong count
 costs more than a missed one (a missed remark is still read by a person from the review list).
+On audio the bound is not kept: 8.7 % wrong at 10 dB (whisper-base), above the 8 % bound (Level 3).
+The audio row uses 80 messages, 39 of them from the calibration half the thresholds were tuned on; on the 41 held-out messages only, Echo captures 51.1 % with 7.1 % of 28 accepted answers wrong (small sample).
 
 **Why the blind lists are the headline baseline.** The original lists (`eval/keywords/`) were written by the same agent
 that wrote the synthetic corpus, so they can repeat its exact wording, which flatters keyword matching. The blind lists
@@ -261,6 +263,7 @@ Chunks are clustered with the shipped `clusterOffList` (average linkage, thresho
 | `off_list` | 104 | no | 4 | 0.0 % | 0.0 % |
 | `off_list_and_unsure` (shipped) | 214 | yes | 19 | 98.2 % | 0.4 % |
 
+The shipped configuration was also simulated separately (other random months, same setting): picking flagged 98.2 %, months with a false alert 1.0 %. The spread between the two draws (0.4 % vs 1.0 %) is Monte Carlo noise (500 months each); the false-alert rate is somewhere around that range, not precisely either value.
 Where the three picking remarks land: en-026: not_sure (below_threshold); fr-025: not_sure (below_threshold); de-025: not_sure (below_threshold).
 With the literal SPEC 4.5 rule (only off-list chunks), the picking remarks never trigger the signal: they are close to
 "field visit" findings, so they end up "not sure" rather than off-list. The shipped rule also clusters "not sure" chunks whose

@@ -989,3 +989,21 @@ configuration (48 % / 6 % on the held-out half).
 - **Remains**: the error on audio is above the 8 % bound at 20, 10 and 5 dB (10.4 %, 8.7 %, 8.3 %) and on the text of the level-3 messages (10.2 %) [corrected by the verify pass: first written as "two conditions"]; a
   rule that also looks at audio (e.g. a stricter threshold when the transcription confidence is lower) would need its
   own calibration, not on the test half. Real visitors and a real phone are still unmeasured.
+
+## 2026-10-04 — verification fixes (after commit 9b631c5)
+
+- **RESULTS.md headline** (`eval/src/report.ts`, report regenerated with `pnpm eval -- --level report`, no model run):
+  "keeps the wrong-answer rate under the 8 % bound" now says "on text", followed by a line stating that on audio the
+  bound is not kept (8.7 % at 10 dB, whisper-base).
+- **Level-3 rows mix calibration data**: the 80 audio messages include 39 from the calibration half. The headline audio
+  row (RESULTS.md, README §1 bullet, §5.4, §5.6 table) now says so, and the held-out-only subset is quoted next to it
+  (`echoTestSubset`, whisper-base 10 dB, 41 messages: 51.1 % captured, 7.1 % wrong, 2 of 28 accepted).
+- **Unknown-topic false-alert rate**: `level2.json` had two 500-month draws of the same shipped setting (`shipped` 1.0 %,
+  `offListAndUnsure` 0.4 %) and only 0.4 % was quoted. README §5.5 now gives "0.4 % to 1.0 %" with the explanation;
+  RESULTS.md prints both. `eval/src/level2.ts`: `shipped` now reuses its mode's draw (applies from the next level-2
+  run; the RNG sequence of that section changes, so the next run's month samples differ from this one).
+- **"sin dudar"** (`packages/core/src/negation.ts`): only occurrence in the corpus is held-out es-026; the
+  calibration trigger was fr-031 "sans hésiter". Documented in `eval/results/experiments/log.md` §3, left in place.
+- Earlier in this pass (commit 7eceb87): README §5.4 and the "Remains" line said "two conditions" above the 8 % bound;
+  corrected to 20, 10 and 5 dB plus the level-3 text.
+- No evaluation number changed; no held-out run.

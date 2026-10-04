@@ -75,6 +75,13 @@ Real negations in the same chunk are still detected (tests).
 
 Kept (+1 remark).
 
+Note added by the verification pass (2026-10-04): the only calibration-half trigger was fr-031 "sans hésiter"; the
+other phrases were written as translations of it. Checked afterwards against the whole corpus: "sin dudar" occurs only
+in held-out feedback es-026 ("lo recomendamos sin dudar"); "sans hésiter" only in fr-031 (calibration); "without
+hesitation", "ohne zu zögern", "sin dudarlo" and "sin pensarlo" in no feedback. So one entry of the list matches
+held-out text only. Nothing in this log shows it was chosen by looking at es-026, but it can only affect that one held-out message; it is
+left in place (removing it now would itself be a change decided on held-out text) and this is stated here.
+
 ## 4. Language detection of written messages (`packages/core/src/language.ts`)
 
 ~30 frequent function words per language (never a word shared by two of the four languages, no content word taken

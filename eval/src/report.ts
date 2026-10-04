@@ -128,14 +128,19 @@ export function runReport(log: (s: string) => void = console.log) {
       row("Off-list feedbacks given a finding anyway", `${e.offListSpans.gotFinding}/${e.offListSpans.total}`, `${k.offListSpans.gotFinding}/${k.offListSpans.total}`, ko && `${ko.offListSpans.gotFinding}/${ko.offListSpans.total}`),
       row("Remarks flagged \"not sure — ask a person\" instead", pct(e.remarks.notSure / Math.max(1, e.remarks.total), 0), "0 % (no such state)", "0 %"),
       row("Remarks either counted right or flagged \"not sure — ask a person\"", pct((e.remarks.captured + e.remarks.notSure) / Math.max(1, e.remarks.total), 0), `${pct(k.remarks.captureRate, 0)} (no such flag)`, ko && pct(ko.remarks.captureRate, 0)),
-      ...(e3 && k3 ? [row("Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices): captured / wrong", `${pct(e3.remarks.captureRate, 0)} / ${pct(e3.answers.acceptedErrorRate, 0)}`, `${pct(k3.remarks.captureRate, 0)} / ${pct(k3.answers.acceptedErrorRate, 0)}`, ko3 && `${pct(ko3.captureRate, 0)} / ${pct(ko3.acceptedErrorRate, 0)}`)] : []),
+      ...(e3 && k3 ? [row(`Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices; ${l3.clips} messages, ${l3.clips - l3.clipsInTestHalf} of them from the calibration half): captured / wrong`, `${pct(e3.remarks.captureRate, 0)} / ${pct(e3.answers.acceptedErrorRate, 0)}`, `${pct(k3.remarks.captureRate, 0)} / ${pct(k3.answers.acceptedErrorRate, 0)}`, ko3 && `${pct(ko3.captureRate, 0)} / ${pct(ko3.acceptedErrorRate, 0)}`)] : []),
     ]));
     w();
     w("95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but more than one counted answer in");
     w("four is wrong (negations such as \"the walk was not too long\" count as complaints, a \"delicious coffee\" counts as a meal, …),");
-    w("and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate under the");
+    w("and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate on text under the");
     w(`${(l2.calibration.maxAcceptedError ?? 0.05) * 100} % bound of the calibration rule, and routes the rest to a person. The host acts on the counts, so a wrong count`);
     w("costs more than a missed one (a missed remark is still read by a person from the review list).");
+    if (e3) {
+      const sub = base3?.echoTestSubset;
+      w(`On audio the bound is not kept: ${pct(e3.answers.acceptedErrorRate, 1)} wrong at 10 dB (whisper-base), above the ${(l2.calibration.maxAcceptedError ?? 0.05) * 100} % bound (Level 3).`);
+      if (sub) w(`The audio row uses ${l3.clips} messages, ${l3.clips - l3.clipsInTestHalf} of them from the calibration half the thresholds were tuned on; on the ${sub.messages} held-out messages only, Echo captures ${pct(sub.captureRate, 1)} with ${pct(sub.acceptedErrorRate, 1)} of ${sub.accepted} accepted answers wrong (small sample).`);
+    }
     w();
     w("**Why the blind lists are the headline baseline.** The original lists (`eval/keywords/`) were written by the same agent");
     w("that wrote the synthetic corpus, so they can repeat its exact wording, which flatters keyword matching. The blind lists");
@@ -298,6 +303,12 @@ export function runReport(log: (s: string) => void = console.log) {
     w(table(["Chunks clustered", "Candidate chunks", "Picking flagged (250 as one month)", "False alerts (250 as one month)", "Picking flagged (realistic months)", "Months with a false alert"],
       [u.offListOnly, u.offListAndUnsure].map((m: J) => [`\`${m.sources}\`${m.sources === u.shipped.sources ? " (shipped)" : ""}`, m.candidateChunks, m.fullCorpus.detected ? "yes" : "no", m.fullCorpus.falseAlerts, pct(m.realisticMonths.detectionRate), pct(m.realisticMonths.falseAlertMonthRate)])));
     w();
+    {
+      const sh = u.shipped?.realisticMonths;
+      const md = (u.shipped?.sources === u.offListOnly?.sources ? u.offListOnly : u.offListAndUnsure)?.realisticMonths;
+      if (sh && md && (sh.falseAlertMonthRate !== md.falseAlertMonthRate || sh.detectionRate !== md.detectionRate))
+        w(`The shipped configuration was also simulated separately (other random months, same setting): picking flagged ${pct(sh.detectionRate)}, months with a false alert ${pct(sh.falseAlertMonthRate)}. The spread between the two draws (${pct(md.falseAlertMonthRate)} vs ${pct(sh.falseAlertMonthRate)}) is Monte Carlo noise (500 months each); the false-alert rate is somewhere around that range, not precisely either value.`);
+    }
     w("Where the three picking remarks land: " + u.pickingMessages.map((p: J) => `${p.id}: ${p.chunks.map((c: J) => `${c.status} (${c.reason})`).join(", ")}`).join("; ") + ".");
     w("With the literal SPEC 4.5 rule (only off-list chunks), the picking remarks never trigger the signal: they are close to");
     w("\"field visit\" findings, so they end up \"not sure\" rather than off-list. The shipped rule also clusters \"not sure\" chunks whose");
