@@ -3,7 +3,7 @@
 // moteur de rendu, mesuré sur émulateur) font tuer la page. En mode « un modèle à la fois », chaque modèle vit
 // dans son propre worker, terminé avant que l'autre soit chargé ; l'app transcrit d'abord toute la file, puis
 // analyse (host-store.ts), ce qui ne fait qu'un changement de modèle par lot.
-import type { KnownMessage, MessageAnalysis, MessageInput } from "@echo/core";
+import { segmentsNeedingEnglish, withSegmentEnglish, type KnownMessage, type MessageAnalysis, type MessageInput } from "@echo/core";
 import { modelSourceFor } from "./platform.ts";
 import type { InitInfo, ModelRole, Stage, Timings, WorkerEvent, WorkerRequest } from "../worker/protocol.ts";
 
@@ -21,6 +21,11 @@ type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K>
 interface Pending {
   resolve: (e: Extract<WorkerEvent, { kind: "result" }>) => void;
   reject: (err: Error) => void;
+}
+
+/** Remet un tampon audio à zéro, sauf s'il a été transféré au worker (détaché : c'est le worker qui l'efface). */
+export function wipeAudio(a: Float32Array): void {
+  if (a.buffer.byteLength > 0) a.fill(0);
 }
 
 export type MemoryPreference = "auto" | "low" | "normal";
@@ -195,7 +200,31 @@ export class AnalysisClient {
     });
   }
 
-  /** Message vocal en une fois (démo) : transcription puis analyse ; `onTranscribed` dès que l'audio est effacé. */
+  /**
+   * Étape 3 (Whisper) : anglais des seuls segments à relire de cette analyse (`segmentsNeedingEnglish`), chacun
+   * traduit seul. `audio` est la copie gardée en mémoire depuis l'étape 1 : transférée au worker, qui la remet à zéro
+   * (et remise à zéro ici s'il n'y a rien à traduire). Rien à traduire : aucun modèle chargé.
+   */
+  async englishForReview(a: MessageAnalysis, input: MessageInput, audio: Float32Array): Promise<{ analysis: MessageAnalysis; translateMs: number }> {
+    const segments = input.transcript?.segments ?? [];
+    const need = segmentsNeedingEnglish(a, segments);
+    if (need.length === 0) {
+      wipeAudio(audio);
+      return { analysis: a, translateMs: 0 };
+    }
+    const r = await this.serial(async () => {
+      await this.ensure("asr");
+      return this.request({ kind: "translateSegments", audio, segments: need.map((k) => ({ start: segments[k]!.start, end: segments[k]!.end })), language: a.lang }, [audio.buffer]);
+    });
+    const english = r.english ?? [];
+    const withEnglish = segments.map((sg, k) => (need.includes(k) ? { ...sg, english: english[need.indexOf(k)] ?? "" } : sg));
+    return { analysis: withSegmentEnglish(a, withEnglish), translateMs: r.timings?.translateMs ?? 0 };
+  }
+
+  /**
+   * Message vocal en une fois (démo) : transcription, analyse, puis anglais des segments à relire. Une copie de
+   * l'audio reste en mémoire (jamais stockée) jusqu'à cette dernière étape, puis est remise à zéro.
+   */
   async analyzeAudio(
     id: string,
     receivedAt: string,
@@ -203,11 +232,20 @@ export class AnalysisClient {
     knownMessages: KnownMessage[],
     onTranscribed?: () => void,
   ): Promise<{ analysis: MessageAnalysis; timings: Timings }> {
-    const t = await this.transcribeAudio(id, receivedAt, audio);
-    onTranscribed?.();
-    const a = await this.analyzeInput(t.input, knownMessages);
-    const transcribeMs = t.timings.transcribeMs ?? 0;
-    return { analysis: a.analysis, timings: { transcribeMs, analyzeMs: a.timings.analyzeMs, totalMs: t.timings.totalMs + a.timings.totalMs } };
+    const copy = audio.slice();
+    try {
+      const t = await this.transcribeAudio(id, receivedAt, audio);
+      onTranscribed?.();
+      const a = await this.analyzeInput(t.input, knownMessages);
+      const e = await this.englishForReview(a.analysis, t.input, copy);
+      const transcribeMs = t.timings.transcribeMs ?? 0;
+      return {
+        analysis: e.analysis,
+        timings: { transcribeMs, analyzeMs: a.timings.analyzeMs, translateMs: e.translateMs, totalMs: t.timings.totalMs + a.timings.totalMs + e.translateMs },
+      };
+    } finally {
+      wipeAudio(copy);
+    }
   }
 
   async embed(texts: string[]): Promise<Float32Array[]> {

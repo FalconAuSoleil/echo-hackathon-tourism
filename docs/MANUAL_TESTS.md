@@ -47,6 +47,21 @@ choose "Echo" in the Android share sheet; everything else is the same. Note whic
    goes to 0 as soon as the transcription ends; the message appears under "What is stored" with findings only
    (no text). In Chrome DevTools (USB remote debugging) → Application → IndexedDB → `echo`: `queue` is empty,
    `messages` rows have no text, `reviewChunks` only contain not-sure / off-list chunks without names or numbers.
+6a. **Names spoken by real people, English of the unclear part (SPEC 4.3 step 3, 4.4)**: record 4 voice notes in
+   French, German or Spanish from the farm phone's WhatsApp, each starting with a first name and mixing one clear
+   remark with one hedged remark, e.g. "Claudine nous a très bien accueillis. Bon, Jean-Marc a trouvé que c'était
+   peut-être un peu long par moments." and "Thomas fand das Rösten super. Mir war, glaube ich, manchmal etwas kalt."
+   Share them to Echo and analyse offline. Expected, in DevTools → IndexedDB → `echo` → `reviewChunks`: no first name
+   in any `text` or `englishMT` (write down every name that slipped through: the scrubber's measured recall on
+   synthetic sentences is 90 %, real names through Whisper are not measured); the hedged remark's row has an
+   `englishMT` (shown under "To be read by a person" as "English of this part of the voice note"), and no row holds
+   the clear remark in French/German/Spanish or in English. Note the time per voice note and the "English of the unclear
+   parts" time shown under "Just analysed": each unclear segment costs one more Whisper pass (laptop: 30 s French
+   message 10.8 s instead of 3.2 s, 1 thread).
+6c. **Month closure**: with at least one "not sure" chunk stored, set the phone's date to the 1st of the next month
+   (or wait for it), reopen Echo. Expected: in IndexedDB the previous month's `reviewChunks` rows have no `embedding`
+   field any more; candidates for the unknown-topic signal carry a `clusterId`; the previous month's recap (month
+   selector) still shows the same "topic the tool does not know comes back" line as before the change of month.
 6b. **Delete the original in WhatsApp (consent, SPEC 4.1)**: right after step 6, the host app shows a red reminder
    "1 voice note still to delete. Delete the original voice note in WhatsApp now: the visitor card promised that the
    sound is deleted after analysis". In WhatsApp, long-press the voice note → Delete → Delete for me. Back in Echo,

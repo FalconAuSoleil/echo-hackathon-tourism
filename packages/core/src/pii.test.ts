@@ -32,15 +32,42 @@ describe("scrubPii", () => {
   it("ne touche pas aux noms communs allemands (majuscules)", () => {
     expect(s("Der Weg war lang aber der Kaffee war gut", "de")).toBe("Der Weg war lang aber der Kaffee war gut");
   });
-  it("ne prend pas le début de phrase pour un nom", () => {
+  it("ne prend pas un mot courant en début de phrase pour un nom", () => {
     expect(s("Great tour. Coffee was amazing")).toBe("Great tour. Coffee was amazing");
     expect(s("Great tour\nCoffee was amazing")).toBe("Great tour\nCoffee was amazing");
+  });
+  it("retire un prénom du dictionnaire en début de phrase, en allemand et en minuscules", () => {
+    expect(s("Eric was a bit hard to follow at times.")).toBe("[nom] was a bit hard to follow at times.");
+    expect(s("Anna and I loved it.")).toBe("[nom] and I loved it.");
+    expect(s("Marie a trouvé le chemin long.", "fr")).toBe("[nom] a trouvé le chemin long.");
+    expect(s("Juan y yo volveremos.", "es")).toBe("[nom] y yo volveremos.");
+    expect(s("Unser Guide hieß Jean-Pierre und war super, Thomas fand den Weg lang.", "de")).toBe("Unser Guide hieß [nom] und war super, [nom] fand den Weg lang.");
+    expect(s("eric was a bit hard to follow at times")).toBe("[nom] was a bit hard to follow at times");
+    expect(s("Uwimana showed us the trees")).toBe("[nom] showed us the trees");
+    expect(scrubPii("Eric's explanations were too fast", "en").removed.names).toBe(1);
+  });
+  it("garde un prénom qui est aussi un mot courant, sauf coordonné à un nom retiré", () => {
+    expect(s("Pierre a été super", "fr")).toBe("Pierre a été super");
+    expect(s("Will we come back? Yes!")).toBe("Will we come back? Yes!");
+    expect(s("Pierre et Valentin ont trouvé ça long.", "fr")).toBe("[nom] et [nom] ont trouvé ça long.");
+    expect(s("Grace and I loved it")).toBe("[nom] and I loved it");
+    expect(s("Liebe Grüße von Felix", "de")).toBe("Liebe Grüße von [nom]");
+    expect(s("Der Kaffee war gut und die Rösterei auch.", "de")).toBe("Der Kaffee war gut und die Rösterei auch.");
+  });
+  it("retire un numéro dicté en toutes lettres, garde les petits nombres dits", () => {
+    expect(s("call me on zero seven eight eight, one two three, four five six")).toBe("call me on [numéro]");
+    expect(s("mon numéro c'est zéro sept quatre-vingt-huit douze trente-quatre cinquante-six", "fr")).toBe("mon numéro c'est [numéro]");
+    expect(s("Meine Nummer ist null sieben acht acht eins zwei drei vier", "de")).toBe("Meine Nummer ist [numéro]");
+    expect(s("plus two five zero double seven eight one two three", "en")).toBe("[numéro]");
+    expect(s("We were two or three people, maybe four")).toBe("We were two or three people, maybe four");
+    expect(s("the visit lasted three and a half hours")).toBe("the visit lasted three and a half hours");
+    expect(s("éramos cuatro o cinco y pagamos diez mil", "es")).toBe("éramos cuatro o cinco y pagamos diez mil");
   });
   it("retire numéros de téléphone, e-mails écrits ou dictés, pseudonymes", () => {
     const r = scrubPii("Call me on +250 788 123 456 or write to anna.smith@mail.com, insta @anna_travels", "en");
     expect(r.text).toBe("Call me on [numéro] or write to [e-mail], insta [pseudo]");
     expect(r.removed).toEqual({ names: 0, phones: 1, emails: 1, handles: 1 });
-    expect(s("écrivez à marie point dupont at gmail dot com", "fr")).toBe("écrivez à marie point [e-mail]");
+    expect(s("écrivez à marie point dupont at gmail dot com", "fr")).toBe("écrivez à [nom] point [e-mail]");
     expect(s("mon numéro 07 88 12 34 56", "fr")).toBe("mon numéro [numéro]");
   });
   it("garde les petits nombres (durées, prix)", () => {

@@ -12,8 +12,8 @@ function Item({ c }: { c: ReviewChunk }) {
         {c.synthetic && <span class="badge synthetic">synthetic</span>}
       </div>
       {c.englishMT && c.englishMT.trim() !== c.text.trim() && (
-        <div style={{ marginTop: "0.3rem", fontSize: "0.88rem" }}>
-          <span class="badge mt">machine translation, to be checked</span> <span class="muted">English, whole message (Whisper):</span> {c.englishMT}
+        <div style={{ marginTop: "0.3rem", fontSize: "0.88rem" }} data-testid="review-mt">
+          <span class="badge mt">machine translation, to be checked</span> <span class="muted">English of this part of the voice note (Whisper):</span> {c.englishMT}
         </div>
       )}
     </li>

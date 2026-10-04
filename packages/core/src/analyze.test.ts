@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyzeMessage, isPhantomTranscript, mentionsGuide, type AnalyzeDeps } from "./analyze.ts";
+import { analyzeMessage, chunkSegments, isPhantomTranscript, mentionsGuide, type AnalyzeDeps } from "./analyze.ts";
 import { analyzeAudioMessage } from "./audio.ts";
 import { makeConfig } from "./config.ts";
 import { createMatcher } from "./matcher.ts";
@@ -212,6 +212,54 @@ describe("storage : seulement ce que SPEC 6 autorise", () => {
     const r = toReviewChunks(allReview);
     expect(r[0]!.englishMT).toMatch(/^The path was not too long/);
     expect(r[0]!.englishMT).not.toMatch(/Anna|7700/);
+  });
+
+  it("message mixte : la traduction du SEGMENT d'un morceau à relire est stockée, jamais celle d'un morceau compté", async () => {
+    const segs = [
+      { start: 0, end: 2.4, text: "Die Mahlzeit war lecker.", english: "The meal was delicious." },
+      { start: 2.4, end: 5, text: "Der Weg war nicht zu lang, sagt Thomas.", english: "The path was not too long, says Thomas." },
+    ];
+    const a = await analyzeMessage(
+      audio({ text: segs.map((sg) => sg.text).join(" "), language: "de", segments: segs, englishTranslation: segs.map((sg) => sg.english).join(" ") }),
+      await deps(),
+    );
+    expect(a.chunks.map((c) => c.status)).toEqual(["matched", "not_sure"]);
+    const review = toReviewChunks(a);
+    expect(review).toHaveLength(1);
+    expect(review[0]!.text).toBe("Der Weg war nicht zu lang, sagt [nom].");
+    expect(review[0]!.englishMT).toBe("The path was not too long, says [nom].");
+    expect(JSON.stringify(review)).not.toMatch(/meal|Mahlzeit|Thomas/);
+  });
+
+  it("segment qui contient aussi un morceau compté : pas de traduction pour le morceau à relire", async () => {
+    const segs = [{ start: 0, end: 5, text: "Die Mahlzeit war lecker. Der Weg war nicht zu lang.", english: "The meal was delicious. The path was not too long." }];
+    const a = await analyzeMessage(audio({ text: segs[0]!.text, language: "de", segments: segs }), await deps());
+    expect(a.chunks.map((c) => c.status)).toEqual(["matched", "not_sure"]);
+    expect(toReviewChunks(a)[0]!.englishMT).toBeUndefined();
+  });
+
+  it("segment sans traduction isolable (undefined) : pas de traduction pour son morceau", async () => {
+    const segs = [
+      { start: 0, end: 2.4, text: "Die Mahlzeit war lecker.", english: "The meal was delicious." },
+      { start: 2.4, end: 5, text: "Der Weg war nicht zu lang." },
+    ];
+    const a = await analyzeMessage(audio({ text: segs.map((sg) => sg.text).join(" "), language: "de", segments: segs }), await deps());
+    expect(a.chunks.map((c) => c.status)).toEqual(["matched", "not_sure"]);
+    expect(toReviewChunks(a)[0]!.englishMT).toBeUndefined();
+  });
+
+  it("chunkSegments : alignement des morceaux nettoyés sur les segments bruts", () => {
+    const segs = [
+      { start: 0, end: 2, text: "My name is Anna Smith." },
+      { start: 2, end: 4, text: "The meal was great, but" },
+      { start: 4, end: 6, text: "the walk was long." },
+    ];
+    expect(chunkSegments(segs, "My name is [nom]. The meal was great, but the walk was long.", ["My name is [nom].", "The meal was great,", "but the walk was long."])).toEqual([[0], [1], [1, 2]]);
+  });
+
+  it("message écrit : aucune traduction anglaise", async () => {
+    const a = await analyzeMessage(text("Der Weg war nicht zu lang.", "de"), await deps());
+    expect(toReviewChunks(a).every((r) => r.englishMT === undefined)).toBe(true);
   });
 
   it("l'embedding du message est retiré de la fiche après la fenêtre des doublons", async () => {

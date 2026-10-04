@@ -46,6 +46,8 @@ export interface InitInfo {
 export interface Timings {
   decodeMs?: number;
   transcribeMs?: number;
+  /** Traduction anglaise des segments à relire (Whisper), après l'analyse. */
+  translateMs?: number;
   analyzeMs: number;
   totalMs: number;
 }
@@ -57,9 +59,14 @@ export type WorkerRequest =
   /** Étape 2 : modèle de similarité seul, sur l'entrée produite par transcribeAudio. */
   | { kind: "analyzeInput"; reqId: number; input: MessageInput; knownMessages: KnownMessage[] }
   | { kind: "analyzeText"; reqId: number; id: string; receivedAt: string; text: string; knownMessages: KnownMessage[] }
-  | { kind: "embed"; reqId: number; texts: string[] };
+  | { kind: "embed"; reqId: number; texts: string[] }
+  /**
+   * Étape 3 : Whisper traduit les seuls segments à relire (aucun morceau compté), chacun seul ; l'audio (copie
+   * gardée en mémoire depuis l'étape 1, jamais stockée) est remis à zéro dans le worker.
+   */
+  | { kind: "translateSegments"; reqId: number; audio: Float32Array; segments: { start: number; end: number }[]; language: string };
 
 export type WorkerEvent =
   | { kind: "progress"; stage: Stage; loaded: number; total: number; file?: string }
-  | { kind: "result"; reqId: number; analysis?: MessageAnalysis; input?: MessageInput; info?: InitInfo; timings?: Timings; vectors?: Float32Array[] }
+  | { kind: "result"; reqId: number; analysis?: MessageAnalysis; input?: MessageInput; info?: InitInfo; timings?: Timings; vectors?: Float32Array[]; english?: string[] }
   | { kind: "error"; reqId: number; message: string };

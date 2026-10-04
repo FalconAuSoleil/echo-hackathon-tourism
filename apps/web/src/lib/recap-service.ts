@@ -5,6 +5,7 @@ import {
   clusterOffList,
   recapRwLines,
   recurringUnknownVisitors,
+  reviewChunkCandidates,
   splitSms,
   unknownTopicItems,
   type AnalysisConfig,
@@ -42,13 +43,10 @@ export function analysisToMonthMessage(a: MessageAnalysis): MonthMessage {
 
 /**
  * Morceaux candidats au signal « sujet inconnu » à partir des morceaux stockés (liste « À faire lire ») :
- * même règle que `unknownTopicItems` du cœur (hors liste, plus « pas sûr » sous le seuil si la config le dit ;
- * jamais ceux mis en « pas sûr » par une négation ou un message entier peu fiable).
+ * règle du cœur (`reviewChunkCandidates`). Seuls ceux qui ont encore leur embedding (mois non fermé).
  */
 export function reviewChunksToItems(chunks: readonly ReviewChunk[], config: Pick<AnalysisConfig, "unknownTopicSources">): OffListItem[] {
-  return chunks
-    .filter((c) => c.embedding && (c.status === "off_list" || (config.unknownTopicSources === "off_list_and_unsure" && c.status === "not_sure" && c.reason === "below_threshold")))
-    .map((c) => ({ chunkId: c.id, visitorKey: c.messageId, month: c.month, text: c.text, embedding: c.embedding! }));
+  return reviewChunkCandidates(chunks, config);
 }
 
 export interface MonthReport {
@@ -66,7 +64,14 @@ export function monthReport(
   catalog: Catalog,
   config: AnalysisConfig,
 ): MonthReport {
-  const clusters = clusterOffList(items.filter((i) => i.month === month), config);
+  return monthReportFromClusters(month, messages, clusterOffList(items.filter((i) => i.month === month), config), catalog);
+}
+
+/**
+ * Récap d'un mois à partir de groupes déjà calculés : pour l'app hôte, `monthClustersFromReview` du cœur (groupes
+ * écrits à la fermeture du mois, dont les embeddings ont été retirés, plus ceux du mois en cours).
+ */
+export function monthReportFromClusters(month: string, messages: readonly MonthMessage[], clusters: OffListCluster[], catalog: Catalog): MonthReport {
   const recurring = clusters.filter((c) => c.recurring);
   const recap = buildMonthlyRecap({ month, messages: [...messages], recurringUnknownVisitors: recurringUnknownVisitors(clusters) }, catalog);
   return { recap, clusters, recurring, sms: smsParts(recap) };

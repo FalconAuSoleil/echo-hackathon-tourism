@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { DEFAULT_CONFIG } from "@echo/core";
+import { DEFAULT_CONFIG, monthClustersFromReview } from "@echo/core";
 import { findingLabel, langName, type StaticData } from "../lib/assets.ts";
 import { addFiles, addText, db, host, processQueue, refresh, removeQueued, updateSettings } from "../lib/host-store.ts";
 import { HostLabel, Icon } from "../ui/HostLabel.tsx";
-import { currentMonth, monthReport, reviewChunksToItems, toMonthMessage } from "../lib/recap-service.ts";
+import { currentMonth, monthReportFromClusters, toMonthMessage } from "../lib/recap-service.ts";
 import { verifyPin } from "../lib/pin.ts";
 import { ModelBox } from "../ui/ModelBox.tsx";
 import { MessageResult, StatusBadge } from "../ui/MessageResult.tsx";
@@ -46,7 +46,7 @@ export function Host({ data }: { data: StaticData }) {
   const [month, setMonth] = useState(currentMonth());
   const [glosses, setGlosses] = useState(false);
   const report = useMemo(
-    () => monthReport(month, st.messages.map(toMonthMessage), reviewChunksToItems(st.review, DEFAULT_CONFIG), data.catalog, DEFAULT_CONFIG),
+    () => monthReportFromClusters(month, st.messages.map(toMonthMessage), monthClustersFromReview(month, st.review, DEFAULT_CONFIG), data.catalog),
     [st.messages, st.review, month],
   );
   const monthMsgs = st.messages.filter((m) => m.month === month);
@@ -156,6 +156,7 @@ export function Host({ data }: { data: StaticData }) {
           disabled={!st.queue.length || !!st.processing || progress.stage === "error"}
           onClick={() => void processQueue()}
           data-testid="host-process"
+          data-busy={st.processing ? "1" : "0"}
         >
           {st.processing ? (
             (st.processingLabel ?? "Analysing on this device…")

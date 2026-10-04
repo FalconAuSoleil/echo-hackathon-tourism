@@ -1,0 +1,320 @@
+{
+  "synthetic": true,
+  "sentences": 52,
+  "givenNames": 6154,
+  "note": "Synthetic sentences written for this check (eval/data/pii-names.jsonl); each also lowercased (Whisper-style transcript without capitals). Same scrubPii as the app.",
+  "byVariant": {
+    "original": {
+      "names": 58,
+      "namesRemoved": 52,
+      "phones": 4,
+      "phonesRemoved": 4,
+      "otherWords": 364,
+      "otherRemoved": 1,
+      "nameRecall": 0.897,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0.0027
+    },
+    "lowercase": {
+      "names": 58,
+      "namesRemoved": 47,
+      "phones": 4,
+      "phonesRemoved": 4,
+      "otherWords": 364,
+      "otherRemoved": 0,
+      "nameRecall": 0.81,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    }
+  },
+  "byLang": {
+    "en original": {
+      "names": 17,
+      "namesRemoved": 15,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 130,
+      "otherRemoved": 1,
+      "nameRecall": 0.882,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0.0077
+    },
+    "fr original": {
+      "names": 15,
+      "namesRemoved": 14,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 92,
+      "otherRemoved": 0,
+      "nameRecall": 0.933,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "de original": {
+      "names": 15,
+      "namesRemoved": 13,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 75,
+      "otherRemoved": 0,
+      "nameRecall": 0.867,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "es original": {
+      "names": 11,
+      "namesRemoved": 10,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 67,
+      "otherRemoved": 0,
+      "nameRecall": 0.909,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "en lowercase": {
+      "names": 17,
+      "namesRemoved": 14,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 130,
+      "otherRemoved": 0,
+      "nameRecall": 0.824,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "fr lowercase": {
+      "names": 15,
+      "namesRemoved": 12,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 92,
+      "otherRemoved": 0,
+      "nameRecall": 0.8,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "de lowercase": {
+      "names": 15,
+      "namesRemoved": 13,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 75,
+      "otherRemoved": 0,
+      "nameRecall": 0.867,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    },
+    "es lowercase": {
+      "names": 11,
+      "namesRemoved": 8,
+      "phones": 1,
+      "phonesRemoved": 1,
+      "otherWords": 67,
+      "otherRemoved": 0,
+      "nameRecall": 0.727,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    }
+  },
+  "byPosition": {
+    "sentence-initial": {
+      "names": 44,
+      "namesRemoved": 31,
+      "phones": 0,
+      "phonesRemoved": 0,
+      "otherWords": 268,
+      "otherRemoved": 0,
+      "nameRecall": 0.705,
+      "phoneRecall": null,
+      "falseRemovalRate": 0
+    },
+    "mid-sentence": {
+      "names": 26,
+      "namesRemoved": 25,
+      "phones": 0,
+      "phonesRemoved": 0,
+      "otherWords": 150,
+      "otherRemoved": 0,
+      "nameRecall": 0.962,
+      "phoneRecall": null,
+      "falseRemovalRate": 0
+    },
+    "after": {
+      "names": 32,
+      "namesRemoved": 30,
+      "phones": 0,
+      "phonesRemoved": 0,
+      "otherWords": 220,
+      "otherRemoved": 1,
+      "nameRecall": 0.938,
+      "phoneRecall": null,
+      "falseRemovalRate": 0.0045
+    },
+    "end": {
+      "names": 14,
+      "namesRemoved": 13,
+      "phones": 0,
+      "phonesRemoved": 0,
+      "otherWords": 54,
+      "otherRemoved": 0,
+      "nameRecall": 0.929,
+      "phoneRecall": null,
+      "falseRemovalRate": 0
+    },
+    "spoken": {
+      "names": 0,
+      "namesRemoved": 0,
+      "phones": 8,
+      "phonesRemoved": 8,
+      "otherWords": 36,
+      "otherRemoved": 0,
+      "nameRecall": null,
+      "phoneRecall": 1,
+      "falseRemovalRate": 0
+    }
+  },
+  "misses": [
+    {
+      "id": "en-10",
+      "variant": "original",
+      "kind": "name",
+      "value": "Grace",
+      "output": "Grace showed us how they dry the beans."
+    },
+    {
+      "id": "en-14",
+      "variant": "original",
+      "kind": "name",
+      "value": "Noor",
+      "output": "Noor welcomed us like family."
+    },
+    {
+      "id": "fr-08",
+      "variant": "original",
+      "kind": "name",
+      "value": "Claire",
+      "output": "Claire nous a expliqué le séchage, c'était passionnant."
+    },
+    {
+      "id": "de-11",
+      "variant": "original",
+      "kind": "name",
+      "value": "Ernst",
+      "output": "Ernst und Rose kommen bestimmt wieder."
+    },
+    {
+      "id": "de-11",
+      "variant": "original",
+      "kind": "name",
+      "value": "Rose",
+      "output": "Ernst und Rose kommen bestimmt wieder."
+    },
+    {
+      "id": "es-08",
+      "variant": "original",
+      "kind": "name",
+      "value": "Pilar",
+      "output": "Pilar tuvo frío durante la caminata."
+    },
+    {
+      "id": "en-09",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Kwame",
+      "output": "honestly the best part was tasting the coffee with kwame and [nom]."
+    },
+    {
+      "id": "en-10",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Grace",
+      "output": "grace showed us how they dry the beans."
+    },
+    {
+      "id": "en-14",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Noor",
+      "output": "noor welcomed us like family."
+    },
+    {
+      "id": "fr-02",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Aimable",
+      "output": "notre guide aimable parlait trop vite pour nous."
+    },
+    {
+      "id": "fr-08",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Claire",
+      "output": "claire nous a expliqué le séchage, c'était passionnant."
+    },
+    {
+      "id": "de-11",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Ernst",
+      "output": "ernst und rose kommen bestimmt wieder."
+    },
+    {
+      "id": "de-11",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Rose",
+      "output": "ernst und rose kommen bestimmt wieder."
+    },
+    {
+      "id": "es-04",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Lucía",
+      "output": "fuimos con [nom] y lucía y nos encantó el café."
+    },
+    {
+      "id": "es-08",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Pilar",
+      "output": "pilar tuvo frío durante la caminata."
+    },
+    {
+      "id": "fr-13",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Pierre",
+      "output": "pierre et [nom] ont trouvé que l'attente au début était trop longue."
+    },
+    {
+      "id": "es-11",
+      "variant": "lowercase",
+      "kind": "name",
+      "value": "Dolores",
+      "output": "nuestra amiga dolores dice que fue el mejor día del viaje."
+    }
+  ],
+  "falseRemovals": [
+    {
+      "id": "en-13",
+      "variant": "original",
+      "words": [
+        "leeds"
+      ],
+      "output": "We are [nom] and [nom] from [nom], it was a lovely day."
+    }
+  ],
+  "corpus": {
+    "texts": 1006,
+    "words": 9584,
+    "removedWords": 2,
+    "falseRemovalRate": 0.0002,
+    "textsTouched": 2,
+    "removed": {
+      "lyon": 1,
+      "valencia": 1
+    },
+    "note": "feedback.jsonl (250) + catalog examples; 'Noor' (the fictional farmer) is the only person name, every other removed word counts as a false removal."
+  }
+}

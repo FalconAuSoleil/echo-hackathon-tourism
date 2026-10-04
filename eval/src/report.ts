@@ -78,6 +78,7 @@ export function runReport(log: (s: string) => void = console.log) {
   const l2 = load("level2.json");
   const l3 = load("level3.json");
   const perf = load("perf.json");
+  const pii = load("pii.json");
   const out: string[] = [];
   const w = (s = "") => out.push(s);
 
@@ -274,6 +275,29 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
   }
 
+  // ---------- Level 2 : nettoyage des données personnelles ----------
+  if (pii) {
+    const o = pii.byVariant.original;
+    const lo = pii.byVariant.lowercase;
+    w("### Personal data scrubbing: names and spoken phone numbers (SYNTHETIC sentences)");
+    w();
+    w(`\`scrubPii\` (the shipped heuristic scrubber, no model) on ${pii.sentences} synthetic sentences written for this check (eval/data/pii-names.jsonl): first names at the start of a sentence, in the middle, after a role or an introduction (\"our guide was called …\", \"hieß …\"), at the end, compound names, Rwandan names, names that are also common words (Grace, Claire, Pierre, Pilar, Ernst, Rose, Dolores), and phone numbers spoken as words. Each sentence is also run lowercased, as a transcript without capitals. A name counts as removed when none of its words is left.`);
+    w();
+    w(table(["", "Original case", "Lowercased"], [
+      ["Names removed (recall)", `**${pct(o.nameRecall, 0)}** (${o.namesRemoved}/${o.names})`, `**${pct(lo.nameRecall, 0)}** (${lo.namesRemoved}/${lo.names})`],
+      ["Spoken phone numbers removed", `${o.phonesRemoved}/${o.phones}`, `${lo.phonesRemoved}/${lo.phones}`],
+      ["Other words removed by mistake", `${pct(o.falseRemovalRate, 1)} (${o.otherRemoved}/${o.otherWords})`, `${pct(lo.falseRemovalRate, 1)} (${lo.otherRemoved}/${lo.otherWords})`],
+    ]));
+    w();
+    w(table(["Language", "Recall, original case", "Recall, lowercased"], ["en", "fr", "de", "es"].map((l) => [l, `${pct(pii.byLang[`${l} original`].nameRecall, 0)} (${pii.byLang[`${l} original`].namesRemoved}/${pii.byLang[`${l} original`].names})`, `${pct(pii.byLang[`${l} lowercase`].nameRecall, 0)} (${pii.byLang[`${l} lowercase`].namesRemoved}/${pii.byLang[`${l} lowercase`].names})`])));
+    w();
+    const missed = [...new Set<string>(pii.misses.filter((m: J) => m.kind === "name").map((m: J) => `${m.value}${m.variant === "lowercase" ? " (lowercased)" : ""}`))];
+    w(`Names kept: ${missed.join(", ")}. They are names that are also common words (kept on purpose unless next to another name or \"and I\"), names absent from the first-name list (Noor, Kwame) when they start a sentence or are lowercased, and lowercased names whose lowercase form is a word.`);
+    w(`On the whole written corpus (${pii.corpus.texts} texts: the 250 feedbacks and the catalog examples, where the fictional farmer \"Noor\" is the only person name), ${pii.corpus.removedWords} of ${pii.corpus.words} words were removed by mistake (${Object.keys(pii.corpus.removed).join(", ")}: place names in the middle of a sentence).`);
+    w(`The first-name list (${pii.givenNames} names: US Census 1990, INSEE, Wikidata incl. Rwandan and Burundian names; docs/DATASHEET.md) was widened once after the first run of this check (Rwandan names from Wikidata person labels) and \"Liebe Grüße\" was fixed: these sentences are not a blind test set, so read the recall as optimistic. Real names said by real visitors, through Whisper, are not measured.`);
+    w();
+  }
+
   // ---------- Level 3 ----------
   if (l3) {
     w("## Level 3 — end to end on audio (SYNTHETIC voices + real outdoor noise)");
@@ -389,6 +413,7 @@ export function runReport(log: (s: string) => void = console.log) {
   w("- The held-out half has 125 feedbacks; intervals are wide (see brackets). Many choices (classifier, threshold, floor) were made on the calibration half, but the unknown-topic rule and cluster threshold were adjusted after seeing the only recurring-topic example (picking).");
   w("- The catalog examples and the corpus were written by the same team; they are checked for near-duplicates but share a style.");
   w("- Mozilla Common Voice was not used: it moved to Mozilla Data Collective (account required) in Oct 2025 (docs/DATASHEET.md). FLEURS accents are read speech.");
+  w("- The personal-data check uses 52 synthetic sentences written by the team, not names spoken by real visitors through Whisper; the scrubber is a heuristic and misses names (see the recall above).");
   w("- No Kinyarwanda is evaluated here: the host side only plays frozen catalog sentences (catalog back-translation scores are in the catalog).");
   w();
 

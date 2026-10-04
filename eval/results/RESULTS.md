@@ -246,6 +246,27 @@ Rule: exact fingerprint of the normalised scrubbed text, or whole-message embedd
 A forwarded voice note is bit-identical, so its transcript is identical: that case is the "exact" row. "One word added" is
 deliberately ambiguous (a resend after an edit, or a second visitor): about 4 in 5 are merged.
 
+### Personal data scrubbing: names and spoken phone numbers (SYNTHETIC sentences)
+
+`scrubPii` (the shipped heuristic scrubber, no model) on 52 synthetic sentences written for this check (eval/data/pii-names.jsonl): first names at the start of a sentence, in the middle, after a role or an introduction ("our guide was called …", "hieß …"), at the end, compound names, Rwandan names, names that are also common words (Grace, Claire, Pierre, Pilar, Ernst, Rose, Dolores), and phone numbers spoken as words. Each sentence is also run lowercased, as a transcript without capitals. A name counts as removed when none of its words is left.
+
+|  | Original case | Lowercased |
+|---|---:|---:|
+| Names removed (recall) | **90 %** (52/58) | **81 %** (47/58) |
+| Spoken phone numbers removed | 4/4 | 4/4 |
+| Other words removed by mistake | 0.3 % (1/364) | 0.0 % (0/364) |
+
+| Language | Recall, original case | Recall, lowercased |
+|---|---:|---:|
+| en | 88 % (15/17) | 82 % (14/17) |
+| fr | 93 % (14/15) | 80 % (12/15) |
+| de | 87 % (13/15) | 87 % (13/15) |
+| es | 91 % (10/11) | 73 % (8/11) |
+
+Names kept: Grace, Noor, Claire, Ernst, Rose, Pilar, Kwame (lowercased), Grace (lowercased), Noor (lowercased), Aimable (lowercased), Claire (lowercased), Ernst (lowercased), Rose (lowercased), Lucía (lowercased), Pilar (lowercased), Pierre (lowercased), Dolores (lowercased). They are names that are also common words (kept on purpose unless next to another name or "and I"), names absent from the first-name list (Noor, Kwame) when they start a sentence or are lowercased, and lowercased names whose lowercase form is a word.
+On the whole written corpus (1006 texts: the 250 feedbacks and the catalog examples, where the fictional farmer "Noor" is the only person name), 2 of 9584 words were removed by mistake (lyon, valencia: place names in the middle of a sentence).
+The first-name list (6154 names: US Census 1990, INSEE, Wikidata incl. Rwandan and Burundian names; docs/DATASHEET.md) was widened once after the first run of this check (Rwandan names from Wikidata person labels) and "Liebe Grüße" was fixed: these sentences are not a blind test set, so read the recall as optimistic. Real names said by real visitors, through Whisper, are not measured.
+
 ## Level 3 — end to end on audio (SYNTHETIC voices + real outdoor noise)
 
 80 feedbacks from the corpus (en 20, fr 20, de 20, es 20) spoken by Piper TTS voices (13 voices, varied speakers and speed), clean and mixed with ESC-50 outdoor noise at 20, 10 and 5 dB SNR (eval/data/README.md). Audio → `analyzeAudioMessage` (audio checks, Whisper with automatic language detection, audio wiped, analysis) with the calibrated configuration. English translation: disabled in this run (only used for the 'to be read by a person' list, not for classification). WER references contain the corpus' deliberate typos.
@@ -437,7 +458,7 @@ seeing the numbers; the table lets the reader apply another one.
 
 ## Performance
 
-Machine: Intel(R) Core(TM) Ultra 5 226V, 8 logical CPUs, Linux WSL2, Node v24.19.0, onnxruntime-node (transformers.js 4). Message: 30.0 s French message made of concatenated SYNTHETIC Piper clips (worst case: French triggers the second Whisper pass for the English machine translation of the review list).
+Machine: Intel(R) Core(TM) Ultra 5 226V, 8 logical CPUs, Linux WSL2, Node v24.19.0, onnxruntime-node (transformers.js 4). Message: 30.0 s French message made of concatenated SYNTHETIC Piper clips (not English, so with the English translation it adds a timestamped Whisper pass and, after the analysis, the translation of each segment that holds a not-sure or off-list chunk and no counted chunk, cut out and translated alone; several of its segments are unclear, so it is close to a worst case).
 
 | Model | Files (MB) | Total (MB) |
 |---|---:|---:|
@@ -451,15 +472,15 @@ App download for the shipped pair: **215.1 MB** (onnx-community/whisper-base + X
 
 | Whisper | onnxruntime threads | Load models (s) | 1st run: embed examples + train (s) | 30 s message with EN translation (s) | without translation (s) | RSS after loading (MB) | Peak RSS (MB) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| whisper-tiny | all | 1.3 | 5.0 | 5.8 | 3.3 | 812 | 1053 |
-| whisper-tiny | 2 | 1.0 | 3.9 | 3.6 | 2.3 | 814 | 1060 |
-| whisper-tiny | 1 | 1.0 | 4.3 | 3.9 | 2.4 | 813 | 1052 |
-| whisper-base | all | 1.4 | 5.3 | 5.2 | 4.7 | 883 | 1225 |
-| whisper-base | 2 | 1.2 | 4.1 | 3.6 | 2.9 | 875 | 1239 |
-| whisper-base | 1 | 1.1 | 4.4 | 4.3 | 3.3 | 885 | 1233 |
-| whisper-small | all | 2.1 | 5.2 | 13.5 | 8.1 | 1144 | 1845 |
-| whisper-small | 2 | 1.7 | 4.2 | 10.0 | 6.2 | 1153 | 1873 |
-| whisper-small | 1 | 1.8 | 4.7 | 13.3 | 8.0 | 1152 | 1870 |
+| whisper-tiny | all | 1.5 | 5.4 | 9.8 | 3.3 | 812 | 1063 |
+| whisper-tiny | 2 | 1.0 | 4.0 | 6.6 | 2.0 | 816 | 1057 |
+| whisper-tiny | 1 | 1.0 | 4.3 | 8.2 | 2.5 | 813 | 1056 |
+| whisper-base | all | 1.4 | 5.1 | 13.0 | 4.1 | 883 | 1244 |
+| whisper-base | 2 | 1.3 | 4.0 | 8.3 | 2.8 | 873 | 1255 |
+| whisper-base | 1 | 1.1 | 4.4 | 10.8 | 3.2 | 876 | 1246 |
+| whisper-small | all | 2.0 | 5.1 | 22.3 | 7.8 | 1137 | 1879 |
+| whisper-small | 2 | 1.7 | 4.3 | 18.8 | 5.7 | 1158 | 1893 |
+| whisper-small | 1 | 1.7 | 4.8 | 26.3 | 7.9 | 1152 | 1891 |
 
 Memory is the whole Node process (onnxruntime-node native libraries alone take ~170 MB, each model is held both as a file
 buffer and as an onnxruntime session, plus the decoding arena). It is an upper bound for the app's own share; a browser tab
@@ -475,9 +496,9 @@ core and Cortex-A55/A75-class entry phones are in that range; not measured here)
 WebAssembly threads with cross-origin isolation), so a phone using 2–4 threads would be faster. Peak memory is the native
 process here; a browser tab adds its own overhead.
 
-- whisper-tiny: **~26–68 s** per 30 s message (transcription + analysis), **~42–112 s** with the English translation for the review list (native 1 thread here: 2.4 s / 3.9 s; WASM ×3.55).
-- whisper-base: **~33–87 s** per 30 s message (transcription + analysis), **~43–114 s** with the English translation for the review list (native 1 thread here: 3.3 s / 4.3 s; WASM ×3.3).
-- whisper-small: **~83–222 s** per 30 s message (transcription + analysis), **~138–369 s** with the English translation for the review list (native 1 thread here: 8 s / 13.3 s; WASM ×3.47).
+- whisper-tiny: **~26–70 s** per 30 s message (transcription + analysis), **~88–234 s** with the English translation for the review list (native 1 thread here: 2.5 s / 8.2 s; WASM ×3.55).
+- whisper-base: **~31–82 s** per 30 s message (transcription + analysis), **~102–273 s** with the English translation for the review list (native 1 thread here: 3.2 s / 10.8 s; WASM ×3.16).
+- whisper-small: **~84–224 s** per 30 s message (transcription + analysis), **~279–744 s** with the English translation for the review list (native 1 thread here: 7.9 s / 26.3 s; WASM ×3.54).
 
 This is an estimate. Messages are processed in a queue in the background (SPEC 4.2), so minutes per message is usable for 6–7 messages a month, but it must be confirmed on a real phone.
 
@@ -489,4 +510,5 @@ The real measurement on a phone is a manual procedure: docs/MANUAL_TESTS.md ("Pe
 - The held-out half has 125 feedbacks; intervals are wide (see brackets). Many choices (classifier, threshold, floor) were made on the calibration half, but the unknown-topic rule and cluster threshold were adjusted after seeing the only recurring-topic example (picking).
 - The catalog examples and the corpus were written by the same team; they are checked for near-duplicates but share a style.
 - Mozilla Common Voice was not used: it moved to Mozilla Data Collective (account required) in Oct 2025 (docs/DATASHEET.md). FLEURS accents are read speech.
+- The personal-data check uses 52 synthetic sentences written by the team, not names spoken by real visitors through Whisper; the scrubber is a heuristic and misses names (see the recall above).
 - No Kinyarwanda is evaluated here: the host side only plays frozen catalog sentences (catalog back-translation scores are in the catalog).

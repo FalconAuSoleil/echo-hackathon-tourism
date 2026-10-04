@@ -66,6 +66,11 @@ function ChunkItem({ c, catalog }: { c: ChunkResult; catalog: Catalog }) {
           </span>
         )}
       </div>
+      {c.englishMT && c.englishMT.trim() !== c.text.trim() && (
+        <div style={{ marginTop: "0.3rem", fontSize: "0.88rem" }} data-testid="chunk-mt">
+          <span class="badge mt">machine translation, to be checked</span> <span class="muted">English of this part of the voice note (Whisper):</span> {c.englishMT}
+        </div>
+      )}
     </li>
   );
 }
@@ -116,7 +121,7 @@ export function MessageResult({
           <>
             <dt>On-device time</dt>
             <dd>
-              {(timings.totalMs / 1000).toFixed(1)} s{timings.transcribeMs ? ` (Whisper ${(timings.transcribeMs / 1000).toFixed(1)} s)` : ""}
+              {(timings.totalMs / 1000).toFixed(1)} s{timings.transcribeMs ? ` (Whisper ${(timings.transcribeMs / 1000).toFixed(1)} s${timings.translateMs ? `, English of the unclear parts ${(timings.translateMs / 1000).toFixed(1)} s` : ""})` : ""}
             </dd>
           </>
         )}
@@ -137,7 +142,7 @@ export function MessageResult({
       {a.englishTranslation && a.englishTranslation.trim() !== a.scrubbedText.trim() && (
         <p data-testid="english-mt">
           <span class="badge mt">machine translation, to be checked</span>{" "}
-          <span class="muted">English, whole message (Whisper), shown once, stored only if no chunk was counted: </span>
+          <span class="muted">English, whole message (Whisper), shown once, never stored: </span>
           {a.englishTranslation}
         </p>
       )}

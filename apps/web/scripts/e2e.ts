@@ -7,7 +7,7 @@
 //   5. captures d'écran dans docs/screenshots/, rapport JSON dans apps/web/test-results/e2e-report.json.
 // Usage : pnpm --filter @echo/web build && pnpm --filter @echo/web e2e   (E2E_URL=… pour une instance déjà servie)
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, type Page } from "playwright";
@@ -24,6 +24,37 @@ const BASE = process.env.E2E_URL ?? `http://localhost:${PORT}`;
 const MODEL_TIMEOUT = 15 * 60_000;
 const failures: string[] = [];
 const report: Record<string, unknown> = { base: BASE, startedAt: new Date().toISOString() };
+
+/** Deux WAV PCM 16 bits mono 16 kHz mis bout à bout avec 0,6 s de silence (message vocal « mixte »). */
+function concatWav(a: string, b: string, out: string): string {
+  const pcm = (f: string) => {
+    const buf = readFileSync(f);
+    let off = 12;
+    while (off + 8 <= buf.length) {
+      const id = buf.toString("ascii", off, off + 4);
+      const size = buf.readUInt32LE(off + 4);
+      if (id === "data") return buf.subarray(off + 8, off + 8 + size);
+      off += 8 + size + (size % 2);
+    }
+    throw new Error(`no data chunk in ${f}`);
+  };
+  const data = Buffer.concat([pcm(a), Buffer.alloc(16000 * 2 * 0.6), pcm(b)]);
+  const h = Buffer.alloc(44);
+  h.write("RIFF", 0, "ascii");
+  h.writeUInt32LE(36 + data.length, 4);
+  h.write("WAVEfmt ", 8, "ascii");
+  h.writeUInt32LE(16, 16);
+  h.writeUInt16LE(1, 20); // PCM
+  h.writeUInt16LE(1, 22); // mono
+  h.writeUInt32LE(16000, 24);
+  h.writeUInt32LE(32000, 28);
+  h.writeUInt16LE(2, 32);
+  h.writeUInt16LE(16, 34);
+  h.write("data", 36, "ascii");
+  h.writeUInt32LE(data.length, 40);
+  writeFileSync(out, Buffer.concat([h, data]));
+  return out;
+}
 
 function check(cond: boolean, msg: string): void {
   console.log(`${cond ? "  ok  " : "  FAIL"} ${msg}`);
@@ -189,7 +220,7 @@ try {
   check(stored.messages.length === 2 && stored.queue.length === 0, "2 message records stored, queue empty");
   check(!/John|Smith|7700|900123/.test(storedJson), "no name or phone number in IndexedDB");
   check(!storedJson.includes("tasting was wonderful"), "full text not stored (only not-sure / off-list chunks)");
-  // Traduction anglaise Whisper : jamais stockée pour un message dont un morceau a été compté (elle contiendrait ce morceau).
+  // Traduction anglaise Whisper : jamais stockée pour un segment audio qui contient un morceau compté.
   type Row = { id: string; messageId?: string; lang?: string; findings?: unknown[]; englishMT?: string };
   const msgs = stored.messages as Row[];
   const reviewRows = stored.review as Row[];
@@ -197,9 +228,9 @@ try {
   const mtOfCounted = reviewRows.filter((r) => r.englishMT && (msgs.find((m) => m.id === r.messageId)?.findings?.length ?? 0) > 0);
   report.deStored = { findings: de?.findings, reviewRows: reviewRows.filter((r) => r.messageId === de?.id).map(({ id, englishMT }) => ({ id, englishMT })) };
   check(!!de && (de.findings?.length ?? 0) > 0, `German sample stored with counted findings (${JSON.stringify(de?.findings)})`);
-  check(mtOfCounted.length === 0, "no stored englishMT for a message with a counted chunk (German sample: matched clauses not kept as text)");
-  const mtShown = await page.getByTestId("english-mt").count();
-  check(mtShown > 0, `English machine translation shown once in "Just analysed", labelled "to be checked" (${mtShown})`);
+  check(mtOfCounted.length === 0, "no stored englishMT for the German sample (every chunk counted: matched clauses not kept as text)");
+  const mtShown = (await page.getByTestId("english-mt").count()) + (await page.getByTestId("chunk-mt").count());
+  check(mtShown === 0, `no English made for the German sample: every chunk counted, nothing to read (${mtShown})`);
   const withEmbedding = (stored.messages as { embedding?: unknown }[]).filter((m) => m.embedding).length;
   check(withEmbedding === 2, "fresh messages keep their embedding (duplicate window: 7 days)");
   const hostSms = await page.locator("[data-testid=sms-part] a").first().getAttribute("href");
@@ -253,6 +284,44 @@ try {
   await page.goto(BASE + "/?memory=auto#/settings");
   await page.locator('input[name="mode"]').nth(1).check();
   await page.waitForTimeout(300);
+
+  // ---------- 3c. Liste « À faire lire » : nom en tête de phrase, traduction par segment ----------
+  console.log("3c. Review list: sentence-initial name scrubbed; English of the not-sure part of a mixed voice note");
+  const mixedWav = concatWav(join(WEB, "public/samples/fr-welcome-meal.wav"), join(WEB, "public/samples/fr-ambiguous.wav"), join(REPORT_DIR, "mixed-fr-welcome-ambiguous.wav"));
+  await page.goto(BASE + "/#/host");
+  await page.getByTestId("inbox").waitFor();
+  await page.getByTestId("host-text").fill("Eric was a bit hard to follow at times.");
+  await page.getByTestId("host-add-text").click();
+  await page.getByTestId("host-file").setInputFiles(mixedWav);
+  await page.waitForFunction(() => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("2 waiting"), null, { timeout: 10_000 });
+  await page.getByTestId("host-process").click();
+  // Fin du traitement, étape 3 comprise (anglais des segments à relire, après que la file est vide).
+  await page.waitForFunction(
+    () => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("0 waiting") && document.querySelector("[data-testid=host-process]")?.getAttribute("data-busy") === "0",
+    null,
+    { timeout: 10 * 60_000, polling: 1000 },
+  );
+  const stored3 = (await page.evaluate(`(async () => {
+    const db = await new Promise((res) => { const r = indexedDB.open("echo"); r.onsuccess = () => res(r.result); });
+    const all = (store) => new Promise((res) => { const r = db.transaction(store).objectStore(store).getAll(); r.onsuccess = () => res(r.result); });
+    return { messages: await all("messages"), review: await all("reviewChunks") };
+  })()`)) as { messages: Row[]; review: (Row & { text: string; status: string })[] };
+  const json3 = JSON.stringify(stored3, (k, v) => (k === "embedding" || k === "fingerprint" ? undefined : v));
+  const ericRow = stored3.review.find((r) => /hard to follow/.test(r.text));
+  report.sentenceInitialName = ericRow;
+  check(!!ericRow && (ericRow.status === "not_sure" || ericRow.status === "off_list"), `"Eric was a bit hard to follow" kept as a review chunk (${ericRow?.status}): ${ericRow?.text}`);
+  check(!/Eric/.test(json3), "sentence-initial name not stored anywhere in IndexedDB");
+  const frMixed = stored3.messages.find((m) => m.lang === "fr" && (m.findings?.length ?? 0) > 0 && stored3.review.some((r) => r.messageId === m.id));
+  const frRows = stored3.review.filter((r) => r.messageId === frMixed?.id);
+  report.mixedVoiceNote = { findings: frMixed?.findings, review: frRows.map(({ text, status, englishMT }) => ({ text, status, englishMT })) };
+  check(!!frMixed, `mixed French voice note: counted findings plus a review chunk (${JSON.stringify(frMixed?.findings)})`);
+  check(frRows.some((r) => r.status === "not_sure" && !!r.englishMT), `its not-sure chunk keeps the English of its own segment: "${frRows.find((r) => r.englishMT)?.englishMT}"`);
+  check(!frRows.some((r) => /welcome|meal|delicious|accueil|repas/i.test(`${r.text} ${r.englishMT ?? ""}`)), "no counted clause (welcome, meal) stored, in French or in English");
+  const chunkMt = await page.getByTestId("chunk-mt").allTextContents();
+  check(chunkMt.length === 1 && /machine translation, to be checked/.test(chunkMt[0]!), `"Just analysed" shows the English of the not-sure part only (${chunkMt.length})`);
+  const reviewMt = await page.getByTestId("review-mt").allTextContents();
+  check(reviewMt.some((t) => /machine translation, to be checked/.test(t)), `review list shows the English version, labelled "machine translation, to be checked" (${reviewMt.length})`);
+  await page.getByTestId("review-list").screenshot({ path: join(SHOTS, "16-review-list-english.png") });
 
   await page.goto(BASE + "/#/coop");
   await page.getByTestId("coop").waitFor();

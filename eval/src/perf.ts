@@ -152,7 +152,7 @@ export async function runPerf(opts: { sizes: string[]; log: (s: string) => void;
   }
   const out = {
     machine: { cpuModel, logicalCpus: ncpu, platform: "Linux WSL2, Node " + process.version + ", onnxruntime-node (transformers.js 4)" },
-    message: "30.0 s French message made of concatenated SYNTHETIC Piper clips (worst case: French triggers the second Whisper pass for the English machine translation of the review list)",
+    message: "30.0 s French message made of concatenated SYNTHETIC Piper clips (not English, so with the English translation it adds a timestamped Whisper pass and, after the analysis, the translation of each segment that holds a not-sure or off-list chunk and no counted chunk, cut out and translated alone; several of its segments are unclear, so it is close to a worst case)",
     modelSizes: sizes,
     runs,
     wasmOverhead: wasm,

@@ -1,6 +1,7 @@
 // Point d'entrée unique de l'évaluation (SPEC 9) : `pnpm eval`.
 //   pnpm eval                       # tout : niveaux 1, 2, 3, performances, puis RESULTS.md
 //   pnpm eval -- --level 2          # un seul niveau (répétable : --level 2 --level 3), aussi perf, report
+//   pnpm eval -- --level pii --level report   # contrôle du nettoyage des noms/numéros seul (sans modèle)
 //   pnpm eval -- --whisper tiny,base,small   --fleurs-limit 20   --quick
 // Mêmes modèles (@echo/models) et même code (@echo/core) que l'app. Les sorties brutes (transcriptions
 // en cache) vont dans eval/results/raw/ (git-ignoré) : relancer reprend là où l'on s'était arrêté.
@@ -34,6 +35,11 @@ if (levels.has("1"))
     limits: { small: Number(values["small-limit"] ?? values["fleurs-limit"] ?? 50) },
     log,
   });
+// Contrôle du nettoyage des données personnelles (niveau 2, rapide, sans modèle) : aussi seul avec --level pii.
+if (levels.has("2") || levels.has("pii")) {
+  const { runPii } = await import("./pii.ts");
+  runPii({ log });
+}
 if (levels.has("2")) {
   const { runLevel2 } = await import("./level2.ts");
   await runLevel2({ log, variants: values.quick ? ["similarity-minilm-max", "linear-minilm-l2=3e-4"] : undefined });

@@ -59,6 +59,28 @@ export interface ChunkResult {
   id: string;
   /** Embedding du morceau (regroupement hors liste). Absent si le message n'a pas été analysé. */
   embedding?: Float32Array;
+  /**
+   * Traduction anglaise Whisper du ou des segments audio qui contiennent ce morceau, nettoyée. Seulement pour un
+   * morceau « pas sûr » / « hors liste » dont les segments ne contiennent AUCUN morceau compté (sinon elle
+   * garderait en texte une proposition comptée, SPEC 6). Absente pour un message écrit (aucune traduction).
+   */
+  englishMT?: string;
+}
+
+/** Segment horodaté d'une transcription Whisper (secondes depuis le début de l'audio). */
+export interface TranscriptSegment {
+  start: number;
+  end: number;
+  /**
+   * Texte du segment (brut, nettoyé plus tard par analyzeMessage). Vient de la passe horodatée : peut différer
+   * un peu de `Transcript.text` ; sert seulement à situer les morceaux dans les segments (alignement des mots).
+   */
+  text: string;
+  /**
+   * Traduction anglaise de CE segment seul (Whisper task=translate sur la fenêtre du segment), faite avant
+   * l'effacement de l'audio. Brute : nettoyée des données personnelles par analyzeMessage.
+   */
+  english?: string;
 }
 
 export interface Transcript {
@@ -71,6 +93,8 @@ export interface Transcript {
   durationSec: number;
   /** Traduction anglaise par Whisper (task=translate), marquée « traduction automatique, à vérifier ». */
   englishTranslation?: string;
+  /** Segments horodatés, dans l'ordre, avec leur traduction : seulement si la traduction anglaise est demandée. */
+  segments?: TranscriptSegment[];
 }
 
 export type MessageSource = "audio" | "text";

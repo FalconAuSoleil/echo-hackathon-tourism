@@ -3,6 +3,7 @@
 // coûte peu, garder un nom coûte la vie privée d'un visiteur.
 import type { DetectedLang } from "./types.ts";
 import { escapeRegExp, fold } from "./text.ts";
+import { AMBIGUOUS_NAMES_PACKED, CAPITALIZED_ONLY_NAMES_PACKED, GIVEN_NAMES_PACKED } from "./given-names.ts";
 
 export interface ScrubResult {
   text: string;
@@ -13,13 +14,13 @@ export const PII_TOKENS = { name: "[nom]", phone: "[numéro]", email: "[e-mail]"
 
 /** Tournures de présentation : le ou les mots qui suivent sont un nom. */
 const INTRO_CUES: Record<string, string[]> = {
-  en: ["my name is", "my name's", "name is", "i am called", "i'm called", "call me", "this is", "i am", "i'm", "signed", "from your friend", "regards", "cheers"],
-  fr: ["je m'appelle", "je me nomme", "mon nom est", "mon prénom est", "moi c'est", "c'est", "je suis", "signé", "de la part de", "bises"],
-  de: ["ich heiße", "ich heisse", "mein name ist", "mein vorname ist", "ich bin der", "ich bin die", "hier ist", "hier spricht", "grüße von", "gruß"],
-  es: ["me llamo", "mi nombre es", "soy", "aquí", "habla", "de parte de", "saludos de", "firmado"],
+  en: ["my name is", "my name's", "name is", "i am called", "i'm called", "call me", "this is", "i am", "i'm", "signed", "from your friend", "regards", "cheers", "named", "called", "name was"],
+  fr: ["je m'appelle", "je me nomme", "mon nom est", "mon prénom est", "moi c'est", "c'est", "je suis", "signé", "de la part de", "bises", "nommé", "nommée", "s'appelle", "s'appelait", "appelé", "appelée", "prénommé", "prénommée"],
+  de: ["ich heiße", "ich heisse", "mein name ist", "mein vorname ist", "ich bin der", "ich bin die", "hier ist", "hier spricht", "grüße von", "gruß", "hieß", "hiess", "heißt", "heisst", "namens", "genannt"],
+  es: ["me llamo", "mi nombre es", "soy", "aquí", "habla", "de parte de", "saludos de", "firmado", "llamado", "llamada", "se llama", "se llamaba", "de nombre"],
 };
 /** Après ces tournures, on n'accepte que des mots à majuscule (sinon « I am happy » perdrait « happy »). */
-const INTRO_CAPITALIZED_ONLY = new Set(["this is", "i am", "i'm", "c'est", "je suis", "soy", "aquí", "habla", "regards", "cheers", "bises", "gruß", "signed", "signé", "firmado", "hier ist"]);
+const INTRO_CAPITALIZED_ONLY = new Set(["this is", "i am", "i'm", "c'est", "je suis", "soy", "aquí", "habla", "regards", "cheers", "bises", "gruß", "signed", "signé", "firmado", "hier ist", "hieß", "hiess", "heißt", "heisst", "called", "appelé", "appelée", "genannt", "llamado", "llamada"]);
 
 /** Titres de civilité, et rôles suivis d'un prénom (« notre guide Eric »). */
 const HONORIFICS = [
@@ -43,6 +44,13 @@ const NOT_NAMES = new Set(
     "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december",
     "whatsapp", "google", "facebook", "instagram", "tripadvisor", "airbnb", "booking", "mtn", "airtel", "momo", "arabica", "bourbon", "robusta", "echo",
     "christmas", "easter", "noël", "weihnachten", "navidad", "covid",
+    // Lieux, nationalités, mois et fêtes qui sont aussi des prénoms du dictionnaire (given-names.ts).
+    "india", "jordan", "georgia", "virginia", "carolina", "paris", "victoria", "florence", "chad", "israel", "lorraine", "savannah",
+    "sydney", "kampala", "nairobi", "london", "berlin", "madrid", "brussels", "bruxelles", "geneva", "genève", "milan", "roma", "rome", "vienna", "wien",
+    "christian", "christians", "chrétien", "janvier", "avril", "juin", "juillet", "août", "mai", "enero", "febrero", "abril", "mayo", "junio", "julio", "agosto",
+    "mercedes", "toyota", "jesus", "jésus", "jesús",
+    // Noms communs allemands courants derrière « Liebe / Hallo / Danke » (« Liebe Grüße »).
+    "grüße", "gruß", "grüsse", "gruss", "leute", "familie", "freunde", "gastgeber", "gastgeberin", "gäste", "kinder", "dank",
   ].map((w) => fold(w)),
 );
 
@@ -79,8 +87,111 @@ function alternation(terms: string[]): string {
   return [...terms].sort((a, b) => b.length - a.length).map(ci).join("|");
 }
 
+/** Dictionnaire de prénoms (en/fr/de/es + noms rwandais) : given-names.ts, généré, sources dans DATASHEET. */
+const GIVEN_NAMES = new Set(GIVEN_NAMES_PACKED.split("|"));
+export const GIVEN_NAME_COUNT = GIVEN_NAMES.size;
+const unpack = (packed: Record<string, string>): Record<string, Set<string>> =>
+  Object.fromEntries(Object.entries(packed).map(([l, v]) => [l, new Set(v ? v.split("|") : [])]));
+const AMBIGUOUS_NAMES = unpack(AMBIGUOUS_NAMES_PACKED);
+const CAPITALIZED_ONLY_NAMES = unpack(CAPITALIZED_ONLY_NAMES_PACKED);
+const anyLang = (table: Record<string, Set<string>>, key: string): boolean => Object.values(table).some((set) => set.has(key));
+
+/**
+ * Le mot est-il un prénom du dictionnaire, retirable quelle que soit sa position (début de phrase, allemand,
+ * texte en minuscules) ? Non si le prénom est aussi un mot courant de la langue (« Grace », « Pierre »,
+ * « Dolores ») : celui-là n'est retiré que par les règles de contexte. Un prénom parfois écrit en minuscules
+ * (« jack », « jean » en français) n'est retiré qu'avec sa majuscule. Langue inconnue : prudence de toutes.
+ */
+export function isGazetteerName(word: string, lang: DetectedLang): boolean {
+  const key = fold(word).replace(/['’]s$/, "");
+  if (key.length < 3 || NOT_NAMES.has(key)) return false;
+  const known = AMBIGUOUS_NAMES[lang] !== undefined;
+  const ambiguous = (k: string) => (known ? AMBIGUOUS_NAMES[lang]!.has(k) : anyLang(AMBIGUOUS_NAMES, k));
+  const capOnly = (k: string) => (known ? CAPITALIZED_ONLY_NAMES[lang]!.has(k) : anyLang(CAPITALIZED_ONLY_NAMES, k));
+  const capitalized = /^\p{Lu}/u.test(word);
+  const ok = (k: string) => GIVEN_NAMES.has(k) && !ambiguous(k) && (capitalized || !capOnly(k));
+  if (ok(key)) return true;
+  // Prénom composé absent du dictionnaire (« Marie-Claude ») : chaque partie est un prénom, majuscule exigée.
+  const parts = key.split("-");
+  return capitalized && parts.length > 1 && parts.every((p) => GIVEN_NAMES.has(p) && !NOT_NAMES.has(p)) && !ambiguous(parts[0]!);
+}
+
+/** Chiffres dictés en toutes lettres (numéro de téléphone dit à voix haute), et combien de chiffres chacun vaut. */
+const DIGIT_WORDS: Record<string, number> = Object.fromEntries(
+  [
+    ...["zero", "oh", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"].map((w) => [w, 1]),
+    ...["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf"].map((w) => [w, 1]),
+    ...["null", "eins", "zwei", "zwo", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"].map((w) => [w, 1]),
+    ...["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve"].map((w) => [w, 1]),
+    // Dizaines et nombres de 10 à 99 dits par paires (« zéro sept, quatre-vingt-huit, douze »).
+    ...["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"].map((w) => [w, 2]),
+    ...["dix", "onze", "douze", "treize", "quatorze", "quinze", "seize", "vingt", "trente", "quarante", "cinquante", "soixante", "septante", "huitante", "nonante"].map((w) => [w, 2]),
+    ...["zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig", "dreißig", "dreissig", "vierzig", "fünfzig", "sechzig", "siebzig", "achtzig", "neunzig"].map((w) => [w, 2]),
+    ...["diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve", "veinte", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"].map((w) => [w, 2]),
+  ].map(([w, n]) => [fold(w as string), n as number]),
+);
+const REPEATERS: Record<string, number> = { double: 2, triple: 3, doppel: 2, doble: 2 };
+const NUMBER_JOINERS = new Set(["and", "et", "und", "y", "o"].map(fold));
+
+/** Valeur en chiffres d'un mot d'une suite dictée (« quatre-vingt-huit » → 2, « 788 » → 3), ou null. */
+function spokenDigits(token: string): number | null {
+  const f = fold(token);
+  if (/^\d+$/.test(f)) return f.length;
+  if (DIGIT_WORDS[f] !== undefined) return DIGIT_WORDS[f]!;
+  // Composés : « quatre-vingt-huit », « twenty-one », « vingt et un » (géré par les joints), « dreiundzwanzig ».
+  const parts = f.split(/-|und/).filter(Boolean);
+  if (parts.length > 1 && parts.every((p) => DIGIT_WORDS[p] !== undefined)) return 2;
+  return null;
+}
+
 function isNotName(word: string): boolean {
   return NOT_NAMES.has(fold(word).replace(/['’]s$/, ""));
+}
+
+/**
+ * Remplace les suites de chiffres dictés (au moins 4 mots, au moins 7 chiffres en tout) par le jeton donné.
+ * « double » / « triple » répètent le chiffre suivant ; « plus » en tête (indicatif) est inclus.
+ */
+function replaceSpokenNumbers(text: string, token: () => string): string {
+  const re = new RegExp(`${ANY_WORD}|\\d+|\\+`, "gu");
+  const toks: { s: number; e: number; w: string }[] = [];
+  for (let m = re.exec(text); m; m = re.exec(text)) toks.push({ s: m.index, e: m.index + m[0].length, w: m[0] });
+  const spans: [number, number][] = [];
+  let i = 0;
+  while (i < toks.length) {
+    let j = i;
+    let digits = 0;
+    let words = 0;
+    let pending = 1;
+    let lastDigit = -1;
+    const start = toks[i]!.w === "+" || fold(toks[i]!.w) === "plus" ? i + 1 : i;
+    for (j = start; j < toks.length; j++) {
+      // Seuls des espaces, virgules, points, tirets ou barres séparent deux mots d'une même suite.
+      if (j > start && !/^[\s,.\-/()]*$/.test(text.slice(toks[j - 1]!.e, toks[j]!.s))) break;
+      const f = fold(toks[j]!.w);
+      const rep = REPEATERS[f];
+      if (rep) {
+        pending = rep;
+        continue;
+      }
+      const d = spokenDigits(toks[j]!.w);
+      if (d === null) {
+        if (NUMBER_JOINERS.has(f) && j + 1 < toks.length && spokenDigits(toks[j + 1]!.w) !== null) continue;
+        break;
+      }
+      digits += d * pending;
+      pending = 1;
+      words++;
+      lastDigit = j;
+    }
+    if (lastDigit >= 0 && words >= 4 && digits >= 7 && digits <= 15) {
+      spans.push([toks[i]!.s, toks[lastDigit]!.e]);
+      i = lastDigit + 1;
+    } else i++;
+  }
+  let out = text;
+  for (const [s, e] of spans.reverse()) out = out.slice(0, s) + token() + out.slice(e);
+  return out;
 }
 
 /** Remplace par des jetons neutres : [nom], [numéro], [e-mail], [pseudo]. */
@@ -111,6 +222,12 @@ export function scrubPii(text: string, lang: DetectedLang): ScrubResult {
   t = t.replace(/(?<![\p{L}\p{N}])\+?\(?\d[\d\s().\-/]{5,}\d(?![\p{L}\p{N}])/gu, (m) => {
     const digits = m.replace(/\D/g, "").length;
     if (digits < 7 || digits > 15) return m;
+    removed.phones++;
+    return PII_TOKENS.phone;
+  });
+
+  // 3b. Numéros dictés en toutes lettres : « zero seven eight eight, one two three... », au moins 7 chiffres.
+  t = replaceSpokenNumbers(t, () => {
     removed.phones++;
     return PII_TOKENS.phone;
   });
@@ -156,6 +273,18 @@ export function scrubPii(text: string, lang: DetectedLang): ScrubResult {
       return replaceName();
     });
   }
+
+  // 8. Prénoms du dictionnaire, dans toute position et toute langue (allemand compris), y compris en minuscules
+  //    (transcription sans majuscules) : « Eric was hard to follow », « Thomas fand den Weg lang ».
+  t = t.replace(new RegExp(`(?<![\\[\\p{L}\\p{N}'’-])${ANY_WORD}`, "gu"), (w: string) => (isGazetteerName(w, lang) ? replaceName() : w));
+
+  // 9. Prénom du dictionnaire mais aussi mot courant (« Pierre », « Grace ») : retiré seulement s'il est coordonné
+  //    à un nom déjà retiré ou à « moi / I / ich / yo » (« Pierre et [nom] », « Grace and I loved it »).
+  const coord = "(?:and|et|und|y|e|&)";
+  const self = "(?:I|me|moi|ich|yo|mí)";
+  const asName = (w: string): boolean => GIVEN_NAMES.has(fold(w).replace(/['’]s$/, "")) && !NOT_NAMES.has(fold(w)) && /^\p{Lu}/u.test(w);
+  t = t.replace(new RegExp(`(?<![\\p{L}\\p{N}'’-])(${NAME_WORD})(?=\\s+${coord}\\s+(?:\\[nom\\]|${self}${E}))`, "gu"), (w: string) => (asName(w) ? replaceName() : w));
+  t = t.replace(new RegExp(`(\\[nom\\],?\\s+${coord}\\s+)(${NAME_WORD})${E}`, "gu"), (m: string, pre: string, w: string) => (asName(w) ? pre + replaceName() : m));
 
   // Jetons [nom] consécutifs (« [nom] [nom] ») fusionnés.
   t = t.replace(/\[nom\](?:\s+\[nom\])+/g, PII_TOKENS.name);

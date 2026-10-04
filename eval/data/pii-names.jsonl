@@ -1,0 +1,52 @@
+{"id": "en-01", "lang": "en", "text": "Eric was a bit hard to follow at times.", "names": ["Eric"], "phones": [], "position": "sentence-initial"}
+{"id": "en-02", "lang": "en", "text": "Anna and I loved it.", "names": ["Anna"], "phones": [], "position": "sentence-initial"}
+{"id": "en-03", "lang": "en", "text": "The coffee was great. Claudine explained every step of the roasting.", "names": ["Claudine"], "phones": [], "position": "sentence-initial"}
+{"id": "en-04", "lang": "en", "text": "We came with my sister Rachel and her husband.", "names": ["Rachel"], "phones": [], "position": "mid-sentence"}
+{"id": "en-05", "lang": "en", "text": "Our guide was called Jean-Bosco and he knew everything about the plants.", "names": ["Jean-Bosco"], "phones": [], "position": "after cue"}
+{"id": "en-06", "lang": "en", "text": "The walk was long, but Uwase kept everyone smiling.", "names": ["Uwase"], "phones": [], "position": "mid-sentence"}
+{"id": "en-07", "lang": "en", "text": "Thanks to Mukamana for the delicious lunch!", "names": ["Mukamana"], "phones": [], "position": "after cue"}
+{"id": "en-08", "lang": "en", "text": "Patrick's explanations about fermentation were too fast for us.", "names": ["Patrick"], "phones": [], "position": "sentence-initial possessive"}
+{"id": "en-09", "lang": "en", "text": "Honestly the best part was tasting the coffee with Kwame and Lisa.", "names": ["Kwame", "Lisa"], "phones": [], "position": "end"}
+{"id": "en-10", "lang": "en", "text": "Grace showed us how they dry the beans.", "names": ["Grace"], "phones": [], "position": "sentence-initial ambiguous"}
+{"id": "en-11", "lang": "en", "text": "If you want to reach me my number is zero seven eight eight one two three four five six.", "names": [], "phones": ["zero seven eight eight one two three four five six"], "position": "spoken phone"}
+{"id": "en-12", "lang": "en", "text": "Daniel thinks the visit should be shorter, I think it was perfect.", "names": ["Daniel"], "phones": [], "position": "sentence-initial"}
+{"id": "en-13", "lang": "en", "text": "We are Tom and Sarah from Leeds, it was a lovely day.", "names": ["Tom", "Sarah"], "phones": [], "position": "after cue"}
+{"id": "en-14", "lang": "en", "text": "Noor welcomed us like family.", "names": ["Noor"], "phones": [], "position": "sentence-initial"}
+{"id": "fr-01", "lang": "fr", "text": "Marie a trouvé le chemin long.", "names": ["Marie"], "phones": [], "position": "sentence-initial"}
+{"id": "fr-02", "lang": "fr", "text": "Notre guide Aimable parlait trop vite pour nous.", "names": ["Aimable"], "phones": [], "position": "after role"}
+{"id": "fr-03", "lang": "fr", "text": "Julien et moi avons adoré la torréfaction.", "names": ["Julien"], "phones": [], "position": "sentence-initial"}
+{"id": "fr-04", "lang": "fr", "text": "Le repas préparé par Immaculée était délicieux.", "names": ["Immaculée"], "phones": [], "position": "mid-sentence"}
+{"id": "fr-05", "lang": "fr", "text": "On est venus avec Chantal et Bernard, ils ont trouvé la visite trop longue.", "names": ["Chantal", "Bernard"], "phones": [], "position": "mid-sentence"}
+{"id": "fr-06", "lang": "fr", "text": "Mon fils s'appelle Hugo et il a adoré cueillir les cerises.", "names": ["Hugo"], "phones": [], "position": "after cue"}
+{"id": "fr-07", "lang": "fr", "text": "Merci à Niyonsaba pour sa patience.", "names": ["Niyonsaba"], "phones": [], "position": "after cue"}
+{"id": "fr-08", "lang": "fr", "text": "Claire nous a expliqué le séchage, c'était passionnant.", "names": ["Claire"], "phones": [], "position": "sentence-initial ambiguous"}
+{"id": "fr-09", "lang": "fr", "text": "Appelez-moi au zéro six, douze, trente-quatre, cinquante-six, soixante-dix-huit.", "names": [], "phones": ["zéro six, douze, trente-quatre, cinquante-six, soixante-dix-huit"], "position": "spoken phone"}
+{"id": "fr-10", "lang": "fr", "text": "Sophie a eu un peu froid pendant la visite des parcelles.", "names": ["Sophie"], "phones": [], "position": "sentence-initial"}
+{"id": "fr-11", "lang": "fr", "text": "Le guide, Jean-Claude, connaissait chaque arbre.", "names": ["Jean-Claude"], "phones": [], "position": "mid-sentence"}
+{"id": "fr-12", "lang": "fr", "text": "Bises de la part de Léa et Nathan.", "names": ["Léa", "Nathan"], "phones": [], "position": "end"}
+{"id": "de-01", "lang": "de", "text": "Unser Guide hieß Jean-Pierre und war super, Thomas fand den Weg lang.", "names": ["Jean-Pierre", "Thomas"], "phones": [], "position": "after cue + mid-sentence"}
+{"id": "de-02", "lang": "de", "text": "Lukas und ich haben das Rösten geliebt.", "names": ["Lukas"], "phones": [], "position": "sentence-initial"}
+{"id": "de-03", "lang": "de", "text": "Die Führung mit Emmanuel war sehr interessant.", "names": ["Emmanuel"], "phones": [], "position": "mid-sentence"}
+{"id": "de-04", "lang": "de", "text": "Sabine hat das Essen besonders gut geschmeckt.", "names": ["Sabine"], "phones": [], "position": "sentence-initial"}
+{"id": "de-05", "lang": "de", "text": "Wir waren mit Klaus und Monika da, der Kaffee war wunderbar.", "names": ["Klaus", "Monika"], "phones": [], "position": "mid-sentence"}
+{"id": "de-06", "lang": "de", "text": "Vielen Dank an Uwimana für die Geduld.", "names": ["Uwimana"], "phones": [], "position": "after cue"}
+{"id": "de-07", "lang": "de", "text": "Meine Tochter Hannah wollte gar nicht mehr gehen.", "names": ["Hannah"], "phones": [], "position": "after role"}
+{"id": "de-08", "lang": "de", "text": "Der Weg war steil, aber Habimana hat uns geholfen.", "names": ["Habimana"], "phones": [], "position": "mid-sentence"}
+{"id": "de-09", "lang": "de", "text": "Meine Nummer ist null sieben acht acht, eins zwei drei, vier fünf sechs.", "names": [], "phones": ["null sieben acht acht, eins zwei drei, vier fünf sechs"], "position": "spoken phone"}
+{"id": "de-10", "lang": "de", "text": "Jürgen fand die Preise nicht klar genug.", "names": ["Jürgen"], "phones": [], "position": "sentence-initial"}
+{"id": "de-11", "lang": "de", "text": "Ernst und Rose kommen bestimmt wieder.", "names": ["Ernst", "Rose"], "phones": [], "position": "sentence-initial ambiguous"}
+{"id": "de-12", "lang": "de", "text": "Liebe Grüße von Felix und Marie.", "names": ["Felix", "Marie"], "phones": [], "position": "end"}
+{"id": "es-01", "lang": "es", "text": "Juan y yo volveremos.", "names": ["Juan"], "phones": [], "position": "sentence-initial"}
+{"id": "es-02", "lang": "es", "text": "La guía, Solange, explicaba muy bien.", "names": ["Solange"], "phones": [], "position": "mid-sentence"}
+{"id": "es-03", "lang": "es", "text": "Carmen pensó que la visita fue demasiado larga.", "names": ["Carmen"], "phones": [], "position": "sentence-initial"}
+{"id": "es-04", "lang": "es", "text": "Fuimos con Diego y Lucía y nos encantó el café.", "names": ["Diego", "Lucía"], "phones": [], "position": "mid-sentence"}
+{"id": "es-05", "lang": "es", "text": "Muchas gracias a Ishimwe por la comida.", "names": ["Ishimwe"], "phones": [], "position": "after cue"}
+{"id": "es-06", "lang": "es", "text": "Mi hijo Mateo quería quedarse más tiempo.", "names": ["Mateo"], "phones": [], "position": "after role"}
+{"id": "es-07", "lang": "es", "text": "Mi número es cero siete ocho ocho, uno dos tres, cuatro cinco seis.", "names": [], "phones": ["cero siete ocho ocho, uno dos tres, cuatro cinco seis"], "position": "spoken phone"}
+{"id": "es-08", "lang": "es", "text": "Pilar tuvo frío durante la caminata.", "names": ["Pilar"], "phones": [], "position": "sentence-initial ambiguous"}
+{"id": "es-09", "lang": "es", "text": "Lo mejor fue tostar el café con Esperance.", "names": ["Esperance"], "phones": [], "position": "end"}
+{"id": "es-10", "lang": "es", "text": "Alejandro dice que los precios no estaban claros.", "names": ["Alejandro"], "phones": [], "position": "sentence-initial"}
+{"id": "en-15", "lang": "en", "text": "My wife Fatima and I would love to buy a bag of coffee.", "names": ["Fatima"], "phones": [], "position": "after role"}
+{"id": "en-16", "lang": "en", "text": "Everything was wonderful, signed Peter.", "names": ["Peter"], "phones": [], "position": "after cue"}
+{"id": "fr-13", "lang": "fr", "text": "Pierre et Valentin ont trouvé que l'attente au début était trop longue.", "names": ["Pierre", "Valentin"], "phones": [], "position": "sentence-initial ambiguous"}
+{"id": "es-11", "lang": "es", "text": "Nuestra amiga Dolores dice que fue el mejor día del viaje.", "names": ["Dolores"], "phones": [], "position": "after role"}

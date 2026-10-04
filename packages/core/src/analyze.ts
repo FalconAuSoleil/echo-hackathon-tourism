@@ -4,14 +4,14 @@
 import type { Catalog } from "./catalog.ts";
 import type { AnalysisConfig } from "./config.ts";
 import type { Matcher } from "./matcher.ts";
-import type { ChunkResult, DetectedLang, FindingId, FindingScore, MessageAnalysis, MessageInput } from "./types.ts";
+import type { ChunkResult, DetectedLang, FindingId, FindingScore, MessageAnalysis, MessageInput, TranscriptSegment } from "./types.ts";
 import { audioInaudibleReason } from "./audio-stats.ts";
 import { checkDuplicate, fingerprint, type KnownMessage } from "./duplicates.ts";
 import { detectTextLanguage } from "./language.ts";
 import { detectNegation } from "./negation.ts";
 import { scrubPii } from "./pii.ts";
 import { segment } from "./segment.ts";
-import { fold, wordListRegExp } from "./text.ts";
+import { fold, wordListRegExp, words } from "./text.ts";
 
 export interface AnalyzeDeps {
   catalog: Catalog;
@@ -69,6 +69,91 @@ function unionFindings(chunks: readonly ChunkResult[], filter: (c: ChunkResult) 
     for (const f of c.findings) best.set(f.id, Math.max(best.get(f.id) ?? -Infinity, f.score));
   }
   return [...best.entries()].map(([id, score]) => ({ id, score })).sort((a, b) => b.score - a.score);
+}
+
+/** Indices (dans `a`) alignés sur `b` par plus longue sous-suite commune : `out[j]` = indice dans `a` du mot b[j], ou -1. */
+function alignWords(a: readonly string[], b: readonly string[]): number[] {
+  const n = a.length;
+  const m = b.length;
+  const L: Uint32Array[] = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i]![j] = a[i] === b[j] ? L[i + 1]![j + 1]! + 1 : Math.max(L[i + 1]![j]!, L[i]![j + 1]!);
+  const out = new Array<number>(m).fill(-1);
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) out[j++] = i++;
+    else if (L[i + 1]![j]! >= L[i]![j + 1]!) i++;
+    else j++;
+  }
+  return out;
+}
+
+/**
+ * Segments audio (indices dans `segments`) que touche chaque morceau. Les mots du texte nettoyé sont alignés sur
+ * ceux des segments bruts (le nettoyage remplace des noms par [nom]) ; un mot non aligné prend le segment du mot
+ * précédent. Exporté pour les tests.
+ */
+export function chunkSegments(segments: readonly TranscriptSegment[], scrubbedText: string, chunkTexts: readonly string[]): number[][] {
+  const rawWords: string[] = [];
+  const rawSeg: number[] = [];
+  segments.forEach((sg, k) => {
+    for (const w of words(sg.text)) {
+      rawWords.push(w);
+      rawSeg.push(k);
+    }
+  });
+  const scrubbedWords = words(scrubbedText);
+  const align = alignWords(rawWords, scrubbedWords);
+  const segOf: number[] = [];
+  let last = 0;
+  for (let j = 0; j < scrubbedWords.length; j++) {
+    if (align[j]! >= 0) last = rawSeg[align[j]!]!;
+    segOf.push(last);
+  }
+  // Mots de chaque morceau retrouvés dans l'ordre dans le texte nettoyé (curseur qui avance).
+  let cursor = 0;
+  return chunkTexts.map((text) => {
+    const found = new Set<number>();
+    for (const w of words(text)) {
+      let k = cursor;
+      while (k < scrubbedWords.length && scrubbedWords[k] !== w) k++;
+      if (k < scrubbedWords.length) {
+        found.add(segOf[k]!);
+        cursor = k + 1;
+      }
+    }
+    return [...found].sort((x, y) => x - y);
+  });
+}
+
+/**
+ * Indices des segments à traduire : ceux qui contiennent au moins un morceau « pas sûr » / « hors liste » et
+ * aucun morceau compté (leur traduction ne contiendra aucune proposition comptée). Message en anglais, doublon ou
+ * inaudible : aucun.
+ */
+export function segmentsNeedingEnglish(a: MessageAnalysis, segments: readonly TranscriptSegment[]): number[] {
+  if (!segments.length || a.lang === "en" || a.status === "duplicate" || a.status === "inaudible") return [];
+  const segsOf = chunkSegments(segments, a.scrubbedText, a.chunks.map((c) => c.text));
+  const counted = new Set(a.chunks.flatMap((c, i) => (c.status === "matched" ? segsOf[i]! : [])));
+  const review = new Set(a.chunks.flatMap((c, i) => (c.status !== "matched" ? segsOf[i]! : [])));
+  return [...review].filter((k) => !counted.has(k)).sort((x, y) => x - y);
+}
+
+/**
+ * Traduction anglaise par morceau à relire : celle de ses segments, si tous sont traduits et qu'aucun ne
+ * contient un morceau compté. Nettoyée des données personnelles. Renvoie une nouvelle analyse.
+ */
+export function withSegmentEnglish(a: MessageAnalysis, segments: readonly TranscriptSegment[]): MessageAnalysis {
+  if (!segments.length) return a;
+  const segsOf = chunkSegments(segments, a.scrubbedText, a.chunks.map((c) => c.text));
+  const counted = new Set(a.chunks.flatMap((c, i) => (c.status === "matched" ? segsOf[i]! : [])));
+  const chunks = a.chunks.map((c, i) => {
+    const segs = segsOf[i]!;
+    // Segment non traduit, ou qui contient aussi un morceau compté : pas d'anglais pour ce morceau.
+    if (c.status === "matched" || segs.length === 0 || segs.some((k) => counted.has(k) || !segments[k]!.english)) return c;
+    return { ...c, englishMT: scrubPii(segs.map((k) => segments[k]!.english!).join(" ").trim(), "en").text };
+  });
+  return { ...a, chunks };
 }
 
 export async function analyzeMessage(input: MessageInput, deps: AnalyzeDeps): Promise<MessageAnalysis> {
@@ -175,7 +260,7 @@ export async function analyzeMessage(input: MessageInput, deps: AnalyzeDeps): Pr
 
   const findings = unionFindings(chunks);
   const coopFindings = unionFindings(chunks, (c) => !c.mentionsGuide).map((f) => f.id);
-  return {
+  const result: MessageAnalysis = {
     ...base,
     lang,
     status: wholeReason ? "not_sure" : "analyzed",
@@ -189,4 +274,6 @@ export async function analyzeMessage(input: MessageInput, deps: AnalyzeDeps): Pr
     offListCount: chunks.filter((c) => c.status === "off_list").length,
     messageEmbedding,
   };
+  // Segments déjà traduits (transcription qui les fournit) : anglais des morceaux à relire tout de suite.
+  return t?.segments?.some((sg) => sg.english) ? withSegmentEnglish(result, t.segments) : result;
 }

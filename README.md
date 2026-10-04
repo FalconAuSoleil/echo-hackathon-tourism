@@ -99,8 +99,13 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    the host taps "Done": the card promised the sound is deleted, and Echo cannot delete WhatsApp's copy itself.
 3. **Offline analysis on the phone** (Web Worker, models from the phone's own cache):
    1. **Whisper base** transcribes and detects the language (our own detection pass; transformers.js has none).
-   2. **The audio is deleted** from the queue as soon as transcription ends, and the buffer is zero-filled.
-   3. **Names, phone numbers, e-mails and @handles are scrubbed** before anything is stored.
+   2. **The audio is deleted** from the queue as soon as transcription ends, and the buffer is zero-filled. A
+      decoded copy stays in memory only (never stored) until step 3 below has made the English of the unclear parts,
+      in the same queue run, and is then zero-filled.
+   3. **Names, phone numbers (also spoken as words), e-mails and @handles are removed by a heuristic scrubber**
+      before anything is stored: rules around introductions, titles and thanks, capitalised words mid-sentence,
+      and a list of 6,154 first names (en/fr/de/es + Rwandan and Burundian names) matched in any position. Measured
+      recall on synthetic sentences: **90 % of names** (81 % in lowercased transcripts), not 100 % (§5.2, §10).
    4. The text is **split into sentences, then clauses** ("but", "mais", "aber", "pero"…).
    5. A **multilingual sentence-embedding model** (MiniLM) embeds each chunk; a small classifier trained on the
       catalog's example sentences gives a probability per finding. Accepted only if ≥ the calibrated threshold
@@ -108,10 +113,15 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    6. Below the threshold, low transcription confidence, unclear negation → **"not sure"**.
    7. Unlike any finding (cosine below the floor 0.59) → **"off-list"**.
 4. **"Not sure": flag, never guess.** Never counted. The recap says "{p} unclear remarks: ask someone" ({p} counts remarks, i.e. not-sure chunks, not messages). A read-only
-   list **"To be read by a person"** shows the scrubbed original text and, when no chunk of the message was counted,
-   Whisper's English translation of the message labelled "machine translation, to be checked" (for a message with a
-   counted chunk, the translation is shown once right after analysis and not stored). The guide, the daughter or someone from the cooperative can read them; the
-   tool never decides for them.
+   list **"To be read by a person"** shows the scrubbed original text and, for a voice note, Whisper's English
+   translation of **that part of the recording**, labelled "machine translation, to be checked". Whisper notes the
+   time segments of the voice note while transcribing (an extra timestamped pass; the transcript itself is
+   unchanged); after the analysis, it translates **only the segments that contain a not-sure or off-list chunk and
+   no counted chunk**, each cut from the audio and translated on its own, while the decoded copy is still in
+   memory. So no counted clause is ever stored as text, in any language, and a voice note whose chunks are all
+   counted costs no translation at all. When a not-sure chunk shares its segment with a counted one, it has no
+   English version. **Written messages have no English version** (no machine-translation model runs on the phone). The guide, the daughter or someone from
+   the cooperative can read them; the tool never decides for them.
 5. **Unknown topics that come back.** Off-list and below-threshold chunks are clustered by meaning. When one cluster
    spans **≥ 3 different visitors**, the recap says "a topic the tool does not know comes back from {k} visitors:
    ask a person to read these remarks". Echo never names the topic (it has no validated sentence for it). The catalog
@@ -201,8 +211,9 @@ says small operators cannot do for themselves.
 - **Unknown topics are never named**; they are only pointed out for a person to read.
 - **Human in the loop everywhere:** the SMS app opens pre-filled and a person presses Send; Echo never acts, never
   replies to visitors, never changes the catalog itself.
-- **Privacy by construction:** audio deleted after transcription, PII scrubbed before storage, only findings stored
-  for each message, nothing sent to any cloud (§7).
+- **Privacy by construction:** audio deleted after transcription, names / numbers / e-mails removed before storage
+  by a heuristic scrubber (measured recall 90 % of names on synthetic sentences, so not a guarantee: §5.2, §10),
+  only findings stored for each message, nothing sent to any cloud (§7).
 - **Every synthetic or simulated element is labelled** in the UI and here (§12).
 
 ## 5. Measured results
@@ -258,6 +269,21 @@ everything else not captured went to "not sure" (most) or off-list. Annotated of
 sure, 0 counted. Ambiguous passages: 5 not sure, 1 off-list, 2 counted as N3. Negated passages: 2 counted (N7, N9),
 11 not sure / off-list. The weakest findings by recall (P11 general thanks 3/13, P3 roasting 3/11) mostly fall to
 "not sure", not to a wrong finding.
+
+**Personal-data scrubbing (SYNTHETIC sentences, `eval/data/pii-names.jsonl`).** The shipped `scrubPii` on 52
+sentences with 58 first names in varied positions (sentence start, German, after "our guide was called" or
+"hieß", compound and Rwandan names, names that are also common words) and 4 phone numbers spoken as words, each
+sentence also lowercased like a transcript without capitals:
+
+| | Original case | Lowercased |
+|---|---:|---:|
+| Names removed (recall) | **90 %** (52/58) | **81 %** (47/58) |
+| Spoken phone numbers removed | 4/4 | 4/4 |
+| Other words removed by mistake | 0.3 % (1/364) | 0 % (0/364) |
+
+On the whole written corpus (250 feedbacks + 756 catalog examples), 2 of 9,584 words were removed by mistake (the
+place names Lyon and Valencia). The sentences were written before the first measurement, but the name list was
+widened once afterwards (Rwandan names), so this recall is optimistic; details in RESULTS.md.
 
 ### 5.3 The threshold: share of chunks handled vs error, and why 0.84
 
@@ -349,10 +375,10 @@ The keyword lists were written by the same author as the synthetic corpus, which
 | Side-loadable debug APK (models bundled) | ~150 MB (157 MB file). **On the phone: the installed APK (150 MB) + ~36 MB of app data**: the models are read in place from the APK, not copied (the data is the service worker's copy of the app shell and the 27 MB WebAssembly runtime). Measured on the Android 14 emulator: app data 267 MB before this fix (models copied into Cache Storage), 36 MB after. Cost: reading the 118 MB MiniLM file from the APK takes ~1.4–1.6 s vs ~0.7 s from Cache Storage (emulator) |
 | Memory (laptop, Node process, whisper-base) | 885 MB after loading, **peak 1.2 GB** (native runtime libraries + file buffers) |
 | Memory in the APK's WebView (**Android 14 emulator**, not a phone) | Both models loaded: renderer ≈ **1.55 GB**; with "2 GB" of RAM the renderer was killed by low memory during transcription; 3 GB works. **One model at a time** (automatic when the browser reports ≤ 2 GB, 2026-10-04 re-test, "2 GB" setting: the emulator raises a 2048 MB request to 2560 MB on this system image, MemTotal 2.42 GiB): renderer **peak RSS 1.66 GB** (PSS 1.64 GB; PSS + swap up to 2.34 GB, the rest in zram), lowest MemAvailable 57 MB, **renderer never killed** |
-| 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.3 s** (4.3 s with the English translation for the review list); 8 threads: 4.7 s / 5.2 s on a shared CPU |
-| 30 s message, **low-end Android: ESTIMATE, not measured** | **~33–87 s** (~43–114 s with translation) = 1-thread laptop time × measured WebAssembly overhead (×3.3) × assumed 3–8× per-core gap |
+| 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.2 s**; **10.8 s** with the English of the unclear parts for the review list (a timestamped Whisper pass, then each segment holding a not-sure / off-list chunk and no counted chunk cut out and translated alone; this French test message has several unclear segments, close to a worst case; the former single translation of the whole message took 4.3 s but could not be stored for a message with a counted chunk). 8 threads: 4.1 s / 13.0 s on a shared CPU. A voice note whose chunks are all counted needs no translation at all |
+| 30 s message, **low-end Android: ESTIMATE, not measured** | **~31–82 s** (~102–273 s with the English of the unclear parts) = 1-thread laptop time × measured WebAssembly overhead (×3.2) × assumed 3–8× per-core gap |
 | In the browser (headless Chromium, this laptop) | first load 11 s from localhost; the 10 demo samples (≈ 51 s of audio) analysed in 25 s; offline reload ready in 3 s |
-| APK on an **Android 14 emulator** (KVM, 2 vCPUs, airplane mode; emulator, not a phone; WASM on 1 thread in the APK) | offline start with the bundled models: 2 GB 29 s first load then 10–11 s, 3 GB 19 s. With 3 GB: a **6 s sample transcribed and matched in 18.4 s**; a shared `.opus` voice note analysed from the queue in 6.5 s. "2 GB" with both models: no result (renderer killed). "2 GB" with one model at a time: the 6 s German sample in 30.8 s on-device (Whisper 30.2 s with the English translation; 50 s from the tap, including two model swaps); a queue of 3 voice notes (6–8 s each) transcribed, then analysed, in 84 s from the tap, all three stored (screenshot `apps/android/screenshots/low-memory-host-batch.png`) |
+| APK on an **Android 14 emulator** (KVM, 2 vCPUs, airplane mode; emulator, not a phone; WASM on 1 thread in the APK) | offline start with the bundled models: 2 GB 29 s first load then 10–11 s, 3 GB 19 s. With 3 GB: a **6 s sample transcribed and matched in 18.4 s**; a shared `.opus` voice note analysed from the queue in 6.5 s. "2 GB" with both models: no result (renderer killed). "2 GB" with one model at a time: the 6 s German sample in 30.8 s on-device (Whisper 30.2 s with the former whole-message English translation, which this sample no longer needs since every chunk is counted; 50 s from the tap, including two model swaps); a queue of 3 voice notes (6–8 s each) transcribed, then analysed, in 84 s from the tap, all three stored (screenshot `apps/android/screenshots/low-memory-host-batch.png`) |
 
 Messages are processed in a background queue, so minutes per message would still be usable for 6–7 messages a month,
 but the phone timing must be measured: an emulator on a laptop CPU says little about a low-end phone's CPU or its
@@ -409,20 +435,22 @@ a person, off-list topics) and, with the host's consent, aggregated counts per c
 ## 7. Responsible AI
 
 **Consent.** The printed visitor card states that sending a message is consent, that the sound is deleted after
-analysis and that the name is not kept (four languages). Sending is voluntary and from the visitor's own phone.
+analysis and that the name is not kept (four languages). That promise rests on the heuristic scrubber, which
+removed 90 % of names in our synthetic check, not all of them (§10). Sending is voluntary and from the visitor's own phone.
 Cooperative sharing is a separate host consent, **off by default**, revocable in Settings.
 
 **Where the data lives and who reads it.**
 
 | Data | Where | Who can read it |
 |---|---|---|
-| Audio | Queue in the phone's browser storage (IndexedDB) **until transcription ends**, then deleted; the buffer is zero-filled | Nobody after transcription |
-| Full transcript (and, for a message with a counted chunk, its English machine translation) | Memory only, during analysis; shown once in "Just analysed" | Never stored |
+| Audio | Queue in the phone's browser storage (IndexedDB) **until transcription ends**, then deleted; the buffer is zero-filled; a decoded copy stays in memory (never stored) until the English of the unclear segments is made in the same queue run, then zero-filled | Nobody after transcription |
+| Full transcript and its time segments | Memory only, during the queue run; shown once in "Just analysed" | Never stored |
 | Per message: date, language, findings + confidence, status, counts, a non-reversible text fingerprint | IndexedDB on the phone | Whoever opens Echo on that phone (PIN optional) |
 | Message embedding (384 numbers, near-duplicate detection only) | IndexedDB on the phone, **kept 7 days for duplicate detection**, then removed from the record (at app start and before each queue run) | Whoever opens Echo on that phone |
 | Scrubbed text of "not sure" / off-list chunks | IndexedDB on the phone | The host and the person she asks to read them |
-| Scrubbed English machine translation of the whole message | IndexedDB on the phone, **only when every chunk of that message is "not sure" or off-list** (the whole message is under review anyway); otherwise never stored | The host and the person she asks to read them |
-| Names, visitor phone numbers, e-mails | **Never stored** (scrubbed before storage) | – |
+| Chunk embedding of "not sure" / off-list chunks (384 numbers, unknown-topic clustering of the month) | IndexedDB on the phone **until the month is over**; then the month's clusters are computed once and written on the chunks (`clusterId`), and every embedding of that month is removed (at app start, before and after each queue run) | Whoever opens Echo on that phone |
+| Scrubbed English machine translation of a voice-note segment | IndexedDB on the phone, attached to a "not sure" / off-list chunk, **only for a time segment of the recording that contains no counted chunk**; never for a written message | The host and the person she asks to read them |
+| Names, visitor phone numbers, e-mails | **Removed before storage by a heuristic scrubber**, not a guarantee: measured recall 90 % of names on 52 synthetic sentences (81 % lowercased), spoken phone numbers 4/4; a missed name can end up in a stored review chunk (§10) | – |
 | Anything in the cloud | **Nothing**: no server, no analytics, models served from the app's own origin | – |
 | Cooperative | Counts per finding only, never text, never guide remarks; prototype sends nothing (synthetic farms) | – |
 
@@ -433,14 +461,17 @@ shared or imported voice note: "N voice notes still to delete. Delete the origin
 in WhatsApp". The counter is a number only (no message id, no sender) and is increased only once the analysis is
 saved, so a voice note lost to a crash can still be shared again. Whether the household actually deletes them is a
 human step we cannot enforce; it is part of the phone test in `docs/MANUAL_TESTS.md` (§ 1 step 6b).
-The end-to-end test checks that IndexedDB contains no name, no phone number and no full text after analysis, and that
-no English translation is stored for a message with a counted chunk (the German sample).
+The end-to-end test checks that IndexedDB contains no name, no phone number and no full text after analysis (including
+a sentence-initial name, "Eric was a bit hard to follow at times.", which stays a "not sure" chunk), that the German
+sample (every chunk counted) stores no English, and that in a mixed French voice note (welcome + meal counted, then a
+hedged remark) the not-sure chunk keeps the English of its own segment while neither counted clause is stored in
+French or English.
 
 **Lost or shared phone.** An optional **PIN** (4–8 digits; only a salted PBKDF2-SHA256 hash, 150,000 iterations, is
 stored) locks the host app, settings and cooperative view; the public "Try it" demo stays open. "Delete all
 messages" wipes everything in one tap. Limits, stated plainly: the PIN is an app lock, **not encryption** — someone
 with the unlocked phone and browser developer tools could read IndexedDB; what they would find is findings, dates and
-scrubbed review chunks, never audio, names or numbers. There is no remote wipe.
+scrubbed review chunks, never audio; names or numbers only where the scrubber missed one. There is no remote wipe.
 
 **Quality gaps by language (measured).** Whisper base on real voices: WER en 10.5 %, es 12.3 %, de 21.6 %,
 fr 28.7 %. On synthetic text, Echo's error among accepted answers is 4.2 % en, 0 % fr, 4.8 % es but **15.0 % de**
@@ -565,6 +596,19 @@ Found during the build:
   since the deletion reminder only counts saved analyses.
   (Disk is no longer the issue: in the APK the models are read in place from the APK's assets, ~186 MB in all on
   the phone; in the browser PWA they are downloaded once into Cache Storage, ≈ 242 MB.)
+- **Names can slip through the scrubber.** It is a heuristic (rules + a list of 6,154 first names), not a model.
+  Measured on 52 synthetic sentences: 90 % of names removed, 81 % when the transcript has no capitals. It keeps on
+  purpose first names that are also common words (Grace, Claire, Pierre, Pilar, Rose, Ernst, Dolores) unless they
+  sit next to another name or "and I", and misses names outside its list at the start of a sentence (Noor, Kwame).
+  It removed 2 place names (Lyon, Valencia) out of 9,584 words of the corpus. A missed name in a "not sure" or
+  off-list chunk is stored with that chunk's text. Real visitors' names through Whisper are not measured.
+- **English versions only for voice notes, and not for every unclear part, at a cost.** A not-sure chunk that
+  shares a time segment with a counted chunk gets no English version; written messages never get one. Each unclear
+  segment is translated on its own (one Whisper encoder pass per segment): on the laptop a 30 s French message with
+  several unclear segments takes 10.8 s instead of 3.2 s without translation (1 thread), ~102–273 s estimated on a
+  low-end phone (§5.7); a voice note whose chunks are all counted only pays the extra timestamped pass. A cheaper
+  variant (one timestamped translation of the whole window, split by time) was measured here: about half the cost,
+  but its English segments often straddled two source segments, which leaves the chunk without an English version.
 - **Common Voice not used**; FLEURS is read speech, so accent variety is limited.
 - **Licensing**: NLLB-200, MMS-TTS and ESC-50 are non-commercial; the Piper engine (build time only, not shipped) is
   GPL-3.0.
@@ -595,7 +639,7 @@ Found during the build:
 
 | Path | What |
 |---|---|
-| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation). 114 tests with fakes (142 in the whole workspace). `calibration.ts` is generated by the evaluation. |
+| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation, month closure, per-segment English for review chunks). 127 tests with fakes (159 in the whole workspace). `calibration.ts` is generated by the evaluation. |
 | `packages/models` | transformers.js adapters: Whisper with our language detection, token-log-prob confidence, repetition-loop guard, 30 s windows; embedder (mean pooling, L2). Same file in the browser and in the evaluation. |
 | `apps/web` | Vite + Preact PWA: Try-it demo, host app (modes A/B), settings + PIN, cooperative view, visitor card, service worker, share target, worker. |
 | `apps/android` | Capacitor shell packaging `apps/web/dist` (models bundled) as a side-loadable APK; Android share intent → the web app's queue. |
@@ -677,10 +721,12 @@ Step-by-step phone tests, including airplane mode, WhatsApp sharing and the real
 
 ### 11.4 What was verified on this machine (2026-10-04, WSL2, 8 CPUs, no GPU)
 
-`pnpm install`, `pnpm models:download`, `pnpm test` (142 passed), `pnpm typecheck`, `pnpm smoke:models`,
+`pnpm install`, `pnpm models:download`, `pnpm test` (159 passed), `pnpm typecheck`, `pnpm smoke:models`,
 `pnpm build`, `pnpm --filter @echo/web e2e` (**E2E PASSED**: 10 samples through the real models, recap, SMS link,
-host queue with audio deleted, no PII in IndexedDB, WhatsApp-deletion reminder and its counter, mode A Kinyarwanda
-labels, a low-memory queue run that never holds both models in one worker, then network cut + reload: app, models and analysis work offline)
+host queue with audio deleted, no PII in IndexedDB (including a sentence-initial name in a "not sure" chunk),
+WhatsApp-deletion reminder and its counter, mode A Kinyarwanda labels, a low-memory queue run that never holds both
+models in one worker, a mixed French voice note whose not-sure chunk keeps the English of its own segment and no
+counted clause, then network cut + reload: app, models and analysis work offline)
 and `pnpm eval`. Android 14 emulator (KVM, 2 vCPUs, airplane mode), debug APK installed: offline start with the
 bundled models, cold-start share of an `.opus` voice note queued and its cache copy deleted, text share queued,
 `sms:` opens Google Messages pre-filled, 6 s sample analysed in 18.4 s with 3 GB of RAM, **renderer killed by low
@@ -706,7 +752,8 @@ on a real phone, a real SMS, a real WhatsApp share.
 | Thresholds | Real calibration, but **on synthetic data** | Model box in the app |
 
 What is real: the models run for real on the device (no mock in the app), the analysis, the recap, the SMS link, the
-offline mode (tested in Chromium), the audio deletion and the PII scrubbing; level 1 uses real human voices (FLEURS).
+offline mode (tested in Chromium), the audio deletion and the PII scrubbing (a real heuristic, with a measured recall
+of 90 % of names on synthetic sentences, not a guarantee); level 1 uses real human voices (FLEURS).
 
 ## 13. Our take: localizing AI development
 

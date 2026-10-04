@@ -1,7 +1,8 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import { toReviewChunks, toStoredMessage, type MessageAnalysis } from "@echo/core";
-import { enqueue, getSettings, knownMessages, openEchoDB, pruneExpiredEmbeddings, saveAnalysis, saveSettings, wipeAll } from "./db.ts";
+import { closeFinishedMonths, enqueue, getSettings, knownMessages, openEchoDB, pruneExpiredEmbeddings, queuedMonths, saveAnalysis, saveSettings, wipeAll } from "./db.ts";
+import { monthClustersFromReview, DEFAULT_CONFIG, type ReviewChunk } from "@echo/core";
 
 const analysis: MessageAnalysis = {
   id: "m1",
@@ -60,5 +61,30 @@ describe("IndexedDB storage", () => {
     await wipeAll(db);
     expect(await db.count("queue")).toBe(0);
     expect((await getSettings(db)).hostPhone).toBe("+250");
+  });
+
+  it("a finished month is closed once: unknown-topic groups written on the chunks, every chunk embedding removed", async () => {
+    const db = await openEchoDB("test-close");
+    const chunk = (id: string, month: string, v: number[]): ReviewChunk => ({
+      id, messageId: id.split(":")[0]!, month, status: "off_list", text: `picking ${id}`, mentionsGuide: false, reason: "below_floor", embedding: Float32Array.from(v),
+    });
+    const sep = [chunk("a:0", "2026-09", [1, 0]), chunk("b:0", "2026-09", [0.99, 0.14]), chunk("c:0", "2026-09", [0.98, 0.2]), chunk("d:0", "2026-09", [0, 1])];
+    const oct = [chunk("e:0", "2026-10", [1, 0])];
+    const aug = [chunk("f:0", "2026-08", [1, 0])];
+    for (const c of [...sep, ...oct, ...aug]) await saveAnalysis(db, { ...toStoredMessage(analysis), id: c.messageId, month: c.month }, [c]);
+    const before = monthClustersFromReview("2026-09", await db.getAll("reviewChunks"), DEFAULT_CONFIG);
+    expect(before.find((c) => c.recurring)?.distinctVisitors).toBe(3);
+    // August still has a message in the queue: it waits for the next run.
+    await enqueue(db, { kind: "text", text: "x", receivedAt: "2026-08-31T23:00:00.000Z", via: "paste" });
+    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"), await queuedMonths(db))).toEqual(["2026-09"]);
+    const rows = await db.getAll("reviewChunks");
+    const septRows = rows.filter((r) => r.month === "2026-09");
+    expect(septRows.every((r) => !("embedding" in r) && r.clusterId)).toBe(true);
+    expect(rows.find((r) => r.id === "e:0")!.embedding).toBeDefined(); // current month: kept for clustering
+    expect(rows.find((r) => r.id === "f:0")!.embedding).toBeDefined(); // pending in the queue
+    // The closed month's recap reads the stored groups: same result as before, without any embedding.
+    expect(monthClustersFromReview("2026-09", rows, DEFAULT_CONFIG)).toEqual(before);
+    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"), await queuedMonths(db))).toEqual([]);
+    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"))).toEqual(["2026-08"]);
   });
 });

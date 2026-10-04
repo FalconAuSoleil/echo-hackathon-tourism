@@ -247,14 +247,25 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
     const t1 = performance.now();
     if (req.kind === "transcribeAudio") {
       const transcriber = await asr();
-      // Tampon audio remis à zéro par transcribeAudioMessage dès la fin de la transcription ; traduction
-      // anglaise produite maintenant (pour la liste « À faire lire »), tant que l'audio existe.
+      // Tampon audio remis à zéro par transcribeAudioMessage dès la fin de la transcription. Avec l'anglais demandé,
+      // Whisper donne aussi les segments horodatés : seuls ceux à relire seront traduits, à l'étape 3.
       const input = await transcribeAudioMessage(
         { id: req.id, receivedAt: req.receivedAt, audio16k: req.audio },
         { transcriber, config: DEFAULT_CONFIG, withEnglishTranslation: true },
       );
       const ms = Math.round(performance.now() - t1);
       post({ kind: "result", reqId: req.reqId, input, timings: { transcribeMs: input.transcript ? ms : 0, analyzeMs: 0, totalMs: ms } });
+      return;
+    }
+    if (req.kind === "translateSegments") {
+      try {
+        const transcriber = await asr();
+        const english = transcriber.translateSegments ? await transcriber.translateSegments(req.audio, req.segments, req.language) : [];
+        const ms = Math.round(performance.now() - t1);
+        post({ kind: "result", reqId: req.reqId, english, timings: { translateMs: ms, analyzeMs: 0, totalMs: ms } });
+      } finally {
+        req.audio.fill(0);
+      }
       return;
     }
     const b = await base();
