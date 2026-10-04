@@ -5,8 +5,12 @@
 //    sans majuscules). Rappel = part des noms (et numéros) dont aucun mot ne reste après nettoyage.
 // 2. Retraits à tort : mots qui ne sont ni un nom ni un numéro et qui disparaissent, dans ces phrases et dans
 //    tout le corpus écrit (eval/data/feedback.jsonl + exemples du catalogue, où « Noor » est le seul prénom).
+// 3. Retraits à tort sur des TRANSCRIPTIONS Whisper (niveau 3, voix synthétiques sans bruit, eval/results/
+//    level3.json) : Whisper met des majuscules à des mots qui n'en ont pas à l'écrit (« Wi-Fi ») et entend mal
+//    des mots (« Frank » pour « Franc »). Seule personne citée : « Noor », que Whisper écrit Nor, Nora, Noa, No.
 import { GIVEN_NAME_COUNT, scrubPii, words } from "@echo/core";
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 import { readJson, readJsonl, round, writeJson } from "./lib/io.ts";
 import { CATALOG_PATH, DATA_DIR, RESULTS_DIR } from "./lib/paths.ts";
 
@@ -110,6 +114,8 @@ export function runPii(opts: { log: (s: string) => void }): void {
   }
   const corpusRemovedCount = Object.values(corpusRemoved).reduce((a, b) => a + b, 0);
 
+  const transcripts = transcriptOverScrub();
+
   const summarize = (t: Tally) => ({
     ...t,
     nameRecall: t.names ? round(t.namesRemoved / t.names, 3) : null,
@@ -136,12 +142,61 @@ export function runPii(opts: { log: (s: string) => void }): void {
       removed: corpusRemoved,
       note: "feedback.jsonl (250) + catalog examples; 'Noor' (the fictional farmer) is the only person name, every other removed word counts as a false removal.",
     },
+    transcripts,
   };
   writeJson(join(RESULTS_DIR, "pii.json"), out);
   const o = out.byVariant.original!;
   const l = out.byVariant.lowercase!;
   opts.log(
     `PII: names recall ${o.nameRecall} (original case), ${l.nameRecall} (lowercase); phones ${o.phoneRecall}/${l.phoneRecall}; ` +
-      `false removals ${o.falseRemovalRate}/${l.falseRemovalRate} in the PII set, ${out.corpus.falseRemovalRate} on the corpus (${corpusRemovedCount}/${corpusWords} words)`,
+      `false removals ${o.falseRemovalRate}/${l.falseRemovalRate} in the PII set, ${out.corpus.falseRemovalRate} on the corpus (${corpusRemovedCount}/${corpusWords} words)` +
+      (transcripts ? `; on level-3 clean transcripts (whisper-base) ${transcripts.models["whisper-base"]?.falseRemovals}/${transcripts.models["whisper-base"]?.words} words` : ""),
   );
+}
+
+/** Distance d'édition (Levenshtein), pour reconnaître « Noor » mal entendu (Nor, Nora, Noa, No). */
+function editDistance(a: string, b: string): number {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...new Array<number>(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0]![j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i]![j] = Math.min(d[i - 1]![j]! + 1, d[i]![j - 1]! + 1, d[i - 1]![j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[a.length]![b.length]!;
+}
+
+interface Level3Message {
+  id: string;
+  lang: string;
+  transcript?: string;
+}
+
+/**
+ * Retraits sur les transcriptions Whisper des clips sans bruit (level3.json, écrit par `pnpm eval -- --level 3`).
+ * Un mot retiré à distance d'édition ≤ 2 de « noor » est le prénom de la fermière (retrait correct), tout autre
+ * mot retiré est un retrait à tort.
+ */
+function transcriptOverScrub() {
+  const path = join(RESULTS_DIR, "level3.json");
+  if (!existsSync(path)) return null;
+  const l3 = readJson<{ models: Record<string, Record<string, { perMessage?: Level3Message[] }>> }>(path);
+  const models: Record<string, { transcripts: number; words: number; nameRemovals: number; falseRemovals: number; falseRemovalRate: number; removed: { id: string; word: string; output: string }[] }> = {};
+  for (const [model, conds] of Object.entries(l3.models)) {
+    const msgs = (conds.clean?.perMessage ?? []).filter((m) => m.transcript);
+    let totalWords = 0;
+    let nameRemovals = 0;
+    const removed: { id: string; word: string; output: string }[] = [];
+    for (const m of msgs) {
+      const before = words(m.transcript!);
+      const output = scrubPii(m.transcript!, m.lang).text;
+      totalWords += before.length;
+      for (const w of removedWords(before, cleanWords(output))) {
+        if (editDistance(w, "noor") <= 2) nameRemovals++;
+        else removed.push({ id: m.id, word: w, output });
+      }
+    }
+    models[model] = { transcripts: msgs.length, words: totalWords, nameRemovals, falseRemovals: removed.length, falseRemovalRate: round(removed.length / Math.max(1, totalWords), 4), removed };
+  }
+  return {
+    synthetic: true,
+    note: "Whisper transcripts of the level-3 clean clips (synthetic Piper voices, no noise). 'Noor' is the only person in these feedbacks; a removed word within edit distance 2 of 'noor' counts as her name, any other removed word as a false removal.",
+    models,
+  };
 }

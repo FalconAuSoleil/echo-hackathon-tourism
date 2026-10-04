@@ -2,7 +2,20 @@
 // deux formes : jamais l'audio, jamais le texte complet, jamais de nom ni de numéro.
 import type { AnalysisConfig } from "./config.ts";
 import { clusterOffList, type OffListCluster, type OffListItem } from "./offlist.ts";
+import { DEFAULT_CONFIG } from "./config.ts";
+import { detectTextLanguage } from "./language.ts";
+import { scrubPii } from "./pii.ts";
 import type { FindingId, MessageAnalysis, MessageSource, MessageStatus, DetectedLang } from "./types.ts";
+
+/**
+ * Message écrit nettoyé AVANT d'entrer dans la file d'attente (SPEC 4.3 étape 3, SPEC 6) : collé, importé en
+ * .txt ou partagé depuis WhatsApp, il peut attendre longtemps l'analyse ; aucun nom, numéro ni e-mail ne doit
+ * rester en clair sur le téléphone pendant ce temps. Même langue devinée que `analyzeMessage`, qui nettoie
+ * une seconde fois (sans effet sur un texte déjà nettoyé).
+ */
+export function scrubForQueue(text: string, minLanguageProbability = DEFAULT_CONFIG.minLanguageProbability): string {
+  return scrubPii(text, detectTextLanguage(text, minLanguageProbability).lang).text;
+}
 
 /** Fiche d'un message : date, langue, constats avec confiance, statut. Aucun texte. */
 export interface StoredMessage {
@@ -17,8 +30,12 @@ export interface StoredMessage {
   coopFindings: FindingId[];
   notSureCount: number;
   offListCount: number;
-  /** Empreinte non réversible du texte nettoyé (doublons). */
-  fingerprint: string;
+  /**
+   * Empreinte du texte nettoyé (doublons exacts). Hachage rapide sans sel : pour un retour court, on peut
+   * retrouver le texte en hachant des phrases candidates. Elle ne sert que dans la fenêtre des doublons :
+   * retirée de la fiche avec l'embedding (`expireMessageEmbedding`).
+   */
+  fingerprint?: string;
   /**
    * Embedding du message nettoyé (quasi-doublons). Utile seulement pendant la fenêtre des doublons
    * (`duplicateWindowDays`) : retiré de la fiche ensuite (`expireMessageEmbedding`).
@@ -108,12 +125,13 @@ export function messageEmbeddingExpired(receivedAt: string, now: Date, duplicate
 }
 
 /**
- * Fiche sans son embedding si la fenêtre des doublons est passée : il ne sert plus à rien et pourrait être
- * en partie inversé vers le texte. Renvoie `null` si la fiche n'a rien à changer.
+ * Fiche sans son embedding ni son empreinte si la fenêtre des doublons est passée : ils ne servent plus à rien
+ * (`checkDuplicate` ignore les messages hors fenêtre) et pourraient être en partie inversés vers le texte.
+ * Renvoie `null` si la fiche n'a rien à changer.
  */
 export function expireMessageEmbedding(m: StoredMessage, now: Date, duplicateWindowDays: number): StoredMessage | null {
-  if (!m.embedding || !messageEmbeddingExpired(m.receivedAt, now, duplicateWindowDays)) return null;
-  const { embedding: _dropped, ...rest } = m;
+  if ((!m.embedding && m.fingerprint === undefined) || !messageEmbeddingExpired(m.receivedAt, now, duplicateWindowDays)) return null;
+  const { embedding: _e, fingerprint: _f, ...rest } = m;
   return rest;
 }
 

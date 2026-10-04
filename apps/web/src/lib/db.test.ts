@@ -24,7 +24,7 @@ const analysis: MessageAnalysis = {
 };
 
 describe("IndexedDB storage", () => {
-  it("message embeddings are removed once older than the duplicate window (7 days)", async () => {
+  it("message embeddings and fingerprints are removed once older than the duplicate window (7 days)", async () => {
     const db = await openEchoDB("test-prune");
     const emb = new Float32Array([0.6, 0.8]);
     await saveAnalysis(db, { ...toStoredMessage(analysis), id: "old", receivedAt: "2026-09-20T10:00:00.000Z", embedding: emb }, []);
@@ -32,11 +32,32 @@ describe("IndexedDB storage", () => {
     expect(await pruneExpiredEmbeddings(db, new Date(2026, 9, 4, 12))).toBe(1);
     const old = (await db.get("messages", "old"))!;
     expect("embedding" in old).toBe(false);
-    expect(old).toMatchObject({ fingerprint: "abc", findings: [{ id: "P3", confidence: 0.9 }] });
-    expect((await db.get("messages", "new"))!.embedding).toEqual(emb);
-    // Idempotent ; le doublon exact par empreinte reste détectable (fenêtre gérée par le cœur).
+    expect("fingerprint" in old).toBe(false);
+    expect(old).toMatchObject({ findings: [{ id: "P3", confidence: 0.9 }] });
+    expect((await db.get("messages", "new"))!).toMatchObject({ embedding: emb, fingerprint: "abc" });
+    // Idempotent ; la fiche expirée ne compte plus pour les doublons (hors fenêtre de toute façon).
     expect(await pruneExpiredEmbeddings(db, new Date(2026, 9, 4, 12))).toBe(0);
-    expect((await knownMessages(db)).find((k) => k.receivedAt?.startsWith("2026-09-20"))).toEqual({ fingerprint: "abc", receivedAt: "2026-09-20T10:00:00.000Z" });
+    expect((await knownMessages(db)).map((k) => k.receivedAt)).toEqual(["2026-10-03T10:00:00.000Z"]);
+  });
+
+  it("a record from before this change (fingerprint, no embedding) loses its fingerprint after the window", async () => {
+    const db = await openEchoDB("test-prune-fp");
+    const { embedding: _e, ...noEmb } = toStoredMessage(analysis);
+    await saveAnalysis(db, { ...noEmb, id: "legacy", receivedAt: "2026-09-01T10:00:00.000Z" }, []);
+    expect(await pruneExpiredEmbeddings(db, new Date(2026, 9, 4, 12))).toBe(1);
+    expect("fingerprint" in (await db.get("messages", "legacy"))!).toBe(false);
+    expect(await knownMessages(db)).toEqual([]);
+  });
+
+  it("written messages are scrubbed before they enter the queue (names, phone numbers, e-mails)", async () => {
+    const db = await openEchoDB("test-queue-scrub");
+    const id = await enqueue(db, { kind: "text", text: "My name is Anna, +250 788 000 111. The coffee was great!", receivedAt: "2026-10-04T10:00:00.000Z", via: "paste" });
+    const row = (await db.get("queue", id))!;
+    expect(row.text).toBe("My name is [nom], [numéro]. The coffee was great!");
+    const fr = await enqueue(db, { kind: "text", text: "Merci pour tout, écrivez-moi à marc.dupont@mail.fr. Signé Marc", receivedAt: "2026-10-04T10:00:00.000Z", via: "share" });
+    const raw = JSON.stringify(await db.getAll("queue"));
+    for (const leak of ["Anna", "788", "marc.dupont", "Marc"]) expect(raw).not.toContain(leak);
+    expect((await db.get("queue", fr))!.text).toContain("[e-mail]");
   });
 
   it("stores only the SPEC 6 shapes: no full text in messages", async () => {

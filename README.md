@@ -96,7 +96,8 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    same path, without transcription.
 2. **Reception.** Messages arrive on the smartphone that holds the farm's number. Whoever has it **shares** them to
    Echo in one gesture (Android share sheet → Echo, via the Web Share Target of the installed app), or imports a file
-   / pastes text. Echo puts them in a queue. From here on, nothing needs the internet. After analysis, Echo keeps a
+   / pastes text. Echo puts them in a queue; a written message is scrubbed (step 3.3 below) before it is written to
+   the queue, so no visitor name or number waits there in clear text. From here on, nothing needs the internet. After analysis, Echo keeps a
    red reminder with a counter, "N voice notes still to delete: delete the original voice notes in WhatsApp now", until
    the host taps "Done": the card promised the sound is deleted, and Echo cannot delete WhatsApp's copy itself.
 3. **Offline analysis on the phone** (Web Worker, models from the phone's own cache):
@@ -105,8 +106,9 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
       decoded copy stays in memory only (never stored) until step 3 below has made the English of the unclear parts,
       in the same queue run, and is then zero-filled.
    3. **Names, phone numbers (also spoken as words), e-mails and @handles are removed by a heuristic scrubber**
-      before anything is stored: rules around introductions, titles and thanks, capitalised words mid-sentence,
-      and a list of 6,154 first names (en/fr/de/es + Rwandan and Burundian names) matched in any position. Measured
+      before anything is stored (a written message already when it enters the queue; a voice note only once
+      transcribed): rules around introductions, titles and thanks, capitalised words mid-sentence (minus a list of
+      capitalised non-names: cities, currencies, Wi-Fi, GPS, WhatsApp…), and a list of 6,154 first names (en/fr/de/es + Rwandan and Burundian names) matched in any position. Measured
       recall on synthetic sentences: **90 % of names** (81 % in lowercased transcripts), not 100 % (§5.2, §10).
    4. The text is **split into sentences, then clauses** ("but", "mais", "aber", "pero"…).
    5. A **multilingual sentence-embedding model** (MiniLM) embeds each chunk; a small classifier trained on the
@@ -283,9 +285,14 @@ sentence also lowercased like a transcript without capitals:
 | Spoken phone numbers removed | 4/4 | 4/4 |
 | Other words removed by mistake | 0.3 % (1/364) | 0 % (0/364) |
 
-On the whole written corpus (250 feedbacks + 756 catalog examples), 2 of 9,584 words were removed by mistake (the
-place names Lyon and Valencia). The sentences were written before the first measurement, but the name list was
-widened once afterwards (Rwandan names), so this recall is optimistic; details in RESULTS.md.
+On the whole written corpus (250 feedbacks + 756 catalog examples), 0 of 9,584 words are removed by mistake (Lyon
+and Valencia were, before a list of capitalised non-names was added: cities, currencies, Wi-Fi, GPS, WhatsApp…).
+Over-scrubbing on **Whisper transcripts** is measured too, on the level-3 clean clips (synthetic voices), since
+Whisper capitalises words that are lowercase in writing: **2 of 965 words** removed by mistake with whisper-base
+(Newson's, a mishearing of Musanze, and Frank, a mishearing of Franc at the start of a sentence), 2/979 with tiny,
+2/1,010 with small (Dog, Village); before that list it was 6/965 with base ("Is there any Wi-Fi?" became "Is there
+any [nom]?"). The sentences were written before the first measurement, but the name list was widened once
+afterwards (Rwandan names), so this recall is optimistic; details in RESULTS.md.
 
 ### 5.3 The threshold: share of chunks handled vs error, and why 0.84
 
@@ -309,9 +316,9 @@ RESULTS.md); the test half is not perfectly untouched.
 
 | Input (whisper-base) | WER | Language right | Inaudible (of 80) | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Keywords captured | Keywords error among accepted |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Text, same 80 messages (level 2) | – | – | – | 42.9 % | 8.7 % | 0.60 | 50.0 % | 89.0 % | 32.3 % |
-| Clean + 0.4 s silence | 13.7 % | 100 % | 12 | 40.7 % | 0.0 % | 0.60 | 47.8 % | 71.4 % | 32.5 % |
-| 20 dB SNR | 13.6 % | 100 % | 12 | 37.4 % | 7.3 % | 0.57 | 44.9 % | 70.3 % | 33.6 % |
+| Text, same 80 messages (level 2) | – | – | – | 42.9 % | 8.7 % | 0.60 | 49.3 % | 89.0 % | 32.3 % |
+| Clean + 0.4 s silence | 13.7 % | 100 % | 12 | 40.7 % | 0.0 % | 0.60 | 47.1 % | 71.4 % | 32.5 % |
+| 20 dB SNR | 13.6 % | 100 % | 12 | 37.4 % | 7.3 % | 0.57 | 44.2 % | 70.3 % | 33.6 % |
 | **10 dB SNR** | 17.5 % | 100 % | 12 | **35.2 %** | **2.7 %** | 0.56 | 47.8 % | 69.2 % | 33.0 % |
 | 5 dB SNR | 23.9 % | 97 % | 14 | 30.8 % | 8.3 % | 0.51 | 49.7 % | 65.9 % | 32.4 % |
 
@@ -351,7 +358,7 @@ made after seeing the picking result, and there is no second recurring topic to 
 all 250 feedbacks as one month: picking flagged, but 19 false alerts, so the signal suits one farm, not a
 cooperative-wide feed. In the web demo the three picking samples trigger the signal.
 
-**Duplicates:** exact re-sends 100 % caught, case/punctuation variants 98 %, 1 false duplicate among 125 distinct
+**Duplicates:** exact re-sends 100 % caught, case/punctuation variants 99 %, 1 false duplicate among 125 distinct
 feedbacks, 0 for the same text a month later.
 
 ### 5.6 Echo vs keywords (summary)
@@ -449,9 +456,11 @@ Cooperative sharing is a separate host consent, **off by default**, revocable in
 
 | Data | Where | Who can read it |
 |---|---|---|
+| Written message (pasted, imported .txt, shared from WhatsApp) | Queue in IndexedDB until analysed, **already scrubbed** (names, numbers, e-mails removed when it enters the queue); removed after analysis | Whoever opens Echo on that phone, until the analysis |
 | Audio | Queue in the phone's browser storage (IndexedDB) **until transcription ends**, then deleted; the buffer is zero-filled; a decoded copy stays in memory (never stored) until the English of the unclear segments is made in the same queue run, then zero-filled | Nobody after transcription |
 | Full transcript and its time segments | Memory only, during the queue run; shown once in "Just analysed" | Never stored |
-| Per message: date, language, findings + confidence, status, counts, a non-reversible text fingerprint | IndexedDB on the phone | Whoever opens Echo on that phone (PIN optional) |
+| Per message: date, language, findings + confidence, status, counts | IndexedDB on the phone | Whoever opens Echo on that phone (PIN optional) |
+| Text fingerprint of the scrubbed message (fast unsalted hash, exact-duplicate detection only; a short message could be recovered by hashing candidate sentences) | IndexedDB on the phone, **kept 7 days for duplicate detection**, then removed from the record together with the message embedding | Whoever opens Echo on that phone |
 | Message embedding (384 numbers, near-duplicate detection only) | IndexedDB on the phone, **kept 7 days for duplicate detection**, then removed from the record (at app start and before each queue run) | Whoever opens Echo on that phone |
 | Scrubbed text of "not sure" / off-list chunks | IndexedDB on the phone | The host and the person she asks to read them |
 | Chunk embedding of "not sure" / off-list chunks (384 numbers, unknown-topic clustering of the month) | IndexedDB on the phone **until the month is over**; then the month's clusters are computed once and written on the chunks (`clusterId`), and every embedding of that month is removed (at app start, before and after each queue run) | Whoever opens Echo on that phone |
@@ -606,7 +615,8 @@ Found during the build:
   Measured on 52 synthetic sentences: 90 % of names removed, 81 % when the transcript has no capitals. It keeps on
   purpose first names that are also common words (Grace, Claire, Pierre, Pilar, Rose, Ernst, Dolores) unless they
   sit next to another name or "and I", and misses names outside its list at the start of a sentence (Noor, Kwame).
-  It removed 2 place names (Lyon, Valencia) out of 9,584 words of the corpus. A missed name in a "not sure" or
+  It removes no word of the 9,584-word written corpus by mistake, but 2 of 965 words of the whisper-base transcripts
+  (mishearings Whisper capitalised: "Newson's", "Frank"). A missed name in a "not sure" or
   off-list chunk is stored with that chunk's text. Real visitors' names through Whisper are not measured.
 - **English versions only for voice notes, and not for every unclear part, at a cost.** A not-sure chunk that
   shares a time segment with a counted chunk gets no English version; written messages never get one. Each unclear
@@ -645,7 +655,7 @@ Found during the build:
 
 | Path | What |
 |---|---|
-| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation, month closure, per-segment English for review chunks). 127 tests with fakes (159 in the whole workspace). `calibration.ts` is generated by the evaluation. |
+| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation, month closure, per-segment English for review chunks). 132 tests with fakes (168 in the whole workspace). `calibration.ts` is generated by the evaluation. |
 | `packages/models` | transformers.js adapters: Whisper with our language detection, token-log-prob confidence, repetition-loop guard, 30 s windows; embedder (mean pooling, L2). Same file in the browser and in the evaluation. |
 | `apps/web` | Vite + Preact PWA: Try-it demo, host app (modes A/B), settings + PIN, cooperative view, visitor card, service worker, share target, worker. |
 | `apps/android` | Capacitor shell packaging `apps/web/dist` (models bundled) as a side-loadable APK; Android share intent → the web app's queue. |
@@ -681,7 +691,7 @@ pnpm dev                           # web app with hot reload: http://localhost:5
 pnpm build                         # production build into apps/web/dist (~260 MB with models)
 pnpm preview                       # serve the build: http://localhost:4173 (COOP/COEP headers → WASM threads)
 
-pnpm test                          # vitest, all packages (core, models, web, eval: 159 tests)
+pnpm test                          # vitest, all packages (core, models, web, eval: 168 tests)
 pnpm typecheck                     # tsc on every package
 pnpm --filter @echo/web e2e        # after `pnpm build`: real models in headless Chromium, online then offline
                                    #   (first time: npx playwright install chromium; writes docs/screenshots/)

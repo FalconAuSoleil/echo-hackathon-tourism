@@ -293,7 +293,17 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     const missed = [...new Set<string>(pii.misses.filter((m: J) => m.kind === "name").map((m: J) => `${m.value}${m.variant === "lowercase" ? " (lowercased)" : ""}`))];
     w(`Names kept: ${missed.join(", ")}. They are names that are also common words (kept on purpose unless next to another name or \"and I\"), names absent from the first-name list (Noor, Kwame) when they start a sentence or are lowercased, and lowercased names whose lowercase form is a word.`);
-    w(`On the whole written corpus (${pii.corpus.texts} texts: the 250 feedbacks and the catalog examples, where the fictional farmer \"Noor\" is the only person name), ${pii.corpus.removedWords} of ${pii.corpus.words} words were removed by mistake (${Object.keys(pii.corpus.removed).join(", ")}: place names in the middle of a sentence).`);
+    const corpusRemoved = Object.keys(pii.corpus.removed);
+    w(`On the whole written corpus (${pii.corpus.texts} texts: the 250 feedbacks and the catalog examples, where the fictional farmer \"Noor\" is the only person name), ${pii.corpus.removedWords} of ${pii.corpus.words} words were removed by mistake${corpusRemoved.length ? ` (${corpusRemoved.join(", ")})` : ""}. Lyon and Valencia were removed before the list of capitalised non-names (cities, units, Wi-Fi, GPS…) was added.`);
+    if (pii.transcripts) {
+      const tm = pii.transcripts.models as Record<string, J>;
+      w();
+      w(`Over-scrubbing on **Whisper transcripts** (level-3 clean clips, synthetic voices): Whisper capitalises words that are lowercase in writing (\"Wi-Fi\") and mishears others (\"Frank\" for \"Franc\"). \"Noor\" is the only person in these feedbacks; a removed word within edit distance 2 of \"noor\" (Nor, Nora, Noa) counts as her name.`);
+      w();
+      w(table(["Model", "Transcripts", "Words", "Noor removed", "Other words removed by mistake", "Which"], Object.entries(tm).map(([m, v]) => [m, `${v.transcripts}`, `${v.words}`, `${v.nameRemovals}`, `${pct(v.falseRemovalRate, 1)} (${v.falseRemovals}/${v.words})`, [...new Set((v.removed as J[]).map((r: J) => r.word))].join(", ") || "–"])));
+      w();
+      w("Before the allow-list of capitalised non-names and the quantifier rule (\"jeden Frank\"), the same transcripts lost 4 (tiny), 6 (base: Wi-Fi counted as two words, Newson's, Lyon, Frank, Valencia) and 6 (small) words this way; the remaining ones are mishearings (Newson's for Musanze, Frank for Franc at the start of a sentence) or common nouns that Whisper capitalised (Dog, Village).");
+    }
     w(`The first-name list (${pii.givenNames} names: US Census 1990, INSEE, Wikidata incl. Rwandan and Burundian names; docs/DATASHEET.md) was widened once after the first run of this check (Rwandan names from Wikidata person labels) and \"Liebe Grüße\" was fixed: these sentences are not a blind test set, so read the recall as optimistic. Real names said by real visitors, through Whisper, are not measured.`);
     w();
   }

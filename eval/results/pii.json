@@ -308,13 +308,73 @@
   "corpus": {
     "texts": 1006,
     "words": 9584,
-    "removedWords": 2,
-    "falseRemovalRate": 0.0002,
-    "textsTouched": 2,
-    "removed": {
-      "lyon": 1,
-      "valencia": 1
-    },
+    "removedWords": 0,
+    "falseRemovalRate": 0,
+    "textsTouched": 0,
+    "removed": {},
     "note": "feedback.jsonl (250) + catalog examples; 'Noor' (the fictional farmer) is the only person name, every other removed word counts as a false removal."
+  },
+  "transcripts": {
+    "synthetic": true,
+    "note": "Whisper transcripts of the level-3 clean clips (synthetic Piper voices, no noise). 'Noor' is the only person in these feedbacks; a removed word within edit distance 2 of 'noor' counts as her name, any other removed word as a false removal.",
+    "models": {
+      "whisper-tiny": {
+        "transcripts": 50,
+        "words": 979,
+        "nameRemovals": 2,
+        "falseRemovals": 2,
+        "falseRemovalRate": 0.002,
+        "removed": [
+          {
+            "id": "fr-026",
+            "word": "queue",
+            "output": "Nous étions un groupe de cinq amis de l'Ion et nous gardons un souvenir merveilleux de cette journée, la [nom] de [nom], et de ses enfants, est adorable. Et nous ont tout de suite mis à l'aise. La visite des parcelles étaient très intéressantes. Et les explications sur la fermentation et le séchage était clair, même pour des gens qui ne connaissent rien. La dégustation à la fin était le meilleur moment. Par contre, la visite était un peu long pour nous, presque quatre heures. Et il n'y avait rien à manger avant qu'un heures. On recommandra quand même à tous nos amis."
+          },
+          {
+            "id": "de-061",
+            "word": "wert",
+            "output": "Kurz das Feedback von uns dreien. Die Anfahrt war okay. Aber die letzten zwei Kilometer zu Fuß über den rutschigen Fahrt waren hart. Umwohnern wir aber mit einem breiten Lechchen und frischen Kaffee empfangen. Der Bauern hat die Sorten und die Verarbeitung super erklärt und seine Tochter hat geduldig übersetzt. Das Essen war einfach aber sehr lecker. Vielen Dank, [nom]."
+          }
+        ]
+      },
+      "whisper-base": {
+        "transcripts": 50,
+        "words": 965,
+        "nameRemovals": 2,
+        "falseRemovals": 2,
+        "falseRemovalRate": 0.0021,
+        "removed": [
+          {
+            "id": "en-060",
+            "word": "newson's",
+            "output": "So we're to start. We booked through our hostel in [nom] and honestly didn't know what to expect. The drive was fine but the last part on foot took us nearly. An hour uphill and two of us were really struggling. Once we got there though everything changed. The family was lovely. The kids showed us around and we sat in the kitchen while they cooked on the fire. That's what I'll remember real every day life. The tour itself was short maybe 45 minutes in the field which felt rushed given how far we came. Price was fair. We come back but we'd ask for more time among the coffee trees."
+          },
+          {
+            "id": "de-061",
+            "word": "frank",
+            "output": "Kurzes Feedback von uns dreien. Die Anfahrt war okay, aber die letzten zwei Kilometer zu Fuß über den rutschigen Fahrt waren hart. Umwohnen wir aber mit einem breiten Lächeln und frischen Kaffeeempfangen. Der Bauer hat die Sorten und die Verarbeitung super erklärt und seine Tochter hat geduldig übersetzt. Das Essen war einfach, aber sehr lecker. Tooletten gab es keine richtigen, nur ein Loch hinter dem Haus. Wir haben sehr gerne bezahlt. [nom] Wert."
+          }
+        ]
+      },
+      "whisper-small": {
+        "transcripts": 50,
+        "words": 1010,
+        "nameRemovals": 2,
+        "falseRemovals": 2,
+        "falseRemovalRate": 0.002,
+        "removed": [
+          {
+            "id": "en-023",
+            "word": "dog",
+            "output": "Lovely people. Farm [nom] followed us the whole tour. He was adorable."
+          },
+          {
+            "id": "fr-041",
+            "word": "village",
+            "output": "On a entendu la chorale de l'Église du [nom] répété, c'était très beau."
+          }
+        ]
+      }
+    }
   }
 }

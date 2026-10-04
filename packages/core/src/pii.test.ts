@@ -73,6 +73,19 @@ describe("scrubPii", () => {
   it("garde les petits nombres (durées, prix)", () => {
     expect(s("We walked 45 minutes and paid 10000 francs")).toBe("We walked 45 minutes and paid 10000 francs");
   });
+  it("garde les mots techniques, unités et villes que Whisper écrit avec une majuscule", () => {
+    expect(s("Is there any Wi-Fi? I couldn't check my messages all day.")).toBe("Is there any Wi-Fi? I couldn't check my messages all day.");
+    expect(s("No WiFi, no GPS, but WhatsApp worked")).toBe("No WiFi, no GPS, but WhatsApp worked");
+    expect(s("Pas de WI-FI ni de USB-C", "fr")).toBe("Pas de WI-FI ni de USB-C");
+    expect(s("Wir haben sehr gerne bezahlt. Frank Wert.", "de")).toBe("Wir haben sehr gerne bezahlt. [nom] Wert.");
+    expect(s("das war jeden Frank wert", "de")).toBe("das war jeden Frank wert");
+    expect(s("paid 10 Euro per person, every Franc well spent")).toBe("paid 10 Euro per person, every Franc well spent");
+    expect(s("Nous étions cinq amis de Lyon", "fr")).toBe("Nous étions cinq amis de Lyon");
+    expect(s("Somos una pareja de Valencia", "es")).toBe("Somos una pareja de Valencia");
+    // Une vraie personne nommée Frank reste retirée.
+    expect(s("Danke Frank, es war toll", "de")).toBe("Danke [nom], es war toll");
+    expect(s("Frank fand den Weg lang", "de")).toBe("[nom] fand den Weg lang");
+  });
   it("compte les noms retirés", () => {
     expect(scrubPii("my name is Anna and our guide Eric was great", "en").removed.names).toBe(2);
   });

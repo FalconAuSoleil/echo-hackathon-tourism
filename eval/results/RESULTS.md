@@ -207,7 +207,7 @@ Chunks are clustered with the shipped `clusterOffList` (average linkage, thresho
 
 | Chunks clustered | Candidate chunks | Picking flagged (250 as one month) | False alerts (250 as one month) | Picking flagged (realistic months) | Months with a false alert |
 |---|---:|---:|---:|---:|---:|
-| `off_list` | 95 | no | 4 | 0.0 % | 0.0 % |
+| `off_list` | 96 | no | 4 | 0.0 % | 0.0 % |
 | `off_list_and_unsure` (shipped) | 224 | yes | 19 | 98.0 % | 0.6 % |
 
 Where the three picking remarks land: en-026: not_sure (below_threshold); fr-025: not_sure (below_threshold); de-025: not_sure (below_threshold).
@@ -238,7 +238,7 @@ Rule: exact fingerprint of the normalised scrubbed text, or whole-message embedd
 |---|---:|---:|
 | Distinct feedbacks (should not be flagged) | 125 | 1 |
 | Re-sent: exact | 125 | 125 (100 %) |
-| Re-sent: case punct space | 125 | 123 (98 %) |
+| Re-sent: case punct space | 125 | 124 (99 %) |
 | Re-sent: trailing emphasis | 125 | 124 (99 %) |
 | Re-sent: one word added | 125 | 89 (71 %) |
 | Same text a month later (outside the 7-day window, should not be flagged) | 125 | 0 |
@@ -264,7 +264,17 @@ deliberately ambiguous (a resend after an edit, or a second visitor): about 4 in
 | es | 91 % (10/11) | 73 % (8/11) |
 
 Names kept: Grace, Noor, Claire, Ernst, Rose, Pilar, Kwame (lowercased), Grace (lowercased), Noor (lowercased), Aimable (lowercased), Claire (lowercased), Ernst (lowercased), Rose (lowercased), Lucía (lowercased), Pilar (lowercased), Pierre (lowercased), Dolores (lowercased). They are names that are also common words (kept on purpose unless next to another name or "and I"), names absent from the first-name list (Noor, Kwame) when they start a sentence or are lowercased, and lowercased names whose lowercase form is a word.
-On the whole written corpus (1006 texts: the 250 feedbacks and the catalog examples, where the fictional farmer "Noor" is the only person name), 2 of 9584 words were removed by mistake (lyon, valencia: place names in the middle of a sentence).
+On the whole written corpus (1006 texts: the 250 feedbacks and the catalog examples, where the fictional farmer "Noor" is the only person name), 0 of 9584 words were removed by mistake. Lyon and Valencia were removed before the list of capitalised non-names (cities, units, Wi-Fi, GPS…) was added.
+
+Over-scrubbing on **Whisper transcripts** (level-3 clean clips, synthetic voices): Whisper capitalises words that are lowercase in writing ("Wi-Fi") and mishears others ("Frank" for "Franc"). "Noor" is the only person in these feedbacks; a removed word within edit distance 2 of "noor" (Nor, Nora, Noa) counts as her name.
+
+| Model | Transcripts | Words | Noor removed | Other words removed by mistake | Which |
+|---|---:|---:|---:|---:|---:|
+| whisper-tiny | 50 | 979 | 2 | 0.2 % (2/979) | queue, wert |
+| whisper-base | 50 | 965 | 2 | 0.2 % (2/965) | newson's, frank |
+| whisper-small | 50 | 1010 | 2 | 0.2 % (2/1010) | dog, village |
+
+Before the allow-list of capitalised non-names and the quantifier rule ("jeden Frank"), the same transcripts lost 4 (tiny), 6 (base: Wi-Fi counted as two words, Newson's, Lyon, Frank, Valencia) and 6 (small) words this way; the remaining ones are mishearings (Newson's for Musanze, Frank for Franc at the start of a sentence) or common nouns that Whisper capitalised (Dog, Village).
 The first-name list (6154 names: US Census 1990, INSEE, Wikidata incl. Rwandan and Burundian names; docs/DATASHEET.md) was widened once after the first run of this check (Rwandan names from Wikidata person labels) and "Liebe Grüße" was fixed: these sentences are not a blind test set, so read the recall as optimistic. Real names said by real visitors, through Whisper, are not measured.
 
 ## Level 3 — end to end on audio (SYNTHETIC voices + real outdoor noise)
@@ -273,21 +283,21 @@ The first-name list (6154 names: US Census 1990, INSEE, Wikidata incl. Rwandan a
 
 | Input | WER | Lang right | Inaudible | RTF | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Kw captured | Kw error among accepted | Kw F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| text (level 2, same messages) | – | – | – | – | 42.9 % | 8.7 % | 0.60 | 50.0 % | 89.0 % | 32.3 % | 0.76 |
+| text (level 2, same messages) | – | – | – | – | 42.9 % | 8.7 % | 0.60 | 49.3 % | 89.0 % | 32.3 % | 0.76 |
 | whisper-tiny, clean | 23.1 % | 100 % | 30 | 0.65 | 24.2 % | 14.3 % | 0.39 | 53.1 % | 50.5 % | 30.0 % | 0.60 |
 | whisper-tiny, clean_pad | 21.7 % | 100 % | 12 | 0.57 | 29.7 % | 9.4 % | 0.48 | 53.4 % | 60.4 % | 33.3 % | 0.66 |
 | whisper-tiny, snr20 | 25.4 % | 100 % | 12 | 0.63 | 24.2 % | 10.7 % | 0.42 | 52.5 % | 58.2 % | 31.6 % | 0.66 |
 | whisper-tiny, snr10 | 40.2 % | 97 % | 17 | 0.67 | 20.9 % | 9.1 % | 0.36 | 58.6 % | 48.4 % | 32.9 % | 0.59 |
 | whisper-tiny, snr5 | 50.4 % | 99 % | 20 | 0.51 | 22.0 % | 8.3 % | 0.37 | 65.4 % | 36.3 % | 36.4 % | 0.51 |
 | whisper-base, clean | 16.2 % | 100 % | 30 | 0.73 | 27.5 % | 3.7 % | 0.44 | 52.0 % | 56.0 % | 29.8 % | 0.63 |
-| whisper-base, clean_pad | 13.7 % | 100 % | 12 | 0.86 | 40.7 % | 0.0 % | 0.60 | 47.8 % | 71.4 % | 32.5 % | 0.71 |
-| whisper-base, snr20 | 13.6 % | 100 % | 12 | 0.81 | 37.4 % | 7.3 % | 0.57 | 44.9 % | 70.3 % | 33.6 % | 0.70 |
+| whisper-base, clean_pad | 13.7 % | 100 % | 12 | 0.86 | 40.7 % | 0.0 % | 0.60 | 47.1 % | 71.4 % | 32.5 % | 0.71 |
+| whisper-base, snr20 | 13.6 % | 100 % | 12 | 0.81 | 37.4 % | 7.3 % | 0.57 | 44.2 % | 70.3 % | 33.6 % | 0.70 |
 | whisper-base, snr10 | 17.5 % | 100 % | 12 | 0.75 | 35.2 % | 2.7 % | 0.56 | 47.8 % | 69.2 % | 33.0 % | 0.70 |
 | whisper-base, snr5 | 23.9 % | 97 % | 14 | 0.79 | 30.8 % | 8.3 % | 0.51 | 49.7 % | 65.9 % | 32.4 % | 0.70 |
-| whisper-small, clean | 10.4 % | 100 % | 30 | 1.67 | 33.0 % | 6.1 % | 0.52 | 52.3 % | 60.4 % | 29.2 % | 0.66 |
-| whisper-small, clean_pad | 10.6 % | 100 % | 12 | 1.28 | 40.7 % | 9.3 % | 0.59 | 48.4 % | 75.8 % | 33.1 % | 0.71 |
-| whisper-small, snr20 | 10.2 % | 100 % | 12 | 1.22 | 41.8 % | 7.0 % | 0.61 | 47.2 % | 75.8 % | 33.1 % | 0.71 |
-| whisper-small, snr10 | 10.7 % | 100 % | 12 | 0.69 | 40.7 % | 7.0 % | 0.59 | 46.3 % | 75.8 % | 32.5 % | 0.71 |
+| whisper-small, clean | 10.4 % | 100 % | 30 | 1.67 | 33.0 % | 6.1 % | 0.52 | 51.5 % | 60.4 % | 29.2 % | 0.66 |
+| whisper-small, clean_pad | 10.6 % | 100 % | 12 | 1.28 | 40.7 % | 9.3 % | 0.59 | 47.8 % | 75.8 % | 33.1 % | 0.71 |
+| whisper-small, snr20 | 10.2 % | 100 % | 12 | 1.22 | 41.8 % | 7.0 % | 0.61 | 46.6 % | 75.8 % | 33.1 % | 0.71 |
+| whisper-small, snr10 | 10.7 % | 100 % | 12 | 0.69 | 40.7 % | 7.0 % | 0.59 | 45.6 % | 75.8 % | 32.5 % | 0.71 |
 | whisper-small, snr5 | 13.6 % | 99 % | 12 | 0.62 | 39.6 % | 2.5 % | 0.59 | 44.1 % | 69.2 % | 33.3 % | 0.68 |
 
 Inaudible: clips the app refuses to analyse (SPEC 7). The very short feedbacks ("Thanks!", "Meh.") become clips under 3 s and are
@@ -383,7 +393,7 @@ same Whisper transcripts.
 | Lang | Clips | WER | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Kw P | Kw R | Kw F1 | Kw error among accepted | Kw captured |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | en | 20 | 8.4 % | 1.00 | 0.45 | 0.63 | 0.0 % [0–28] (10 acc.) | 43.5 % | 37.5 % | 0.71 | 0.77 | 0.74 | 30.8 % (26 acc.) | 73.9 % |
-| fr | 20 | 16.2 % | 1.00 | 0.52 | 0.69 | 0.0 % [0–24] (12 acc.) | 47.8 % | 48.6 % | 0.65 | 0.87 | 0.74 | 32.4 % (34 acc.) | 82.6 % |
+| fr | 20 | 16.2 % | 1.00 | 0.52 | 0.69 | 0.0 % [0–24] (12 acc.) | 47.8 % | 46.0 % | 0.65 | 0.87 | 0.74 | 32.4 % (34 acc.) | 82.6 % |
 | de | 20 | 17.2 % | 1.00 | 0.20 | 0.33 | 0.0 % [0–49] (4 acc.) | 20.0 % | 60.5 % | 0.57 | 0.65 | 0.60 | 40.0 % (25 acc.) | 55.0 % |
 | es | 20 | 13.9 % | 1.00 | 0.52 | 0.68 | 0.0 % [0–22] (14 acc.) | 48.0 % | 47.1 % | 0.76 | 0.76 | 0.76 | 27.6 % (29 acc.) | 72.0 % |
 

@@ -233,11 +233,11 @@
         "chunks": {
           "total": 152,
           "matched": 46,
-          "notSure": 76,
-          "offList": 30,
+          "notSure": 75,
+          "offList": 31,
           "coverage": 0.3026,
-          "notSureRate": 0.5,
-          "offListRate": 0.1974
+          "notSureRate": 0.4934,
+          "offListRate": 0.2039
         },
         "answers": {
           "accepted": 46,
@@ -3921,11 +3921,11 @@
           "chunks": {
             "total": 35,
             "matched": 9,
-            "notSure": 21,
-            "offList": 5,
+            "notSure": 20,
+            "offList": 6,
             "coverage": 0.2571,
-            "notSureRate": 0.6,
-            "offListRate": 0.1429
+            "notSureRate": 0.5714,
+            "offListRate": 0.1714
           },
           "answers": {
             "accepted": 9,
@@ -26747,8 +26747,8 @@
               ],
               "accepted": 4,
               "coverage": 0.1176,
-              "notSureRate": 0.5588,
-              "offListRate": 0.3235,
+              "notSureRate": 0.5882,
+              "offListRate": 0.2941,
               "captureRate": 0.2,
               "captureCi95": [
                 0.0807,
@@ -26822,8 +26822,8 @@
               ],
               "accepted": 9,
               "coverage": 0.2647,
-              "notSureRate": 0.5588,
-              "offListRate": 0.1765,
+              "notSureRate": 0.5294,
+              "offListRate": 0.2059,
               "captureRate": 0.3478,
               "captureCi95": [
                 0.1881,
@@ -27874,8 +27874,8 @@
           ],
           "accepted": 17,
           "coverage": 0.2931,
-          "notSureRate": 0.5,
-          "offListRate": 0.2069,
+          "notSureRate": 0.5172,
+          "offListRate": 0.1897,
           "captureRate": 0.3191,
           "captureCi95": [
             0.204,
@@ -29219,11 +29219,11 @@
             "chunks": {
               "total": 157,
               "matched": 40,
-              "notSure": 75,
-              "offList": 42,
+              "notSure": 74,
+              "offList": 43,
               "coverage": 0.2548,
-              "notSureRate": 0.4777,
-              "offListRate": 0.2675
+              "notSureRate": 0.4713,
+              "offListRate": 0.2739
             },
             "answers": {
               "accepted": 40,
@@ -30041,8 +30041,8 @@
               ],
               "accepted": 12,
               "coverage": 0.3243,
-              "notSureRate": 0.4865,
-              "offListRate": 0.1892,
+              "notSureRate": 0.4595,
+              "offListRate": 0.2162,
               "captureRate": 0.4783,
               "captureCi95": [
                 0.2924,
@@ -32504,11 +32504,11 @@
             "chunks": {
               "total": 156,
               "matched": 41,
-              "notSure": 70,
-              "offList": 45,
+              "notSure": 69,
+              "offList": 46,
               "coverage": 0.2628,
-              "notSureRate": 0.4487,
-              "offListRate": 0.2885
+              "notSureRate": 0.4423,
+              "offListRate": 0.2949
             },
             "answers": {
               "accepted": 41,
@@ -33326,8 +33326,8 @@
               ],
               "accepted": 12,
               "coverage": 0.3333,
-              "notSureRate": 0.5278,
-              "offListRate": 0.1389,
+              "notSureRate": 0.5,
+              "offListRate": 0.1667,
               "captureRate": 0.3478,
               "captureCi95": [
                 0.1881,
@@ -42450,11 +42450,11 @@
             "chunks": {
               "total": 132,
               "matched": 33,
-              "notSure": 69,
-              "offList": 30,
+              "notSure": 68,
+              "offList": 31,
               "coverage": 0.25,
-              "notSureRate": 0.5227,
-              "offListRate": 0.2273
+              "notSureRate": 0.5152,
+              "offListRate": 0.2348
             },
             "answers": {
               "accepted": 33,
@@ -43272,8 +43272,8 @@
               ],
               "accepted": 8,
               "coverage": 0.2424,
-              "notSureRate": 0.6061,
-              "offListRate": 0.1515,
+              "notSureRate": 0.5758,
+              "offListRate": 0.1818,
               "captureRate": 0.3478,
               "captureCi95": [
                 0.1881,
@@ -45686,11 +45686,11 @@
             "chunks": {
               "total": 159,
               "matched": 43,
-              "notSure": 77,
-              "offList": 39,
+              "notSure": 76,
+              "offList": 40,
               "coverage": 0.2704,
-              "notSureRate": 0.4843,
-              "offListRate": 0.2453
+              "notSureRate": 0.478,
+              "offListRate": 0.2516
             },
             "answers": {
               "accepted": 43,
@@ -46508,8 +46508,8 @@
               ],
               "accepted": 10,
               "coverage": 0.2703,
-              "notSureRate": 0.5676,
-              "offListRate": 0.1622,
+              "notSureRate": 0.5405,
+              "offListRate": 0.1892,
               "captureRate": 0.3913,
               "captureCi95": [
                 0.2216,
@@ -48984,11 +48984,11 @@
             "chunks": {
               "total": 161,
               "matched": 43,
-              "notSure": 76,
-              "offList": 42,
+              "notSure": 75,
+              "offList": 43,
               "coverage": 0.2671,
-              "notSureRate": 0.472,
-              "offListRate": 0.2609
+              "notSureRate": 0.4658,
+              "offListRate": 0.2671
             },
             "answers": {
               "accepted": 43,
@@ -49806,8 +49806,8 @@
               ],
               "accepted": 10,
               "coverage": 0.2632,
-              "notSureRate": 0.5263,
-              "offListRate": 0.2105,
+              "notSureRate": 0.5,
+              "offListRate": 0.2368,
               "captureRate": 0.4348,
               "captureCi95": [
                 0.2563,
@@ -52281,11 +52281,11 @@
             "chunks": {
               "total": 160,
               "matched": 43,
-              "notSure": 74,
-              "offList": 43,
+              "notSure": 73,
+              "offList": 44,
               "coverage": 0.2688,
-              "notSureRate": 0.4625,
-              "offListRate": 0.2688
+              "notSureRate": 0.4563,
+              "offListRate": 0.275
             },
             "answers": {
               "accepted": 43,
@@ -53103,8 +53103,8 @@
               ],
               "accepted": 10,
               "coverage": 0.2703,
-              "notSureRate": 0.5405,
-              "offListRate": 0.1892,
+              "notSureRate": 0.5135,
+              "offListRate": 0.2162,
               "captureRate": 0.3913,
               "captureCi95": [
                 0.2216,

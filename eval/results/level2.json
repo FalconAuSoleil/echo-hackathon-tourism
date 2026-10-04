@@ -76,7 +76,7 @@
       "precision": 0.9524,
       "recall": 0.4724,
       "f1": 0.6316,
-      "notSureRate": 0.4306,
+      "notSureRate": 0.4258,
       "negationCancelsAccuracy": 1
     },
     "catalogExamples": 756,
@@ -146,7 +146,7 @@
         "precision": 0.9583,
         "recall": 0.1811,
         "f1": 0.3046,
-        "notSureRate": 0.3828,
+        "notSureRate": 0.378,
         "negationCancelsAccuracy": 1
       }
     },
@@ -169,7 +169,7 @@
         "precision": 0.9804,
         "recall": 0.3937,
         "f1": 0.5618,
-        "notSureRate": 0.4928,
+        "notSureRate": 0.488,
         "negationCancelsAccuracy": 1
       }
     },
@@ -186,7 +186,7 @@
         "precision": 0.9643,
         "recall": 0.4252,
         "f1": 0.5902,
-        "notSureRate": 0.4689,
+        "notSureRate": 0.4641,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -203,7 +203,7 @@
         "precision": 0.9643,
         "recall": 0.4252,
         "f1": 0.5902,
-        "notSureRate": 0.4689,
+        "notSureRate": 0.4641,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -220,7 +220,7 @@
         "precision": 0.9516,
         "recall": 0.4646,
         "f1": 0.6243,
-        "notSureRate": 0.4354,
+        "notSureRate": 0.4306,
         "negationCancelsAccuracy": 1
       }
     },
@@ -237,7 +237,7 @@
         "precision": 0.9552,
         "recall": 0.5039,
         "f1": 0.6598,
-        "notSureRate": 0.4163,
+        "notSureRate": 0.4115,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -254,7 +254,7 @@
         "precision": 0.9552,
         "recall": 0.5039,
         "f1": 0.6598,
-        "notSureRate": 0.4163,
+        "notSureRate": 0.4115,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -271,7 +271,7 @@
         "precision": 0.9508,
         "recall": 0.4567,
         "f1": 0.617,
-        "notSureRate": 0.4402,
+        "notSureRate": 0.4354,
         "negationCancelsAccuracy": 1
       }
     },
@@ -288,7 +288,7 @@
         "precision": 0.9508,
         "recall": 0.4567,
         "f1": 0.617,
-        "notSureRate": 0.445,
+        "notSureRate": 0.4402,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -305,7 +305,7 @@
         "precision": 0.9508,
         "recall": 0.4567,
         "f1": 0.617,
-        "notSureRate": 0.445,
+        "notSureRate": 0.4402,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -322,7 +322,7 @@
         "precision": 0.9524,
         "recall": 0.4724,
         "f1": 0.6316,
-        "notSureRate": 0.4306,
+        "notSureRate": 0.4258,
         "negationCancelsAccuracy": 1
       }
     },
@@ -339,7 +339,7 @@
         "precision": 0.9474,
         "recall": 0.4252,
         "f1": 0.587,
-        "notSureRate": 0.4641,
+        "notSureRate": 0.4593,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -356,7 +356,7 @@
         "precision": 0.9474,
         "recall": 0.4252,
         "f1": 0.587,
-        "notSureRate": 0.4641,
+        "notSureRate": 0.4593,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -373,7 +373,7 @@
         "precision": 0.9583,
         "recall": 0.3622,
         "f1": 0.5257,
-        "notSureRate": 0.2584,
+        "notSureRate": 0.2536,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -390,7 +390,7 @@
         "precision": 0.9556,
         "recall": 0.3386,
         "f1": 0.5,
-        "notSureRate": 0.2775,
+        "notSureRate": 0.2727,
         "negationCancelsAccuracy": 0.875
       }
     },
@@ -407,7 +407,7 @@
         "precision": 0.9483,
         "recall": 0.4331,
         "f1": 0.5946,
-        "notSureRate": 0.2105,
+        "notSureRate": 0.2057,
         "negationCancelsAccuracy": 0.875
       }
     },
@@ -424,7 +424,7 @@
         "precision": 0.9483,
         "recall": 0.4331,
         "f1": 0.5946,
-        "notSureRate": 0.2057,
+        "notSureRate": 0.201,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -441,7 +441,7 @@
         "precision": 0.9538,
         "recall": 0.4882,
         "f1": 0.6458,
-        "notSureRate": 0.1722,
+        "notSureRate": 0.1675,
         "negationCancelsAccuracy": 0.875
       }
     },
@@ -458,7 +458,7 @@
         "precision": 0.9545,
         "recall": 0.4961,
         "f1": 0.6528,
-        "notSureRate": 0.1675,
+        "notSureRate": 0.1627,
         "negationCancelsAccuracy": 0.875
       }
     },
@@ -475,7 +475,7 @@
         "precision": 0.9508,
         "recall": 0.4567,
         "f1": 0.617,
-        "notSureRate": 0.1914,
+        "notSureRate": 0.1866,
         "negationCancelsAccuracy": 0.9375
       }
     },
@@ -492,7 +492,7 @@
         "precision": 0.9552,
         "recall": 0.5039,
         "f1": 0.6598,
-        "notSureRate": 0.1627,
+        "notSureRate": 0.1579,
         "negationCancelsAccuracy": 0.875
       }
     },
@@ -509,7 +509,7 @@
         "precision": 0.9559,
         "recall": 0.5118,
         "f1": 0.6667,
-        "notSureRate": 0.1579,
+        "notSureRate": 0.1531,
         "negationCancelsAccuracy": 0.875
       }
     }
@@ -1297,7 +1297,7 @@
         "precision": 0.7295,
         "recall": 0.7008,
         "f1": 0.7149,
-        "notSureRate": 0.1722,
+        "notSureRate": 0.1675,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1309,7 +1309,7 @@
         "precision": 0.7311,
         "recall": 0.685,
         "f1": 0.7073,
-        "notSureRate": 0.1722,
+        "notSureRate": 0.1675,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1321,7 +1321,7 @@
         "precision": 0.7373,
         "recall": 0.685,
         "f1": 0.7102,
-        "notSureRate": 0.1722,
+        "notSureRate": 0.1675,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1333,7 +1333,7 @@
         "precision": 0.7328,
         "recall": 0.6693,
         "f1": 0.6996,
-        "notSureRate": 0.177,
+        "notSureRate": 0.1722,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1345,7 +1345,7 @@
         "precision": 0.7368,
         "recall": 0.6614,
         "f1": 0.6971,
-        "notSureRate": 0.177,
+        "notSureRate": 0.1722,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1357,7 +1357,7 @@
         "precision": 0.7434,
         "recall": 0.6614,
         "f1": 0.7,
-        "notSureRate": 0.177,
+        "notSureRate": 0.1722,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1369,7 +1369,7 @@
         "precision": 0.7706,
         "recall": 0.6614,
         "f1": 0.7119,
-        "notSureRate": 0.1914,
+        "notSureRate": 0.1866,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1381,7 +1381,7 @@
         "precision": 0.7706,
         "recall": 0.6614,
         "f1": 0.7119,
-        "notSureRate": 0.1914,
+        "notSureRate": 0.1866,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1393,7 +1393,7 @@
         "precision": 0.7706,
         "recall": 0.6614,
         "f1": 0.7119,
-        "notSureRate": 0.1914,
+        "notSureRate": 0.1866,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1405,7 +1405,7 @@
         "precision": 0.7706,
         "recall": 0.6614,
         "f1": 0.7119,
-        "notSureRate": 0.1914,
+        "notSureRate": 0.1866,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1417,7 +1417,7 @@
         "precision": 0.7685,
         "recall": 0.6535,
         "f1": 0.7064,
-        "notSureRate": 0.1962,
+        "notSureRate": 0.1914,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1429,7 +1429,7 @@
         "precision": 0.7736,
         "recall": 0.6457,
         "f1": 0.7039,
-        "notSureRate": 0.201,
+        "notSureRate": 0.1962,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1441,7 +1441,7 @@
         "precision": 0.7885,
         "recall": 0.6457,
         "f1": 0.71,
-        "notSureRate": 0.2057,
+        "notSureRate": 0.201,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1453,7 +1453,7 @@
         "precision": 0.7885,
         "recall": 0.6457,
         "f1": 0.71,
-        "notSureRate": 0.2057,
+        "notSureRate": 0.201,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1465,7 +1465,7 @@
         "precision": 0.7864,
         "recall": 0.6378,
         "f1": 0.7043,
-        "notSureRate": 0.2153,
+        "notSureRate": 0.2105,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1477,7 +1477,7 @@
         "precision": 0.7843,
         "recall": 0.6299,
         "f1": 0.6987,
-        "notSureRate": 0.2201,
+        "notSureRate": 0.2153,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1489,7 +1489,7 @@
         "precision": 0.7843,
         "recall": 0.6299,
         "f1": 0.6987,
-        "notSureRate": 0.2201,
+        "notSureRate": 0.2153,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1501,7 +1501,7 @@
         "precision": 0.8081,
         "recall": 0.6299,
         "f1": 0.708,
-        "notSureRate": 0.2344,
+        "notSureRate": 0.2297,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1513,7 +1513,7 @@
         "precision": 0.8163,
         "recall": 0.6299,
         "f1": 0.7111,
-        "notSureRate": 0.2392,
+        "notSureRate": 0.2344,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1525,7 +1525,7 @@
         "precision": 0.8163,
         "recall": 0.6299,
         "f1": 0.7111,
-        "notSureRate": 0.2392,
+        "notSureRate": 0.2344,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1537,7 +1537,7 @@
         "precision": 0.8144,
         "recall": 0.622,
         "f1": 0.7054,
-        "notSureRate": 0.2488,
+        "notSureRate": 0.244,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1549,7 +1549,7 @@
         "precision": 0.8229,
         "recall": 0.622,
         "f1": 0.7085,
-        "notSureRate": 0.2536,
+        "notSureRate": 0.2488,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1561,7 +1561,7 @@
         "precision": 0.8229,
         "recall": 0.622,
         "f1": 0.7085,
-        "notSureRate": 0.2584,
+        "notSureRate": 0.2536,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1573,7 +1573,7 @@
         "precision": 0.8316,
         "recall": 0.622,
         "f1": 0.7117,
-        "notSureRate": 0.2679,
+        "notSureRate": 0.2632,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1585,7 +1585,7 @@
         "precision": 0.8316,
         "recall": 0.622,
         "f1": 0.7117,
-        "notSureRate": 0.2679,
+        "notSureRate": 0.2632,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1597,7 +1597,7 @@
         "precision": 0.828,
         "recall": 0.6063,
         "f1": 0.7,
-        "notSureRate": 0.2775,
+        "notSureRate": 0.2727,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1609,7 +1609,7 @@
         "precision": 0.828,
         "recall": 0.6063,
         "f1": 0.7,
-        "notSureRate": 0.2775,
+        "notSureRate": 0.2727,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1621,7 +1621,7 @@
         "precision": 0.828,
         "recall": 0.6063,
         "f1": 0.7,
-        "notSureRate": 0.2775,
+        "notSureRate": 0.2727,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1633,7 +1633,7 @@
         "precision": 0.837,
         "recall": 0.6063,
         "f1": 0.7032,
-        "notSureRate": 0.2823,
+        "notSureRate": 0.2775,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1645,7 +1645,7 @@
         "precision": 0.8556,
         "recall": 0.6063,
         "f1": 0.7097,
-        "notSureRate": 0.2919,
+        "notSureRate": 0.2871,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1657,7 +1657,7 @@
         "precision": 0.8621,
         "recall": 0.5906,
         "f1": 0.7009,
-        "notSureRate": 0.3062,
+        "notSureRate": 0.3014,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1669,7 +1669,7 @@
         "precision": 0.8621,
         "recall": 0.5906,
         "f1": 0.7009,
-        "notSureRate": 0.3062,
+        "notSureRate": 0.3014,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1681,7 +1681,7 @@
         "precision": 0.8721,
         "recall": 0.5906,
         "f1": 0.7042,
-        "notSureRate": 0.311,
+        "notSureRate": 0.3062,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1693,7 +1693,7 @@
         "precision": 0.8824,
         "recall": 0.5906,
         "f1": 0.7075,
-        "notSureRate": 0.3158,
+        "notSureRate": 0.311,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1705,7 +1705,7 @@
         "precision": 0.8795,
         "recall": 0.5748,
         "f1": 0.6952,
-        "notSureRate": 0.3254,
+        "notSureRate": 0.3206,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1717,7 +1717,7 @@
         "precision": 0.8765,
         "recall": 0.5591,
         "f1": 0.6827,
-        "notSureRate": 0.3397,
+        "notSureRate": 0.3349,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1729,7 +1729,7 @@
         "precision": 0.8861,
         "recall": 0.5512,
         "f1": 0.6796,
-        "notSureRate": 0.3493,
+        "notSureRate": 0.3445,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1741,7 +1741,7 @@
         "precision": 0.8846,
         "recall": 0.5433,
         "f1": 0.6732,
-        "notSureRate": 0.3541,
+        "notSureRate": 0.3493,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1753,7 +1753,7 @@
         "precision": 0.8846,
         "recall": 0.5433,
         "f1": 0.6732,
-        "notSureRate": 0.3541,
+        "notSureRate": 0.3493,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1765,7 +1765,7 @@
         "precision": 0.8846,
         "recall": 0.5433,
         "f1": 0.6732,
-        "notSureRate": 0.3541,
+        "notSureRate": 0.3493,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1777,7 +1777,7 @@
         "precision": 0.8831,
         "recall": 0.5354,
         "f1": 0.6667,
-        "notSureRate": 0.3589,
+        "notSureRate": 0.3541,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1789,7 +1789,7 @@
         "precision": 0.8831,
         "recall": 0.5354,
         "f1": 0.6667,
-        "notSureRate": 0.3589,
+        "notSureRate": 0.3541,
         "negationCancelsAccuracy": 0.9375
       },
       {
@@ -1801,7 +1801,7 @@
         "precision": 0.9067,
         "recall": 0.5354,
         "f1": 0.6733,
-        "notSureRate": 0.3684,
+        "notSureRate": 0.3636,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1813,7 +1813,7 @@
         "precision": 0.9189,
         "recall": 0.5354,
         "f1": 0.6766,
-        "notSureRate": 0.3732,
+        "notSureRate": 0.3684,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1825,7 +1825,7 @@
         "precision": 0.9189,
         "recall": 0.5354,
         "f1": 0.6766,
-        "notSureRate": 0.3732,
+        "notSureRate": 0.3684,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1837,7 +1837,7 @@
         "precision": 0.9189,
         "recall": 0.5354,
         "f1": 0.6766,
-        "notSureRate": 0.378,
+        "notSureRate": 0.3732,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1849,7 +1849,7 @@
         "precision": 0.9315,
         "recall": 0.5354,
         "f1": 0.68,
-        "notSureRate": 0.3828,
+        "notSureRate": 0.378,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1861,7 +1861,7 @@
         "precision": 0.9315,
         "recall": 0.5354,
         "f1": 0.68,
-        "notSureRate": 0.3828,
+        "notSureRate": 0.378,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1873,7 +1873,7 @@
         "precision": 0.9437,
         "recall": 0.5276,
         "f1": 0.6768,
-        "notSureRate": 0.3923,
+        "notSureRate": 0.3876,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1885,7 +1885,7 @@
         "precision": 0.9429,
         "recall": 0.5197,
         "f1": 0.6701,
-        "notSureRate": 0.3971,
+        "notSureRate": 0.3923,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1897,7 +1897,7 @@
         "precision": 0.9403,
         "recall": 0.4961,
         "f1": 0.6495,
-        "notSureRate": 0.4115,
+        "notSureRate": 0.4067,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1909,7 +1909,7 @@
         "precision": 0.9385,
         "recall": 0.4803,
         "f1": 0.6354,
-        "notSureRate": 0.4211,
+        "notSureRate": 0.4163,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1921,7 +1921,7 @@
         "precision": 0.9385,
         "recall": 0.4803,
         "f1": 0.6354,
-        "notSureRate": 0.4211,
+        "notSureRate": 0.4163,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1933,7 +1933,7 @@
         "precision": 0.9385,
         "recall": 0.4803,
         "f1": 0.6354,
-        "notSureRate": 0.4211,
+        "notSureRate": 0.4163,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1945,7 +1945,7 @@
         "precision": 0.9524,
         "recall": 0.4724,
         "f1": 0.6316,
-        "notSureRate": 0.4306,
+        "notSureRate": 0.4258,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1957,7 +1957,7 @@
         "precision": 0.95,
         "recall": 0.4488,
         "f1": 0.6096,
-        "notSureRate": 0.445,
+        "notSureRate": 0.4402,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1969,7 +1969,7 @@
         "precision": 0.95,
         "recall": 0.4488,
         "f1": 0.6096,
-        "notSureRate": 0.445,
+        "notSureRate": 0.4402,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1981,7 +1981,7 @@
         "precision": 0.9474,
         "recall": 0.4252,
         "f1": 0.587,
-        "notSureRate": 0.4593,
+        "notSureRate": 0.4545,
         "negationCancelsAccuracy": 1
       },
       {
@@ -1993,7 +1993,7 @@
         "precision": 0.9464,
         "recall": 0.4173,
         "f1": 0.5792,
-        "notSureRate": 0.4689,
+        "notSureRate": 0.4641,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2005,7 +2005,7 @@
         "precision": 0.9455,
         "recall": 0.4094,
         "f1": 0.5714,
-        "notSureRate": 0.4737,
+        "notSureRate": 0.4689,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2017,7 +2017,7 @@
         "precision": 0.9444,
         "recall": 0.4016,
         "f1": 0.5635,
-        "notSureRate": 0.4785,
+        "notSureRate": 0.4737,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2029,7 +2029,7 @@
         "precision": 0.9615,
         "recall": 0.3937,
         "f1": 0.5587,
-        "notSureRate": 0.488,
+        "notSureRate": 0.4833,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2041,7 +2041,7 @@
         "precision": 0.96,
         "recall": 0.378,
         "f1": 0.5424,
-        "notSureRate": 0.4976,
+        "notSureRate": 0.4928,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2053,7 +2053,7 @@
         "precision": 0.9783,
         "recall": 0.3543,
         "f1": 0.5202,
-        "notSureRate": 0.5167,
+        "notSureRate": 0.512,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2065,7 +2065,7 @@
         "precision": 0.9767,
         "recall": 0.3307,
         "f1": 0.4941,
-        "notSureRate": 0.5311,
+        "notSureRate": 0.5263,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2077,7 +2077,7 @@
         "precision": 0.9737,
         "recall": 0.2913,
         "f1": 0.4485,
-        "notSureRate": 0.5598,
+        "notSureRate": 0.555,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2089,7 +2089,7 @@
         "precision": 1,
         "recall": 0.252,
         "f1": 0.4025,
-        "notSureRate": 0.5885,
+        "notSureRate": 0.5837,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2101,7 +2101,7 @@
         "precision": 1,
         "recall": 0.2047,
         "f1": 0.3399,
-        "notSureRate": 0.6172,
+        "notSureRate": 0.6124,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2113,7 +2113,7 @@
         "precision": 1,
         "recall": 0.1575,
         "f1": 0.2721,
-        "notSureRate": 0.6555,
+        "notSureRate": 0.6507,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2125,7 +2125,7 @@
         "precision": 1,
         "recall": 0.0787,
         "f1": 0.146,
-        "notSureRate": 0.7033,
+        "notSureRate": 0.6986,
         "negationCancelsAccuracy": 1
       },
       {
@@ -2137,7 +2137,7 @@
         "precision": 0,
         "recall": 0,
         "f1": 0,
-        "notSureRate": 0.7512,
+        "notSureRate": 0.7464,
         "negationCancelsAccuracy": 1
       }
     ],
@@ -7799,11 +7799,11 @@
       "chunks": {
         "total": 209,
         "matched": 67,
-        "notSure": 90,
-        "offList": 52,
+        "notSure": 89,
+        "offList": 53,
         "coverage": 0.3206,
-        "notSureRate": 0.4306,
-        "offListRate": 0.2488
+        "notSureRate": 0.4258,
+        "offListRate": 0.2536
       },
       "answers": {
         "accepted": 67,
@@ -8721,11 +8721,11 @@
       "chunks": {
         "total": 433,
         "matched": 150,
-        "notSure": 188,
-        "offList": 95,
+        "notSure": 187,
+        "offList": 96,
         "coverage": 0.3464,
-        "notSureRate": 0.4342,
-        "offListRate": 0.2194
+        "notSureRate": 0.4319,
+        "offListRate": 0.2217
       },
       "answers": {
         "accepted": 150,
@@ -16141,7 +16141,7 @@
     },
     "offListOnly": {
       "sources": "off_list",
-      "candidateChunks": 95,
+      "candidateChunks": 96,
       "fullCorpus": {
         "detected": false,
         "falseAlerts": 4,
@@ -16531,8 +16531,8 @@
       },
       "case_punct_space": {
         "sent": 125,
-        "flagged": 123,
-        "rate": 0.984
+        "flagged": 124,
+        "rate": 0.992
       },
       "trailing_emphasis": {
         "sent": 125,
@@ -17866,7 +17866,7 @@
         "P10"
       ],
       "echoChunks": [
-        "off_list | Somos una pareja de [nom]",
+        "off_list | Somos una pareja de Valencia",
         "matched:P10 | venimos por recomendación de unos amigos.",
         "not_sure | La acogida fue muy cálida, nos ofrecieron té nada más llegar.",
         "not_sure | Luego recorrimos la plantación",

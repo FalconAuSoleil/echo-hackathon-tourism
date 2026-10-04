@@ -61,7 +61,7 @@
     "precision": 0.9524,
     "recall": 0.4724,
     "f1": 0.6316,
-    "notSureRate": 0.4306,
+    "notSureRate": 0.4258,
     "negationCancelsAccuracy": 1
   },
   "catalogExamples": 756,

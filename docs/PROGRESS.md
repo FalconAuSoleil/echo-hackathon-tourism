@@ -816,3 +816,52 @@ README test counts were left to the agent currently changing the core tests.
 
 **Remains**: nothing for these two gaps. The new card sentences in DE/ES/FR were written by the team, not checked by
 native speakers.
+
+## 2026-10-04 — fix-core-3: written messages scrubbed at enqueue, fingerprint expiry, over-scrubbing on transcripts
+
+**Built**
+- **Queue scrubbing (SPEC 4.3 step 3, SPEC 6)**: `scrubForQueue(text)` in core `storage.ts` (`scrubPii` with
+  `detectTextLanguage`, same as `analyzeMessage`), called by `enqueue` (`apps/web/src/lib/db.ts`) for every text
+  item, so pasted text, imported .txt files and WhatsApp/Android text shares (service worker → `enqueue`) are
+  written to the IndexedDB queue already scrubbed. `analyzeMessage` scrubs again (checked: same scrubbed text and
+  findings). Audio cannot be scrubbed before transcription (README wording for audio unchanged).
+- **Fingerprint expiry (SPEC 6)**: `StoredMessage.fingerprint` is now optional; `expireMessageEmbedding` removes
+  the fingerprint together with the message embedding after the 7-day duplicate window (also for older records that
+  only had a fingerprint left), via `pruneExpiredEmbeddings` at app start and before each queue run;
+  `knownMessages` skips expired records. Duplicate detection is unchanged (it already ignored messages outside the
+  window). README §7 table: fingerprint row "kept 7 days, then removed", described as a fast unsalted hash; queue
+  row for written messages added.
+- **Over-scrubbing (SPEC 4.4/4.5)**: `pii.ts` gets an allow-list of capitalised non-names (Wi-Fi/WiFi, GPS, SMS,
+  internet, app/payment brands, euro/franc/Franken/dollar/RWF units, ~50 cities visitors come from incl. Lyon and
+  Valencia); the mid-sentence capital rule now matches whole words only (before, "WhatsApp"/"WiFi" lost their first
+  part: "[nom]App"); the first-name list rule skips a word right after a quantifier ("jeden Frank wert", "every
+  Franc"). All-caps tokens (WI-FI, USB-C, GPS) were never matched by the capitalised-name pattern (test added).
+- **Eval**: `eval/src/pii.ts` adds an over-scrub measure on the Whisper transcripts of the level-3 clean clips
+  (from the committed `level3.json`; Noor's mishearings within edit distance 2 count as her name). RESULTS.md and
+  README §5.2/§10: whisper-base **2/965 words** removed by mistake (Newson's = Musanze, "Frank Wert." at a sentence
+  start), was 6/965 (Wi-Fi as 2 words, Newson's, Lyon, Frank, Valencia); tiny 2/979 (was 4), small 2/1,010 (Dog,
+  Village; was 6). Written corpus 0/9,584 (was 2). Name recall on the synthetic PII set unchanged (90 % / 81 %).
+- Since the scrubbed text of 2 corpus feedbacks changed (Lyon, Valencia kept), level 2 and level 3 were re-run with
+  cached transcripts: small shifts only (level-2 not-sure rate at threshold on the calibration half 43.1 → 42.6 %,
+  case/punctuation re-sends caught 98 → 99 %, level-3 "Echo not sure" text 50.0 → 49.3 %, clean_pad 47.8 → 47.1 %,
+  20 dB 44.9 → 44.2 %); the held-out level-2 table and the 10 dB headline numbers are unchanged. README updated.
+- Tests: core (queue scrub + same analysis, fingerprint expiry, allow-list/quantifier/real Frank still removed),
+  web db (queue rows scrubbed, fingerprint removed after 7 days incl. legacy records). e2e: new check in section 3,
+  "My name is Anna, +250 788 000 111. The meal was great." is stored in the queue as "My name is [nom], [numéro]. …"
+  and removed again (this e2e edit landed in commit b16e74f of fix-web-app-3, which staged the whole file).
+
+**Verified**: `pnpm test` 168 passed, `pnpm typecheck`, `pnpm build`, `pnpm --filter @echo/web e2e` **PASSED**
+(54 checks), `pnpm eval -- --level 2`, `pnpm eval -- --level 3 --level pii --level report`.
+
+**Deviations**
+- Fingerprint: removed after 7 days rather than salted; during the 7 days it is still a fast unsalted hash (stated
+  in README §7).
+- "Frank" stays removed when Whisper writes it at the start of a sentence ("Frank Wert."), and the mishearing
+  "Newson's" and capitalised common nouns ("Dog", "Village" with whisper-small) are still removed: allow-listing
+  mishearings would be overfitting; privacy wins over readability here.
+
+**Touched other areas (minimal)**: `apps/web/src/lib/db.ts` + `db.test.ts`, `apps/web/scripts/e2e.ts` (web app);
+`eval/src/pii.ts`, `eval/src/report.ts`, `eval/results/*` (eval); `docs/ARCHITECTURE.md` §7. Screenshots re-taken
+by the e2e.
+
+**Remains**: real visitors' names and words through Whisper on a real phone (`docs/MANUAL_TESTS.md` §1 step 6a).

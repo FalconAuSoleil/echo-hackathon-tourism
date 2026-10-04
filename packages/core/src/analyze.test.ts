@@ -3,7 +3,7 @@ import { analyzeMessage, chunkSegments, isPhantomTranscript, mentionsGuide, type
 import { analyzeAudioMessage } from "./audio.ts";
 import { makeConfig } from "./config.ts";
 import { createMatcher } from "./matcher.ts";
-import { expireMessageEmbedding, toReviewChunks, toStoredMessage } from "./storage.ts";
+import { expireMessageEmbedding, scrubForQueue, toReviewChunks, toStoredMessage } from "./storage.ts";
 import { SIMILARITY_TEST_CONFIG, fakeEmbedder, fakeTranscriber, testCatalog } from "./test-fixtures.ts";
 import type { MessageInput, Transcript } from "./types.ts";
 
@@ -262,14 +262,26 @@ describe("storage : seulement ce que SPEC 6 autorise", () => {
     expect(toReviewChunks(a).every((r) => r.englishMT === undefined)).toBe(true);
   });
 
-  it("l'embedding du message est retiré de la fiche après la fenêtre des doublons", async () => {
+  it("l'embedding et l'empreinte du message sont retirés de la fiche après la fenêtre des doublons", async () => {
     const stored = toStoredMessage(await analyzeMessage(text("The meal was delicious.", "en"), await deps()));
     expect(stored.embedding).toBeInstanceOf(Float32Array);
     expect(expireMessageEmbedding(stored, new Date("2026-10-09T10:00:00Z"), 7)).toBeNull();
     const expired = expireMessageEmbedding(stored, new Date("2026-10-10T10:00:01Z"), 7);
     expect(expired).not.toBeNull();
     expect("embedding" in expired!).toBe(false);
-    expect(expired).toMatchObject({ id: stored.id, fingerprint: stored.fingerprint, findings: stored.findings });
+    expect("fingerprint" in expired!).toBe(false);
+    expect(expired).toMatchObject({ id: stored.id, findings: stored.findings, lang: "en" });
     expect(expireMessageEmbedding(expired!, new Date("2027-01-01T00:00:00Z"), 7)).toBeNull();
+  });
+
+  it("message écrit nettoyé avant la file (scrubForQueue), et l'analyse donne le même résultat ensuite", async () => {
+    const raw = "My name is Anna, +250 788 000 111. The meal was delicious.";
+    const queued = scrubForQueue(raw);
+    expect(queued).toBe("My name is [nom], [numéro]. The meal was delicious.");
+    const d = await deps();
+    const fromRaw = await analyzeMessage(text(raw, "en"), d);
+    const fromQueued = await analyzeMessage(text(queued, "en"), d);
+    expect(fromQueued.scrubbedText).toBe(fromRaw.scrubbedText);
+    expect(fromQueued.findings).toEqual(fromRaw.findings);
   });
 });

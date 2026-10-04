@@ -1,7 +1,7 @@
 // Stockage sur l'appareil uniquement (IndexedDB), exactement ce que SPEC 6 autorise (docs/ARCHITECTURE.md §7).
 // Utilisé par l'interface ET par le service worker (Web Share Target → file d'attente).
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import { DEFAULT_CONFIG, closeMonthReviewChunks, expireMessageEmbedding, isClosedMonth, localMonth, monthOfReceived, type AnalysisConfig, type KnownMessage, type RecapLine, type ReviewChunk, type StoredMessage } from "@echo/core";
+import { DEFAULT_CONFIG, closeMonthReviewChunks, expireMessageEmbedding, scrubForQueue, isClosedMonth, localMonth, monthOfReceived, type AnalysisConfig, type KnownMessage, type RecapLine, type ReviewChunk, type StoredMessage } from "@echo/core";
 
 export interface QueueItem {
   id: string;
@@ -76,9 +76,15 @@ export function newId(prefix = "m"): string {
   return `${prefix}-${Date.now().toString(36)}-${rnd[0]!.toString(36)}${rnd[1]!.toString(36)}`;
 }
 
+/**
+ * Met un message dans la file. Un message écrit est nettoyé (noms, numéros, e-mails) avant d'être écrit : il
+ * peut attendre des jours que l'hôte lance l'analyse. Un message vocal ne peut l'être qu'après transcription ;
+ * son fichier est supprimé dès la fin de celle-ci.
+ */
 export async function enqueue(db: EchoDatabase, item: Omit<QueueItem, "id"> & { id?: string }): Promise<string> {
   const id = item.id ?? newId("q");
-  await db.put("queue", { ...item, id });
+  const safe = item.kind === "text" && typeof item.text === "string" ? { ...item, text: scrubForQueue(item.text) } : item;
+  await db.put("queue", { ...safe, id });
   return id;
 }
 
@@ -126,12 +132,13 @@ export async function saveAnalysis(db: EchoDatabase, message: StoredMessage, rev
 
 export async function knownMessages(db: EchoDatabase): Promise<KnownMessage[]> {
   const all = await db.getAll("messages");
-  return all.map((m) => ({ fingerprint: m.fingerprint, receivedAt: m.receivedAt, ...(m.embedding ? { embedding: m.embedding } : {}) }));
+  // Une fiche sortie de la fenêtre des doublons n'a plus ni empreinte ni embedding : elle ne compte plus.
+  return all.flatMap((m) => (m.fingerprint === undefined ? [] : [{ fingerprint: m.fingerprint, receivedAt: m.receivedAt, ...(m.embedding ? { embedding: m.embedding } : {}) }]));
 }
 
 /**
- * Retire l'embedding des fiches plus vieilles que la fenêtre des doublons (SPEC 6 : il ne sert qu'à repérer
- * un quasi-doublon dans cette fenêtre). Appelé à l'ouverture de l'app et avant chaque traitement de la file.
+ * Retire l'embedding et l'empreinte des fiches plus vieilles que la fenêtre des doublons (SPEC 6 : ils ne servent
+ * qu'à repérer un doublon dans cette fenêtre). Appelé à l'ouverture de l'app et avant chaque traitement de la file.
  * Renvoie le nombre de fiches modifiées.
  */
 export async function pruneExpiredEmbeddings(db: EchoDatabase, now = new Date(), duplicateWindowDays = DEFAULT_CONFIG.duplicateWindowDays): Promise<number> {

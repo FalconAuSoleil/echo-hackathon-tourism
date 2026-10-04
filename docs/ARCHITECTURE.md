@@ -288,14 +288,14 @@ Fallback: file picker "Import a voice message" and paste box for text.
 
 | Store | Key | Fields | Notes |
 |---|---|---|---|
-| `queue` | `id` | `receivedAt`, `kind: "audio"|"text"`, `blob?`, `text?`, `mime?` | Temporary inbox. Audio deleted right after transcription; text deleted after analysis. |
-| `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint`, `embedding?` (message embedding, near-duplicates; removed by `pruneExpiredEmbeddings` once older than `duplicateWindowDays` = 7, at app start and before each queue run), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
+| `queue` | `id` | `receivedAt`, `kind: "audio"|"text"`, `blob?`, `text?`, `mime?` | Temporary inbox. Text is scrubbed by `enqueue` (`scrubForQueue`: `scrubPii` with the guessed language) before it is written; deleted after analysis. Audio deleted right after transcription. |
+| `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint?` + `embedding?` (exact / near-duplicates; both removed by `pruneExpiredEmbeddings` → `expireMessageEmbedding` once older than `duplicateWindowDays` = 7, at app start and before each queue run), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
 | `reviewChunks` | `id` | `ReviewChunk` from `toReviewChunks`: `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?` (scrubbed English of the chunk's Whisper segment(s), only when no matched chunk shares those segments; fallback without segments: the whole message's translation when every chunk is not_sure/off_list; never for written messages), `mentionsGuide`, `reason?`, `embedding?` (Float32Array, unknown-topic clustering of the month; removed when the month is closed), `clusterId?` + `clusterRecurring?` (written when the month is closed) | The "To be read by a person" list. Month closure (`closeFinishedMonths` in `apps/web/src/lib/db.ts`, at app start and before/after each queue run, skipping months still in the queue): the month's clusters are computed once (`closeMonthReviewChunks`), written on the chunks, then every embedding of that month is deleted; the recap of a closed month reads the stored `clusterId`s (`monthClustersFromReview`). Clustering never spans months. |
 | `recaps` | `month` | `lines: RecapLine[]`, `builtAt`, `smsOpenedAt?` | |
 | `settings` | `key` | `hostPhone` (the host's own number), `pinHash?`, `coopConsent`, `whatsappToDelete?` (count only: analysed shared/imported voice notes whose WhatsApp original is still to delete), `asrModel`, `thresholds?` | |
 
-`fingerprint` (non-reversible hash) and the embeddings are derived technical data needed for duplicates and
-off-list clustering; documented in the README privacy section. Demo data (3 simulated months) is stored with
+`fingerprint` (fast unsalted hash: a short text could be recovered by hashing candidates, hence kept 7 days only)
+and the embeddings are derived technical data needed for duplicates and off-list clustering; documented in the README privacy section. Demo data (3 simulated months) is stored with
 `synthetic: true` and shown with a "synthetic" badge. Optional PIN (SPEC 6 bonus): hash with PBKDF2 (WebCrypto).
 
 ## 8. Evaluation (`eval/`)

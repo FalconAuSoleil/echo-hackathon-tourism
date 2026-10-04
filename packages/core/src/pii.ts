@@ -49,10 +49,21 @@ const NOT_NAMES = new Set(
     "sydney", "kampala", "nairobi", "london", "berlin", "madrid", "brussels", "bruxelles", "geneva", "genève", "milan", "roma", "rome", "vienna", "wien",
     "christian", "christians", "chrétien", "janvier", "avril", "juin", "juillet", "août", "mai", "enero", "febrero", "abril", "mayo", "junio", "julio", "agosto",
     "mercedes", "toyota", "jesus", "jésus", "jesús",
+    // Mots techniques et unités que Whisper écrit avec une majuscule (« Is there any Wi-Fi? »).
+    "wi-fi", "wifi", "hi-fi", "gps", "sms", "internet", "bluetooth", "youtube", "tiktok", "uber", "visa", "mastercard", "paypal",
+    "euro", "euros", "franc", "francs", "franken", "dollar", "dollars", "rwf", "frw", "shilling", "shillings",
+    // Villes d'où viennent souvent les visiteurs, dont certaines sont aussi des prénoms ou des noms de famille.
+    "lyon", "marseille", "lille", "toulouse", "bordeaux", "nantes", "strasbourg", "montpellier", "rennes", "grenoble", "nice",
+    "valencia", "barcelona", "sevilla", "seville", "bilbao", "granada", "zaragoza", "málaga", "malaga", "lisbon", "lisboa", "porto",
+    "hamburg", "münchen", "munich", "köln", "cologne", "frankfurt", "stuttgart", "düsseldorf", "dresden", "leipzig", "zürich", "zurich", "basel", "bern", "lausanne",
+    "amsterdam", "rotterdam", "antwerp", "anvers", "liège", "luxembourg", "manchester", "liverpool", "dublin", "boston", "chicago", "toronto", "montréal", "montreal", "québec", "quebec",
     // Noms communs allemands courants derrière « Liebe / Hallo / Danke » (« Liebe Grüße »).
     "grüße", "gruß", "grüsse", "gruss", "leute", "familie", "freunde", "gastgeber", "gastgeberin", "gäste", "kinder", "dank",
   ].map((w) => fold(w)),
 );
+
+/** Quantifieurs juste avant un mot : ce mot est une unité ou une chose (« jeden Frank », « every Euro »). */
+const QUANTIFIER_BEFORE = /(?<![\p{L}\p{N}])(?:jeden|jede|jedes|keinen|pro|every|each|per|chaque|cada)\s+$/iu;
 
 const NAME_WORD = "\\p{Lu}[\\p{Ll}\\p{Lm}'’]+(?:-\\p{Lu}[\\p{Ll}\\p{Lm}]+)*";
 const ANY_WORD = "[\\p{L}][\\p{L}'’-]*";
@@ -263,7 +274,8 @@ export function scrubPii(text: string, lang: DetectedLang): ScrubResult {
   // 7. Mots à majuscule en milieu de phrase (anglais, français, espagnol : les noms communs n'y ont pas
   //    de majuscule). En allemand, tous les noms communs en ont une : seules les règles 4 à 6 s'appliquent.
   if (lang !== "de") {
-    const mid = new RegExp(`(?<=[\\p{L}\\p{N},;'’)]\\s+)(${NAME_WORD}(?:\\s+${NAME_WORD}){0,2})`, "gu");
+    // Mot entier seulement : « WhatsApp », « WiFi » ne perdent pas leur début (« [nom]App »).
+    const mid = new RegExp(`(?<=[\\p{L}\\p{N},;'’)]\\s+)(${NAME_WORD}(?:\\s+${NAME_WORD}){0,2})${E}`, "gu");
     t = t.replace(mid, (m: string, _name: string, offset: number, whole: string) => {
       // Début de phrase après ponctuation forte : pas un indice.
       const before = whole.slice(0, offset).trimEnd();
@@ -276,7 +288,11 @@ export function scrubPii(text: string, lang: DetectedLang): ScrubResult {
 
   // 8. Prénoms du dictionnaire, dans toute position et toute langue (allemand compris), y compris en minuscules
   //    (transcription sans majuscules) : « Eric was hard to follow », « Thomas fand den Weg lang ».
-  t = t.replace(new RegExp(`(?<![\\[\\p{L}\\p{N}'’-])${ANY_WORD}`, "gu"), (w: string) => (isGazetteerName(w, lang) ? replaceName() : w));
+  //    Pas juste après un quantifieur (« jeden Frank wert », Whisper pour « jeden Franken ») : une unité, pas une
+  //    personne.
+  t = t.replace(new RegExp(`(?<![\\[\\p{L}\\p{N}'’-])${ANY_WORD}`, "gu"), (w: string, offset: number, whole: string) =>
+    isGazetteerName(w, lang) && !QUANTIFIER_BEFORE.test(whole.slice(Math.max(0, offset - 12), offset)) ? replaceName() : w,
+  );
 
   // 9. Prénom du dictionnaire mais aussi mot courant (« Pierre », « Grace ») : retiré seulement s'il est coordonné
   //    à un nom déjà retiré ou à « moi / I / ich / yo » (« Pierre et [nom] », « Grace and I loved it »).
