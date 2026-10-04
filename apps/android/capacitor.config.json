@@ -1,0 +1,14 @@
+{
+  "appId": "org.echo.feedback",
+  "appName": "Echo",
+  "webDir": "../web/dist",
+  "android": {
+    "path": "android",
+    "allowMixedContent": false,
+    "captureInput": false
+  },
+  "server": {
+    "androidScheme": "https",
+    "hostname": "localhost"
+  }
+}

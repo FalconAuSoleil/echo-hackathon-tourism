@@ -105,3 +105,27 @@ Cannot be done here: no Kinyarwanda speaker. Everything in `catalog/` is flagged
    `"status": "speaker_validated"` and add `"validatedBy": "<role>, <date>"`; re-record or regenerate its clip;
    run `.venv/bin/python tools/catalog/validate_catalog.py`.
 Expected result: a list of sentences marked correct / odd / wrong, to be copied into `docs/PROGRESS.md`.
+
+## 4. Android APK on a real phone (apps/android)
+
+Already checked on an Android 14 emulator (see `apps/android/README.md`): offline start, share intent (voice note and
+text), `sms:` opening Google Messages prefilled, transcription with 3 GB of RAM. A 2 GB emulator ran out of memory
+during transcription. Still to check on real hardware:
+
+1. Build (`bash tools/android/build-apk.sh`) or take `apps/android/dist/echo-debug.apk` (~150 MB). Copy it to a
+   low-end phone (2–3 GB RAM, Android 8+), allow "install unknown apps" for the file manager, install.
+2. Turn airplane mode **on** before the first launch. Open Echo. Expected: the app opens and "Ready: works offline"
+   appears without any download. Write down the "Loaded in … s" figure and the phone model and RAM.
+3. In WhatsApp (installed while online beforehand), long-press a received voice note → Share → Echo. Expected: Echo opens on
+   Host app with "1 shared item added to the queue" and the voice note listed. Repeat with Echo already open, then with a
+   forwarded text message. Share 2 voice notes at once: expected "2 shared items".
+4. Tap "Analyse N messages offline". Write down the on-device time per message (SPEC 9 performance). If Echo shows
+   "Echo ran out of memory and restarted", write it down with the phone's RAM. That is the 2 GB limit seen on the emulator.
+5. Record a message in Try it: Android asks for the microphone permission once. Expected: recording works, and refusing
+   the permission shows an error without a crash.
+6. Recap → enter the host's number → "Send SMS". Expected: the phone's SMS app opens with the number and the
+   Kinyarwanda text. Press Send with a SIM, still in airplane mode with cellular on (or airplane mode off and mobile data off):
+   the basic phone receives it. Echo must never send an SMS without that tap (it has no SMS permission:
+   Settings → Apps → Echo → Permissions lists only Microphone).
+7. Privacy: Settings → Apps → Echo → Storage: after the analysis, the cache must not grow with each share
+   (shared copies are deleted). `adb shell run-as org.echo.feedback ls cache/share` (debug build) should be empty.

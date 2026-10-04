@@ -1,0 +1,19 @@
+{
+  "name": "@echo/android",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Echo packaged as a side-loadable Android APK (Capacitor shell around the apps/web build, models bundled)",
+  "scripts": {
+    "sync": "cap sync android",
+    "apk": "bash ../../tools/android/build-apk.sh",
+    "icons": "node ../../tools/android/make-icons.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}

@@ -425,3 +425,42 @@ other agents' outputs) and `tools/android/build-apk.sh`.
 
 **Remains**: the three manual tests in `docs/MANUAL_TESTS.md` (real phone + SMS, phone timing, speaker check); update
 README §5.7/§10/§12 when they are done; public deployment and making the repo public are the user's call.
+
+## 2026-10-04 — Android APK (android-apk agent)
+
+**Built**
+- `apps/android/`: Capacitor 8.5 shell (`@echo/android` workspace package) around `apps/web/dist`, models bundled in
+  the APK assets (no download on the phone). Package `org.echo.feedback`, minSdk 24, target 36.
+  **Debug APK built here: 157,249,918 bytes (150 MB)** → `apps/android/dist/echo-debug.apk` (git-ignored).
+- Native code (`android/app/src/main/java/org/echo/feedback/`): `MainActivity` (share intent `ACTION_SEND`/`SEND_MULTIPLE`
+  for `audio/*`, `application/ogg`, `text/plain` → copy to `cache/share/` → `ShareIntake` script posts the same multipart form
+  to the web app's `/share-target` so the PWA's service worker queues it; low-memory renderer loss → page restart with
+  a message, gives up after 3 losses in 5 min; WebView destroyed on recreate to avoid leaks), `EchoSharePlugin`
+  (deletes the cache copies once queued), `ShareIntakeTest` (4 JVM tests, run by the build script).
+- `sms:` keeps working: it opens the SMS app prefilled and a person presses Send. No `SEND_SMS` permission.
+  `allowBackup=false` + data-extraction rules (no cloud backup of feedback). Icons/splash from the PWA icon.
+- `tools/android/`: `install-sdk.sh` (official cmdline-tools zip, platform 36, build-tools 35, unzip via python),
+  `build-apk.sh`, `make-icons.mjs`, `webview-probe.mjs` (drive the APK's WebView over DevTools).
+- Headless SDK installed at `/root/android-sdk` (+ emulator and an Android 14 x86_64 image for testing).
+
+**Verified on an Android 14 emulator (KVM, 2 vCPUs, airplane mode)**: these are emulator results, not phone results.
+Offline start with models from the APK (2 GB: 29 s first load, then 10–11 s; 3 GB: 19 s). Cold-start share of an `.opus`
+voice note (`audio/ogg`) → "1 shared item added to the queue" and the cache copy deleted. Warm share of text queued,
+bare link ignored. `sms:` → Google Messages opened with the number and the Kinyarwanda body, not sent. With 3 GB: a 6 s
+sample transcribed + matched in 18.4 s, the shared `.opus` analysed from the queue in 6.5 s. **With 2 GB the WebView
+renderer was killed by low memory during transcription** (renderer ~1.55 GB once both models are loaded). Before the fix
+this killed the app; now the page restarts with a message. Screenshots in `apps/android/screenshots/`.
+`pnpm test` (127 tests), `pnpm typecheck`, `pnpm build` still pass. apps/web was not modified.
+
+**Deviations / notes**
+- ARCHITECTURE §1 said no Capacitor APK was planned. It is optional and adds no silent SMS: the PWA stays the main path.
+- `pnpm-lock.yaml` updated (Capacitor packages for `apps/android`).
+- In the APK the worker still "downloads" the models from the bundled assets into Cache Storage, so they take up
+  ~215 MB twice on the phone. Fixing this needs a web-app change (skip the copy when the assets are local) → web agent.
+- No cross-origin isolation in Capacitor's local server: WASM runs on 1 thread in the APK.
+- The "Online" badge stays "Online" in airplane mode inside the WebView (`navigator.onLine` is true) → web agent, cosmetic.
+- README §10/§11 says "APK untested": it is now tested on an emulator (not on a phone) → docs agent.
+
+**Remains**: real phone (install, WhatsApp share, microphone, real SMS, timing, 2 GB RAM limit) → `docs/MANUAL_TESTS.md` § 4.
+Signed release build (needs a keystore: the user's call). Lowering memory (e.g. load MiniLM only after Whisper, or whisper-tiny on
+≤ 2 GB phones) is a web/eval decision.

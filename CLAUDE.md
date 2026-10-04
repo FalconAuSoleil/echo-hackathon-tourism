@@ -29,4 +29,5 @@ pnpm test                    # vitest, all packages
 pnpm typecheck               # tsc on every package
 pnpm dev / pnpm build        # web app (Vite, port 5173)
 pnpm eval                    # three-level evaluation (SPEC 9)
+bash tools/android/build-apk.sh   # debug APK (Capacitor, models bundled) → apps/android/dist/; SDK: tools/android/install-sdk.sh
 ```
