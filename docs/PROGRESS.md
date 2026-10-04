@@ -881,3 +881,21 @@ by the e2e.
 - **Verified**: `pnpm test` 168 passed, `pnpm typecheck`.
 - **Remains**: any later change to `packages/core/src/pii.ts`, the classifier or the thresholds requires re-running
   `pnpm eval -- --level 2 --level 3 --level pii --level report` (about 3 min with cached transcripts).
+
+## 2026-10-04 — blind-keywords: second keyword baseline written without seeing the corpus
+
+- **Why**: the keyword lists in `eval/keywords/` were written by the author of the synthetic corpus and may repeat its
+  wording, which flatters the baseline (the README compares Echo 48 % captured with keywords 88 %).
+- **Done**: `eval/keywords-blind/{en,fr,de,es}.json`, all 21 findings in 4 languages (about 300–370 terms per
+  language), written in one pass without opening `eval/data/`, `eval/results/` or `eval/keywords/` and without running
+  any evaluation with them (protocol in `eval/keywords-blind/README.md`; inputs: catalog ids, labels, polarities and
+  example phrasings, the matching code, own knowledge).
+- **Eval code**: `eval/src/lib/keyword-sets.ts` (+ test). Level 2 now always computes and stores both sets
+  (`keywordSets.original` / `keywordSets.blind` in `level2.json`, both rows in `RESULTS.md`, `keywordsBySet` per
+  message). The primary set (`keywords` field, level 3, headline column) stays `original` by default, so old numbers
+  are unchanged; `pnpm eval -- --keywords blind` (or `ECHO_KEYWORDS=blind`) switches it. `level3.json` records
+  `keywordSet`. `loadKeywordLists` in `eval/src/lib/system.ts` is left as it was (no longer used by level 2/3).
+- **Not done here**: running the evaluation (another agent's task), so no blind-baseline number yet; README problem
+  sentence unchanged.
+- **Verified**: `pnpm test` (172 passed); typecheck clean for every package except a type error in an untracked
+  file of another agent (`eval/src/experiments/threshold-strategies.ts`), not touched here.

@@ -22,6 +22,7 @@ import { loadFeedback, rng, shuffle, splitCorpus, type Feedback } from "./lib/co
 import { round, writeJson } from "./lib/io.ts";
 import { aligned, evaluate, evaluateByLang, summary, type SystemOutput } from "./lib/metrics.ts";
 import { RESULTS_DIR, ROOT } from "./lib/paths.ts";
+import { KEYWORD_SET_NAMES, loadKeywordSet, primaryKeywordSet } from "./lib/keyword-sets.ts";
 import {
   EMBEDDERS,
   decide,
@@ -29,7 +30,6 @@ import {
   getEmbedder,
   keywordOutput,
   loadCatalog,
-  loadKeywordLists,
   prepareTexts,
   acceptOf,
   variantConfig,
@@ -313,7 +313,8 @@ export const CALIBRATION = {
 export async function runLevel2(opts: { log: (s: string) => void; variants?: string[]; writeCalibration?: boolean }) {
   const log = opts.log;
   const catalog = loadCatalog();
-  const lists = loadKeywordLists();
+  const keywordSet = primaryKeywordSet();
+  const lists = loadKeywordSet(keywordSet);
   const all = loadFeedback();
   const byId = new Map(all.map((f) => [f.id, f]));
   const { calibration, test } = splitCorpus(all);
@@ -395,7 +396,19 @@ export async function runLevel2(opts: { log: (s: string) => void; variants?: str
   });
 
   log(`[level2] TEST Echo: P ${echoTest.all.micro.precision} R ${echoTest.all.micro.recall} F1 ${echoTest.all.micro.f1} accepted-error ${echoTest.all.answers.acceptedErrorRate} capture ${echoTest.all.remarks.captureRate} not-sure ${echoTest.all.chunks.notSureRate}`);
-  log(`[level2] TEST keywords: P ${kwTest.all.micro.precision} R ${kwTest.all.micro.recall} F1 ${kwTest.all.micro.f1} accepted-error ${kwTest.all.answers.acceptedErrorRate} capture ${kwTest.all.remarks.captureRate}`);
+  log(`[level2] TEST keywords (${keywordSet}): P ${kwTest.all.micro.precision} R ${kwTest.all.micro.recall} F1 ${kwTest.all.micro.f1} accepted-error ${kwTest.all.answers.acceptedErrorRate} capture ${kwTest.all.remarks.captureRate}`);
+  // Les deux jeux de mots-clés sont toujours rapportés (original = auteur du corpus, blind = protocole aveugle).
+  const kwBySet = Object.fromEntries(
+    KEYWORD_SET_NAMES.map((name) => [name, name === keywordSet ? kw : toMap(all.map((f) => keywordOutput(f.id, f.text, f.lang, loadKeywordSet(name))))]),
+  );
+  const keywordSets = Object.fromEntries(
+    KEYWORD_SET_NAMES.map((name) => {
+      const out = kwBySet[name]!;
+      const t = evaluateByLang(test, out);
+      log(`[level2] TEST keywords[${name}]: P ${t.all.micro.precision} R ${t.all.micro.recall} F1 ${t.all.micro.f1} accepted-error ${t.all.answers.acceptedErrorRate} capture ${t.all.remarks.captureRate}`);
+      return [name, { test: t, calibration: evaluate(calibration, out), all: evaluate(all, out) }];
+    }),
+  );
 
   const unknown = unknownTopics(analyses, byId, finalCfg);
   for (const m of [unknown.offListOnly, unknown.offListAndUnsure])
@@ -449,7 +462,9 @@ export async function runLevel2(opts: { log: (s: string) => void; variants?: str
     variantsOnTest: testAtOtherVariants,
     curves: { calibration: best.curveCalibration, test: curveTest },
     echo: { test: echoTest, calibration: echoCal, all: echoAll },
+    keywordSet,
     keywords: { test: kwTest, calibration: kwCal, all: kwAll },
+    keywordSets,
     languageDetection: {
       correct: analyses.filter((a) => a.lang === byId.get(a.id)!.lang).length,
       unknown: analyses.filter((a) => a.lang === "unknown").length,
@@ -465,6 +480,7 @@ export async function runLevel2(opts: { log: (s: string) => void; variants?: str
       echo: shipped.get(f.id)!.findings,
       echoChunks: shipped.get(f.id)!.chunks.map((c) => `${c.status}${c.findings.length ? ":" + c.findings.join("+") : ""} | ${c.text}`),
       keywords: kw.get(f.id)!.findings,
+      keywordsBySet: Object.fromEntries(KEYWORD_SET_NAMES.map((name) => [name, kwBySet[name]!.get(f.id)!.findings])),
     })),
   };
   writeJson(join(RESULTS_DIR, "level2.json"), result);

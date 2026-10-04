@@ -1,0 +1,26 @@
+{
+  "lang": "fr",
+  "findings": {
+    "P1": ["accueil", "accueilli", "chaleureu", "gentil", "sympa", "aimable", "hospitali", "bienvenu", "souri", "comme à la maison", "comme en famille", "reçus", "chaleur humaine"],
+    "P2": ["champ", "caféier", "plantation", "plants de", "parcelle", "arbuste", "buisson", "cerise", "balade dans", "promenade dans", "visite des champs", "visite du champ", "tour du champ", "où pousse", "cueill", "pépinière"],
+    "P3": ["torréfi", "torrefaction", "dégust", "goût", "grill", "moudre", "moulu", "mouture", "tasse", "arôme", "odeur"],
+    "P4": ["repas", "déjeuner", "dîner", "nourriture", "cuisine", "cuisiné", "plat", "délicieu", "savoureu", "copieu", "fait maison", "banane plantain", "bananes plantains", "manger", "mangé", "miam"],
+    "P5": ["expliqu", "explication", "clairement", "très clair", "appris", "apprendre", "instructi", "informati", "pédagog", "enseign", "j'ai compris", "enfin compris", "maintenant je comprends", "étape par étape"],
+    "P6": ["authenti", "vraie vie", "vie réelle", "vie de la ferme", "vie à la ferme", "vie quotidienne", "quotidien", "vie rurale", "vie paysanne", "vie locale", "pas touristique", "piège à touristes", "mis en scène", "immersion", "traditionnel", "comme les gens d'ici"],
+    "P7": ["paysage", "vue", "panorama", "colline", "vallée", "cadre", "décor", "nature", "montagne", "brume", "environnement", "paisible", "calme", "bel endroit", "endroit magnifique", "magnifique endroit", "beau lieu"],
+    "P8": ["rapport qualité", "qualité-prix", "qualité prix", "vaut le prix", "vaut le coup", "valait le coup", "valait le prix", "prix raisonnable", "prix correct", "prix juste", "prix honnête", "bon prix", "pas cher", "abordable", "bon marché"],
+    "P9": ["acheter", "achat", "commander", "ramener du café", "emporter", "vendez", "vendre", "sachet", "paquet", "kilo"],
+    "P10": ["revenir", "reviendr", "recommand", "conseill", "y retourner", "retournerons", "en parler", "parler à nos amis", "à refaire", "a refaire", "incontournable", "à ne pas manquer"],
+    "P11": ["merci", "génial", "parfait", "inoubliable", "ravi", "satisfait", "belle expérience", "super expérience", "super journée", "belle journée", "très belle journée", "excellente journée", "magnifique journée", "formidable", "bravo", "tout était super", "tout était parfait"],
+    "N1": ["chemin", "route", "piste", "accès", "sentier", "raide", "pente", "montée", "loin", "perdu", "panneau", "signalisation", "boue", "boueu", "glissant", "trajet", "difficile à trouver", "trouver la ferme", "cahot"],
+    "N2": ["prix pas clair", "prix peu clair", "prix non annoncé", "pas clair", "peu clair", "caché", "supplément", "combien", "à l'avance", "liste de prix", "grille tarifaire", "tarifs affichés", "inclus", "pas annoncé", "annoncé trop tard", "au dernier moment", "payer plus"],
+    "N3": ["trop long", "longuet", "interminable", "ennuy", "s'éternis", "fatigu", "durait", "raccourcir", "plus court", "trois heures", "n'en finissait", "traîn"],
+    "N4": ["trop court", "trop rapide", "pressé", "précipit", "plus de temps", "pas assez de temps", "rester plus", "plus longtemps", "seulement une heure", "une heure seulement", "trop vite", "fini trop tôt", "écourt"],
+    "N5": ["langue", "tradu", "interprète", "pas compris", "mal compris", "rien compris", "difficile à comprendre", "du mal à comprendre", "se comprendre", "comprenait pas", "comprenions pas", "communi", "anglais", "barrière"],
+    "N6": ["pas de repas", "pas de déjeuner", "rien à manger", "faim", "affamé", "pas assez à manger", "portion", "pas assez de nourriture", "collation", "en-cas", "quelque chose à manger", "sans repas", "pas mangé"],
+    "N7": ["toilette", "wc", "latrine", "hygiène", "sale", "savon", "laver les mains", "lavabo", "pas propre", "peu propre", "malpropre", "sanitaire"],
+    "N8": ["eau", "ombre", "soleil", "chaleur", "chaud", "soif", "boire", "boisson", "pause", "repos", "s'asseoir", "banc", "déshydrat", "insolation", "abri"],
+    "N9": ["attente", "attendre", "attendu", "retard", "horaire", "à l'heure", "ponctu", "heure convenue", "heure prévue", "personne n'était là", "commencé tard"],
+    "N10": ["pas pu acheter", "impossible d'acheter", "rien à acheter", "rien à vendre", "pas en vente", "souvenir", "boutique", "pas de café à vendre", "carte bancaire", "mobile money", "paiement", "les mains vides"]
+  }
+}

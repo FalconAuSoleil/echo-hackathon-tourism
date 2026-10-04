@@ -11,7 +11,8 @@ import { loadAudio16k, readJson, readJsonl, round, writeJson } from "./lib/io.ts
 import { evaluateByLang, summary, type SystemOutput } from "./lib/metrics.ts";
 import { DATA_DIR, RAW_DIR, RESULTS_DIR, ROOT, abs } from "./lib/paths.ts";
 import { execFileSync } from "node:child_process";
-import { EMBEDDERS, fromAnalysis, getEmbedder, keywordOutput, loadCatalog, loadKeywordLists } from "./lib/system.ts";
+import { EMBEDDERS, fromAnalysis, getEmbedder, keywordOutput, loadCatalog } from "./lib/system.ts";
+import { loadKeywordSet, primaryKeywordSet } from "./lib/keyword-sets.ts";
 import { createMatcher } from "@echo/core";
 import { errorCounts, rates, sumCounts } from "./lib/wer.ts";
 
@@ -48,7 +49,9 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
   const config = opts.config ?? makeConfig(l2.config);
   const embedderKey = l2.calibration.variant.embedder;
   const catalog = loadCatalog();
-  const lists = loadKeywordLists();
+  const keywordSet = primaryKeywordSet();
+  const lists = loadKeywordSet(keywordSet);
+  log(`[level3] keyword set: ${keywordSet}`);
   const matcher = await createMatcher(catalog, await getEmbedder(embedderKey), config);
   const rows = readJsonl<AudioRow>(join(DATA_DIR, "audio_manifest.jsonl"));
   const fbById = new Map(loadFeedback().map((f) => [f.id, f]));
@@ -161,6 +164,7 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
     config,
     embeddingModel: EMBEDDERS[embedderKey],
     englishTranslation: "disabled in this run (only used for the 'to be read by a person' list, not for classification)",
+    keywordSet,
     level2SameMessages: level2Same,
     models,
   };

@@ -1,0 +1,26 @@
+{
+  "lang": "es",
+  "findings": {
+    "P1": ["acogida", "acogedor", "acogieron", "recibimiento", "recibieron", "bienvenid", "hospitalidad", "hospitalari", "amable", "amabilidad", "cariño", "cálid", "calidez", "simpátic", "sonris", "como en casa", "como familia", "buen trato"],
+    "P2": ["campo", "cafetal", "cafeto", "planta", "arbusto", "cereza", "parcela", "recorrido por", "paseo por", "visita al campo", "donde crece", "cultivo", "vivero", "cosecha"],
+    "P3": ["tost", "tuest", "degust", "cata", "probar", "probamos", "sabor", "taza", "moler", "molimos", "molido", "aroma", "olor"],
+    "P4": ["comida", "almuerzo", "almorz", "delicios", "rico", "sabros", "plato", "casera", "cocin", "plátano", "cena", "desayuno"],
+    "P5": ["explic", "aprend", "muy claro", "claramente", "explicaciones claras", "informativ", "educativ", "enseñ", "didáctic", "ahora entiendo", "por fin entend", "paso a paso"],
+    "P6": ["auténtic", "genuin", "vida real", "vida cotidiana", "día a día", "vida en la finca", "vida de la finca", "vida rural", "vida del campo", "nada turístico", "no es turístico", "trampa para turistas", "montado para turistas", "nada montado", "inmersión", "tradicional", "rutina"],
+    "P7": ["paisaje", "vista", "colina", "valle", "montaña", "entorno", "naturaleza", "panorama", "niebla", "tranquil", "lugar precioso", "lugar hermoso", "rincón", "escenario"],
+    "P8": ["calidad-precio", "calidad precio", "relación calidad", "vale la pena", "merece la pena", "vale el precio", "precio justo", "precio razonable", "buen precio", "barato", "económic", "asequible", "cada franco"],
+    "P9": ["comprar", "compra", "pedir café", "llevar café", "llevarme", "vender", "venden", "bolsa", "paquete", "kilo", "adquirir"],
+    "P10": ["volver", "volveremos", "regresar", "regresaremos", "recomend", "repetir", "repetiremos", "de nuevo", "otra vez", "a mis amigos", "a nuestros amigos", "imprescindible", "hay que ir", "no te lo pierdas"],
+    "P11": ["gracias", "genial", "maravillos", "excelente", "perfecto", "increíble", "fantástic", "inolvidable", "estupend", "satisfech", "día precioso", "gran día", "gran experiencia", "buena experiencia", "experiencia maravillosa", "nos encantó todo", "me encantó todo", "todo perfecto", "todo genial"],
+    "N1": ["camino", "carretera", "acceso", "sendero", "pista", "ruta", "empinad", "cuesta", "lejos", "nos perdimos", "perdidos", "señal", "señaliz", "barro", "embarrad", "resbal", "trayecto", "difícil de encontrar", "subida", "pendiente", "baches"],
+    "N2": ["no estaba claro", "poco claro", "precios poco claros", "costo oculto", "coste oculto", "costes ocultos", "costos ocultos", "cargo extra", "suplemento", "cuánto", "por adelantado", "de antemano", "antes de venir", "lista de precios", "tarifa", "incluido", "cobraron más", "nos cobraron"],
+    "N3": ["demasiado larg", "muy larg", "se hizo larg", "un poco larg", "larguísim", "eterno", "interminable", "aburri", "cansad", "agotador", "más corta", "más corto", "acortar", "tres horas", "pesad"],
+    "N4": ["demasiado cort", "muy cort", "un poco cort", "prisa", "apresurad", "apurad", "demasiado rápid", "muy rápid", "más tiempo", "poco tiempo", "no hubo tiempo", "no tuvimos tiempo", "quedarnos más", "quedarme más", "se pasó volando", "solo una hora"],
+    "N5": ["idioma", "lengua", "traduc", "intérprete", "no entend", "difícil de entender", "costaba entender", "entendernos", "comunica", "inglés", "barrera"],
+    "N6": ["no había comida", "sin comida", "no hubo comida", "no hubo almuerzo", "sin almuerzo", "nada de comer", "nada para comer", "algo de comer", "algo para comer", "hambre", "hambrient", "poca comida", "porción", "porciones", "ración", "raciones", "merienda", "tentempié"],
+    "N7": ["baño", "aseo", "letrina", "inodoro", "servicios higiénicos", "higiene", "sucio", "poco limpio", "jabón", "lavar las manos", "lavarnos las manos", "lavarse las manos", "lavabo", "sanitari"],
+    "N8": ["agua", "sombra", "el sol", "al sol", "pleno sol", "bajo el sol", "mucho sol", "calor", "caluros", "sed", "beber", "bebida", "descanso", "descansar", "pausa", "sentarse", "sentarnos", "banco", "insolación", "deshidrat"],
+    "N9": ["tuvimos que esperar", "esperamos mucho", "esperamos una hora", "esperamos media", "esperamos más", "larga espera", "mucha espera", "la espera", "esperando", "nos hicieron esperar", "retraso", "llegó tarde", "empezó tarde", "con retraso", "horario", "puntual", "a tiempo", "hora acordada", "no había nadie", "nadie estaba"],
+    "N10": ["no pudimos comprar", "no se podía comprar", "imposible comprar", "nada para comprar", "nada que comprar", "no estaba a la venta", "no había nada a la venta", "no vendían", "recuerdo", "souvenir", "tienda", "tarjeta", "pago móvil", "mobile money", "con las manos vacías"]
+  }
+}

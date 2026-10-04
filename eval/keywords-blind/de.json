@@ -1,0 +1,26 @@
+{
+  "lang": "de",
+  "findings": {
+    "P1": ["empfang", "empfangen", "willkommen", "herzlich", "gastfreundlich", "gastfreundschaft", "freundlich", "nett", "liebevoll", "warmherzig", "wie zu hause", "wie zuhause", "wie familie", "aufgenommen", "gastgeber", "lächel"],
+    "P2": ["feld", "felder", "kaffeepflanz", "kaffeebaum", "kaffeebäume", "kaffeestrauch", "kaffeesträucher", "strauch", "sträucher", "plantage", "rundgang", "führung durch", "spaziergang", "kaffeekirsch", "kirschen", "parzelle", "wo der kaffee wächst", "anbau"],
+    "P3": ["röst", "geröst", "verkost", "kaffeeverkost", "probier", "geschmack", "geschmeckt", "tasse", "mahlen", "gemahlen", "aroma", "duft"],
+    "P4": ["essen", "mittagessen", "mahlzeit", "gericht", "gekocht", "kochen", "lecker", "köstlich", "schmackhaft", "hausgemacht", "kochbanane", "abendessen", "frühstück"],
+    "P5": ["erklär", "verständlich erklärt", "gelernt", "viel gelernt", "lehrreich", "informativ", "anschaulich", "jetzt verstehe", "endlich verstanden", "schritt für schritt", "wissen vermittelt"],
+    "P6": ["authentisch", "echte", "echtes leben", "ursprünglich", "alltag", "landleben", "bauernleben", "leben auf dem hof", "hofleben", "nicht touristisch", "touristenfalle", "nicht inszeniert", "nichts inszeniert", "keine show", "einblick", "traditionell"],
+    "P7": ["aussicht", "landschaft", "blick", "hügel", "tal", "umgebung", "kulisse", "natur", "panorama", "nebel", "berge", "idyllisch", "ruhig", "friedlich", "wunderschöner ort", "schöner ort"],
+    "P8": ["preis-leistung", "preisleistung", "preis leistung", "preiswert", "günstig", "fairer preis", "fair", "angemessen", "geld wert", "franc wert", "lohnt sich", "billig", "wert"],
+    "P9": ["kaufen", "kauf", "bestellen", "mitnehmen", "mitbringen", "verkaufen", "verkauft", "tüte", "packung", "kilo", "erwerben"],
+    "P10": ["wiederkommen", "wieder kommen", "zurückkommen", "wiederkehr", "empfehl", "weiterempfehl", "nochmal", "noch einmal", "freunden erzählen", "allen erzählen", "ein muss"],
+    "P11": ["danke", "zufrieden", "unvergesslich", "wunderbar", "perfekt", "toller tag", "schöner tag", "wunderschöner tag", "tolles erlebnis", "schönes erlebnis", "tolle erfahrung", "alles super", "alles toll", "alles perfekt", "großartig", "fantastisch", "herrlich"],
+    "N1": ["der weg", "den weg", "dem weg", "weg zur", "weg zum", "fußweg", "wege", "straße", "zufahrt", "anfahrt", "anreise", "pfad", "piste", "steil", "zu weit", "sehr weit", "weit weg", "weit entfernt", "schwer zu finden", "verlaufen", "verfahren", "schild", "beschilderung", "matsch", "schlamm", "rutschig", "holprig", "schotter", "aufstieg"],
+    "N2": ["preis unklar", "preise unklar", "unklare preise", "unklar", "nicht klar", "versteckte kosten", "zusatzkosten", "aufpreis", "extra kosten", "wie viel", "wieviel", "im voraus", "preisliste", "nachträglich", "mehr verlangt", "inbegriffen", "inklusive"],
+    "N3": ["zu lang", "viel zu lang", "langatmig", "langweil", "endlos", "zog sich", "ermüdend", "kürzer", "verkürz", "drei stunden", "ewig"],
+    "N4": ["zu kurz", "zu schnell", "gehetzt", "hektisch", "mehr zeit", "nicht genug zeit", "zu wenig zeit", "länger bleiben", "eile", "schnell vorbei", "nur eine stunde", "knapp"],
+    "N5": ["sprach", "übersetz", "dolmetsch", "verständig", "schwer zu verstehen", "nicht verstanden", "kaum verstanden", "nicht verstehen", "kommunikation", "kommunizier", "englisch"],
+    "N6": ["kein essen", "kein mittagessen", "keine mahlzeit", "hunger", "hungrig", "nichts zu essen", "zu wenig essen", "portion", "snack", "imbiss", "etwas zu essen", "verhungert"],
+    "N7": ["toilette", "wc", "klo", "latrine", "hygiene", "hygienisch", "schmutzig", "dreckig", "seife", "hände waschen", "händewaschen", "sanitär", "unsauber"],
+    "N8": ["wasser", "trinkwasser", "schatten", "sonne", "hitze", "heiß", "durst", "trinken", "getränk", "pause", "rast", "sitzgelegenheit", "hinsetzen", "bank", "ausruhen", "sonnenbrand"],
+    "N9": ["warten", "gewartet", "wartezeit", "wartete", "verspät", "zu spät", "pünktlich", "unpünktlich", "zeitplan", "vereinbarte zeit", "uhrzeit", "niemand da", "keiner da"],
+    "N10": ["nicht kaufen", "nichts zu kaufen", "konnten keinen", "konnten nichts", "kein verkauf", "nicht verkauft", "souvenir", "andenken", "laden", "shop", "kartenzahlung", "karte", "mobile money", "mit leeren händen"]
+  }
+}

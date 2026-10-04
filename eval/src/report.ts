@@ -121,6 +121,18 @@ export function runReport(log: (s: string) => void = console.log) {
     w("5 % target, and routes the rest to a person. The keyword lists were written by the same author as the synthetic corpus,");
     w("which favours the baseline (eval/keywords/README.md).");
     w();
+    const sets = l2.keywordSets as Record<string, J> | undefined;
+    if (sets?.original && sets?.blind) {
+      const o = sets.original.test.all;
+      const b = sets.blind.test.all;
+      w(`Second keyword baseline, written blind (without opening the corpus, the results or the first lists; protocol in eval/keywords-blind/README.md). Primary set in the table above: \`${l2.keywordSet ?? "original"}\`.`);
+      w();
+      w(table(["Keyword set (held-out test half)", "Remarks captured", "Error among accepted", "F1"], [
+        ["original (eval/keywords/, written by the corpus author)", `${pct(o.remarks.captureRate, 0)} ${ci(o.remarks.ci95)}`, `${pct(o.answers.acceptedErrorRate, 0)} ${ci(o.answers.ci95)}`, num(o.micro.f1)],
+        ["blind (eval/keywords-blind/)", `${pct(b.remarks.captureRate, 0)} ${ci(b.remarks.ci95)}`, `${pct(b.answers.acceptedErrorRate, 0)} ${ci(b.answers.ci95)}`, num(b.micro.f1)],
+      ]));
+      w();
+    }
     w("Suggested wording for the problem sentence: *\"our tests on synthetic feedback show the tool correctly captures " +
       `${pct(e.remarks.captureRate, 0)} of visitor remarks with ${pct(e.answers.acceptedErrorRate, 0)} of its counted answers wrong ` +
       `(most of the rest is flagged \"not sure\" for a person), versus ${pct(k.remarks.captureRate, 0)} for keyword matching with ${pct(k.answers.acceptedErrorRate, 0)} wrong.\"*`);
@@ -206,7 +218,10 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     const rowFor = (name: string, m: J): (string | number)[] => [name, num(m.micro.precision), num(m.micro.recall), num(m.micro.f1), `${pct(m.answers.acceptedErrorRate)} ${ci(m.answers.ci95)}`, pct(m.remarks.captureRate), pct(m.chunks.notSureRate), pct(m.chunks.offListRate), pct(m.negationCancels.accuracy), pct(m.negationInherent.recall), `${m.ambiguous.gotFinding}/${m.ambiguous.total}`, `${m.offListSpans.gotFinding}/${m.offListSpans.total}`];
     const head = ["", "Precision", "Recall", "F1", "Error among accepted", "Remarks captured", "Not-sure rate", "Off-list rate", "Cancelling negations OK", "Negation-is-finding recall", "Ambiguous given a finding", "Off-list given a finding"];
-    w(table(head, [rowFor("**Echo**", e.all), rowFor("Keywords", k.all)]));
+    const kwRows = l2.keywordSets
+      ? Object.entries(l2.keywordSets as Record<string, J>).map(([name, m]) => rowFor(`Keywords (${name})`, m.test.all))
+      : [rowFor("Keywords", k.all)];
+    w(table(head, [rowFor("**Echo**", e.all), ...kwRows]));
     w();
     w("Precision / recall / F1: message level (predicted set of findings vs expected). Error among accepted: chunk-level answers");
     w("(chunk, finding) counted by the system that do not match the annotation. Not-sure / off-list rates: share of chunks.");
