@@ -79,6 +79,11 @@ Default total app download with base + MiniLM: ~215 MB (tiny: ~179 MB).
   and offline breaks. The service worker precaches `/models/**` and `/ort/**` (large files: use a runtime
   CacheFirst route with a "download models" button and a progress bar rather than blocking install).
   Side-loading: copying the `models/` folder next to the built app is enough.
+  In the Capacitor APK (`Capacitor.isNativePlatform()`, detected on the main thread by `lib/platform.ts` and sent
+  in the worker's `init` request as `modelSource: "bundled"`), the worker skips that copy, sets
+  `env.useBrowserCache = false` and reads the models in place from the APK assets (same origin, served by the
+  Capacitor local server); it deletes any `transformers-cache` left by an older APK. `InitInfo.modelStorage`
+  says which path was used (`apk-assets` / `browser-cache`).
 
 ### Adapter behaviours (`packages/models`)
 - transformers.js **does not detect the language** (it silently defaults to English). `createWhisperTranscriber`

@@ -21,6 +21,9 @@ export interface AssetsManifest {
   };
 }
 
+/** "bundled" : modèles dans les assets de l'APK (lus sur place) ; "download" : PWA, copiés une fois dans Cache Storage. */
+export type ModelSource = "bundled" | "download";
+
 export type Stage = "download" | "load-asr" | "load-embedder" | "prepare-catalog" | "ready";
 
 export interface InitInfo {
@@ -29,6 +32,8 @@ export interface InitInfo {
   /** Embeddings des exemples : pré-calculés au build et vérifiés ici, ou recalculés sur l'appareil. */
   examples: { count: number; source: "precomputed" | "computed_on_device"; check?: number };
   backend: { threads: number; crossOriginIsolated: boolean };
+  /** Où les modèles sont lus : assets de l'APK (aucune copie) ou Cache Storage du navigateur. */
+  modelStorage: "apk-assets" | "browser-cache";
   loadMs: number;
 }
 
@@ -40,7 +45,7 @@ export interface Timings {
 }
 
 export type WorkerRequest =
-  | { kind: "init"; reqId: number }
+  | { kind: "init"; reqId: number; modelSource: ModelSource }
   | { kind: "analyzeAudio"; reqId: number; id: string; receivedAt: string; audio: Float32Array; knownMessages: KnownMessage[] }
   | { kind: "analyzeText"; reqId: number; id: string; receivedAt: string; text: string; knownMessages: KnownMessage[] }
   | { kind: "embed"; reqId: number; texts: string[] };

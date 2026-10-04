@@ -1,5 +1,6 @@
 // Client du Web Worker d'analyse : une file de requêtes, des événements de progression.
 import type { KnownMessage, MessageAnalysis } from "@echo/core";
+import { modelSourceFor } from "./platform.ts";
 import type { InitInfo, Stage, Timings, WorkerEvent, WorkerRequest } from "../worker/protocol.ts";
 
 export interface ProgressState {
@@ -76,7 +77,7 @@ export class AnalysisClient {
   /** Télécharge (une fois) et charge les modèles. Idempotent. */
   init(): Promise<InitInfo> {
     if (!this.initPromise) {
-      this.initPromise = this.request({ kind: "init" }).then((r) => {
+      this.initPromise = this.request({ kind: "init", modelSource: modelSourceFor() }).then((r) => {
         this.info = r.info!;
         return r.info!;
       });

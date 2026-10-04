@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { modelSourceFor } from "../lib/platform.ts";
 import { analysis } from "../lib/worker-client.ts";
 import type { AssetsManifest, InitInfo } from "../worker/protocol.ts";
 import { Progress, mb, useModelProgress } from "./common.tsx";
@@ -30,13 +31,17 @@ export function ModelBox({ manifest, compact = false }: { manifest: AssetsManife
   const asr = size(manifest.asrModel.id);
   const emb = size(manifest.embeddingModel.id);
   const ort = manifest.ortFiles.reduce((s, f) => s + f.bytes, 0);
+  // APK : modèles inclus dans l'application, lus sur place (rien à télécharger ni à copier).
+  const bundled = modelSourceFor() === "bundled";
   const busy = p.stage !== "idle" && p.stage !== "ready" && p.stage !== "error";
   return (
     <section class="card" data-testid="model-box">
       <h2>Everything runs on this device</h2>
       <p class="muted">
-        No server analyses anything and there is no account. After the first load the app, the models and the catalog are stored in this
-        browser, so it keeps working in airplane mode.
+        No server analyses anything and there is no account.{" "}
+        {bundled
+          ? "The models are part of the app and are read in place (not copied), so it works in airplane mode from the start."
+          : "After the first load the app, the models and the catalog are stored in this browser, so it keeps working in airplane mode."}
       </p>
       {!compact && (
         <table>
@@ -61,7 +66,7 @@ export function ModelBox({ manifest, compact = false }: { manifest: AssetsManife
               <td>{mb(ort)}</td>
             </tr>
             <tr>
-              <th>Total download, once</th>
+              <th>{bundled ? "Total, bundled in the app (no download)" : "Total download, once"}</th>
               <th />
               <th>{mb(asr + emb + ort)}</th>
             </tr>
@@ -81,12 +86,12 @@ export function ModelBox({ manifest, compact = false }: { manifest: AssetsManife
       {p.stage === "error" && <p class="error">{p.error}</p>}
       {(p.stage === "idle" || p.stage === "error") && (
         <button onClick={() => void analysis.init()} data-testid="load-models">
-          {p.stage === "error" ? "Retry" : `Download models (${mb(asr + emb + ort)}) and prepare offline use`}
+          {p.stage === "error" ? "Retry" : bundled ? "Load the models bundled in the app" : `Download models (${mb(asr + emb + ort)}) and prepare offline use`}
         </button>
       )}
       {info && !compact && (
         <p class="muted" style={{ fontSize: "0.82rem" }}>
-          Loaded in {(info.loadMs / 1000).toFixed(1)} s, {info.backend.threads} thread{info.backend.threads > 1 ? "s" : ""}. Catalog examples:{" "}
+          Loaded in {(info.loadMs / 1000).toFixed(1)} s{info.modelStorage === "apk-assets" ? " from the app's own files (not copied)" : ""}, {info.backend.threads} thread{info.backend.threads > 1 ? "s" : ""}. Catalog examples:{" "}
           {info.examples.count}, {info.examples.source === "precomputed" ? `embeddings precomputed at build time with the same model and checked on this device (cosine ${info.examples.check})` : "embedded on this device"}.
           Decision threshold:{" "}
           {manifest.thresholds.scoring === "linear"

@@ -558,3 +558,38 @@ progress), not related to this change.
 
 **Remains**: off-list/not-sure chunk embeddings (`ReviewChunk.embedding`) are still kept, since the unknown-topic
 clustering spans months; not in this audit item.
+
+## 2026-10-04 — APK reads the models in place, no Cache Storage copy (fix-android-1)
+
+**Built**
+- `apps/web/src/lib/platform.ts` (+ test): `modelSourceFor()` → `"bundled"` when `Capacitor.isNativePlatform()` is
+  true (main thread only: the worker cannot see the Capacitor bridge), else `"download"`.
+- Worker protocol: the `init` request carries `modelSource`; `InitInfo.modelStorage` = `apk-assets` | `browser-cache`.
+- `analysis.worker.ts`: `prepareModelFiles()`. Bundled → `env.useBrowserCache = false`, no `ensureModelFiles` copy,
+  and `caches.delete("transformers-cache")` to free the copy left by an older APK; transformers.js then fetches
+  `/models/…` straight from the APK assets (same origin, Capacitor local server). PWA path unchanged.
+- `ModelBox`: in the APK it says the models are bundled and read in place (no "Download models" wording).
+- README §5.7 (sizes) and §11.3, `apps/android/README.md`, ARCHITECTURE (browser model loading) updated.
+  These web-app files (worker, protocol, worker-client, ModelBox) belong to the web area: minimal change, staged as my
+  hunks only on top of HEAD (the web agent's uncommitted edits in the same files were left unstaged).
+
+**Verified**
+- `pnpm test` (142 passed), `pnpm typecheck`; HEAD + only my hunks also typechecks (temporary worktree).
+- `pnpm --filter @echo/web e2e`: online download path and offline reload/analysis pass; 6 failures, all
+  "mode A: frozen Kinyarwanda label …", from another agent's in-progress host-label work, unrelated.
+- Android 14 emulator (3 GB, airplane mode), rebuilt debug APK: `info.modelStorage = "apk-assets"`,
+  `transformers-cache` holds 0 entries, `navigator.storage.estimate()` 31–32 MB, app data
+  (`du /data/data/org.echo.feedback`) **36 MB, was 267 MB** with the previous APK (upgrade path deleted the old copy;
+  fresh install also checked). Models ready in ~21 s; French sample transcribed and matched (P1, P4).
+  Cost measured in the WebView: reading the 118 MB MiniLM file from the APK 1.35–1.6 s vs 0.67 s from Cache Storage.
+  Screenshot: `apps/android/screenshots/models-in-place.png`.
+
+**Notes / deviations**
+- The first launch after upgrading from an older APK still runs the old JS (the service worker serves its precached
+  shell), so the old copy is deleted on the launch after that. Normal PWA update behaviour.
+- The remaining ~31 MB is the service worker precache (app shell + 27 MB WASM runtime), also a copy of APK assets.
+  It is kept because the service worker is also the share-target path; not changed here.
+- My e2e run rewrote some `docs/screenshots/*.png`; not staged (other agents also regenerate them).
+
+**Remains**: on a real phone, check Settings → Apps → Echo → Storage ≈ 150 MB app + ~36 MB data (add to
+`docs/MANUAL_TESTS.md` §4 when that file is no longer being edited by another agent).

@@ -1,7 +1,8 @@
 /// <reference lib="webworker" />
 // Web Worker d'analyse : Whisper + modèle de similarité (transformers.js, WASM) + @echo/core.
 // Tout tourne sur l'appareil : modèles et runtime viennent de la même origine que l'app (jamais d'un hub
-// ni d'un CDN), mis en cache une fois (Cache Storage) pour marcher en mode avion ensuite.
+// ni d'un CDN), mis en cache une fois (Cache Storage) pour marcher en mode avion ensuite ; dans l'APK ils sont
+// lus directement dans les assets, sans copie.
 import { env } from "@huggingface/transformers";
 import {
   DEFAULT_CONFIG,
@@ -16,7 +17,7 @@ import {
   type Transcriber,
 } from "@echo/core";
 import { DEFAULT_EMBEDDING_MODEL, createEmbedder, createWhisperTranscriber } from "@echo/models";
-import type { AssetsManifest, InitInfo, Stage, WorkerEvent, WorkerRequest } from "./protocol.ts";
+import type { AssetsManifest, InitInfo, ModelSource, Stage, WorkerEvent, WorkerRequest } from "./protocol.ts";
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -28,7 +29,7 @@ const progress = (stage: Stage, loaded: number, total: number, file?: string): v
 env.allowRemoteModels = false;
 env.allowLocalModels = true;
 env.localModelPath = "/models/";
-env.useBrowserCache = true;
+env.useBrowserCache = true; // false dans l'APK (voir prepareModelFiles)
 env.cacheKey = CACHE;
 const threads = self.crossOriginIsolated ? Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1)) : 1;
 const onnx = env.backends.onnx as { wasm?: { wasmPaths?: unknown; numThreads?: number; proxy?: boolean } };
@@ -113,7 +114,27 @@ interface Engine {
 
 let enginePromise: Promise<Engine> | null = null;
 
-async function init(): Promise<Engine> {
+/**
+ * Dans l'APK, les modèles sont déjà sur le téléphone (assets servis par la coquille Capacitor sur la même
+ * origine) : on les lit sur place, sans copie dans Cache Storage, qui doublerait leur place (~215 Mo).
+ * Un éventuel cache rempli par une version précédente de l'APK est supprimé.
+ */
+async function prepareModelFiles(manifest: AssetsManifest, source: ModelSource): Promise<InitInfo["modelStorage"]> {
+  if (source === "bundled") {
+    env.useBrowserCache = false;
+    try {
+      await caches.delete(CACHE);
+    } catch {
+      /* Cache Storage indisponible : rien à libérer */
+    }
+    return "apk-assets";
+  }
+  env.useBrowserCache = true;
+  await ensureModelFiles(manifest);
+  return "browser-cache";
+}
+
+async function init(modelSource: ModelSource): Promise<Engine> {
   const t0 = performance.now();
   const manifest = (await (await fetch("/assets-manifest.json")).json()) as AssetsManifest;
   const catalog = validateCatalog(await (await fetch("/catalog/catalog.json")).json());
@@ -122,7 +143,7 @@ async function init(): Promise<Engine> {
   if (manifest.embeddingModel.id !== DEFAULT_EMBEDDING_MODEL) {
     throw new Error(`assets prepared for ${manifest.embeddingModel.id} but thresholds calibrated for ${DEFAULT_EMBEDDING_MODEL}: rebuild the app (pnpm build)`);
   }
-  await ensureModelFiles(manifest);
+  const modelStorage = await prepareModelFiles(manifest, modelSource);
 
   progress("load-asr", 0, 1);
   const transcriber = await createWhisperTranscriber(manifest.asrModel.id, { device: "wasm" });
@@ -162,14 +183,18 @@ async function init(): Promise<Engine> {
       embeddingModel: manifest.embeddingModel.id,
       examples: { count: matcher.examples.length, source, ...(check !== undefined ? { check: Math.round(check * 10000) / 10000 } : {}) },
       backend: { threads, crossOriginIsolated: self.crossOriginIsolated },
+      modelStorage,
       loadMs: Math.round(performance.now() - t0),
     },
   };
 }
 
+// Fixée par la requête "init" du fil principal (seul à voir le pont Capacitor) ; toujours envoyée en premier.
+let modelSource: ModelSource = "download";
+
 function engine(): Promise<Engine> {
   if (!enginePromise) {
-    enginePromise = init();
+    enginePromise = init(modelSource);
     enginePromise.catch(() => (enginePromise = null));
   }
   return enginePromise;
@@ -179,6 +204,7 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   const req = ev.data;
   try {
     if (req.kind === "init") {
+      modelSource = req.modelSource;
       const e = await engine();
       post({ kind: "result", reqId: req.reqId, info: e.info });
       return;

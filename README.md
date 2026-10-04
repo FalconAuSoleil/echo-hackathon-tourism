@@ -339,7 +339,7 @@ The keyword lists were written by the same author as the synthetic corpus, which
 | Shipped models (q8 ONNX) | whisper-base 79.7 MB + MiniLM 135.4 MB = **215.1 MB** (tiny would be 43.6 MB, small 251.8 MB) |
 | One-time download of the web app | ≈ 242 MB (models + 27 MB WebAssembly runtime) + app shell, catalog, clips, samples; side-loadable by copying `models/` |
 | Catalog + Kinyarwanda audio | 68 MP3 clips, ~360 KiB |
-| Side-loadable debug APK (models bundled) | ~150 MB (157 MB file) |
+| Side-loadable debug APK (models bundled) | ~150 MB (157 MB file). **On the phone: the installed APK (150 MB) + ~36 MB of app data**: the models are read in place from the APK, not copied (the data is the service worker's copy of the app shell and the 27 MB WebAssembly runtime). Measured on the Android 14 emulator: app data 267 MB before this fix (models copied into Cache Storage), 36 MB after. Cost: reading the 118 MB MiniLM file from the APK takes ~1.4–1.6 s vs ~0.7 s from Cache Storage (emulator) |
 | Memory (laptop, Node process, whisper-base) | 885 MB after loading, **peak 1.2 GB** (native runtime libraries + file buffers) |
 | Memory in the APK's WebView (**Android 14 emulator**, not a phone) | renderer ≈ **1.55 GB** once both models are loaded. **2 GB of RAM: the renderer was killed by low memory during transcription** (the app now restarts the page with a message); **3 GB: works** |
 | 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.3 s** (4.3 s with the English translation for the review list); 8 threads: 4.7 s / 5.2 s on a shared CPU |
@@ -541,7 +541,8 @@ Found during the build:
   (≈ 1.55 GB with both models loaded) **was killed by low memory during transcription**: no message could be analysed
   (the app now restarts the page with a message instead of dying). With 3 GB it worked (6 s sample in 18.4 s). Not
   measured on a real phone, whose memory killer may behave differently; ~1.2 GB peak in the laptop's Node process.
-  In the APK the models are also copied into Cache Storage, so they take ~215 MB twice on disk.
+  (Disk is no longer the issue: in the APK the models are read in place from the APK's assets, ~186 MB in all on
+  the phone; in the browser PWA they are downloaded once into Cache Storage, ≈ 242 MB.)
 - **Common Voice not used**; FLEURS is read speech, so accent variety is limited.
 - **Licensing**: NLLB-200, MMS-TTS and ESC-50 are non-commercial; the Piper engine (build time only, not shipped) is
   GPL-3.0.

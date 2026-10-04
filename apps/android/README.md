@@ -7,6 +7,7 @@ the APK, so the phone downloads nothing: install, open, use in airplane mode. Th
 |---|---|
 | Package | `org.echo.feedback`, minSdk 24 (Android 7.0), target/compile SDK 36 |
 | Debug APK | **157,249,918 bytes (150 MB)**, built on this machine on 2026-10-04 (models 215 MB uncompressed, ~128 MB compressed in the APK) |
+| Space on the phone | the installed APK (150 MB) + **~36 MB** of app data (measured on the emulator). The web app detects the Capacitor shell and reads the models in place from the APK's assets (`env.useBrowserCache = false`), with no copy into Cache Storage; the 36 MB is the service worker's precache (app shell + 27 MB WASM runtime). Before this, the models were copied into Cache Storage and the app data was 267 MB. An update from an older APK deletes that old copy at the next model load. |
 | Permissions | `INTERNET` (needed by the WebView's local server; Echo sends nothing), `RECORD_AUDIO` + `MODIFY_AUDIO_SETTINGS` (in-app recording, asked at first use). **No `SEND_SMS`, no storage permissions.** |
 | Backups | `allowBackup=false` + data-extraction rules: feedback never goes to a cloud backup or a device transfer. |
 
