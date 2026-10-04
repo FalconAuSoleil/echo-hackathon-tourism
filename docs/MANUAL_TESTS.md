@@ -1,24 +1,22 @@
+# Echo — manual tests (what cannot be verified in the build environment)
 
-## Kinyarwanda catalog: speaker check (catalog agent, 2026-10-04)
+The build machine (Linux WSL2, no phone, no SIM card, no WhatsApp, no Kinyarwanda speaker) could verify everything
+that runs in a browser or in Node: unit tests (`pnpm test`), type checks, the evaluation (`pnpm eval`) and the
+end-to-end test of the production build in headless Chromium with the real models, online then offline
+(`pnpm build && pnpm --filter @echo/web e2e`, last run 2026-10-04: **E2E PASSED**). The items below need real
+hardware or a person. None of them has been done yet; nothing in the README claims they have.
 
-Cannot be done here: no Kinyarwanda speaker. Everything in `catalog/` is flagged
-`machine_translated_unvalidated`. Procedure for a speaker (guide, cooperative member, ~30 min):
+| # | Test | Why it cannot be done here | SPEC | Status |
+|---|---|---|---|---|
+| 1 | P0 path on a real Android phone in airplane mode; WhatsApp share target; real SMS in Kinyarwanda received on a basic phone; audio playback; PIN; printed card | No phone, SIM or WhatsApp | 4.1–4.6, 12 P0, 14 | **not done** |
+| 2 | Time and memory for a 30 s message on a low-end Android (replaces the estimate in `eval/results/RESULTS.md`) | No phone | 9 "performances" | **not done** (estimate only) |
+| 3 | Kinyarwanda sentences and clips checked by a speaker | No Kinyarwanda speaker | 5, 11.10 | **not done** |
 
-1. Open `catalog/README.md`, table "The frozen sentences" (29 lines: 21 findings, 8 recap templates). For each line,
-   read `rw` and the English/French source. Mark: correct / understandable but odd / wrong meaning.
-   Check first the known drifts listed under the table (P2, P3, P6, P7, P8, N5, unknown_topic, keep/fix "ku" vs "kuri").
-2. Read three full recap lines aloud with numbers, e.g. "Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bumvaga bakiriwe neza."
-   Is the word order natural once `{finding}` follows the colon?
-3. Listen to every clip in `catalog/audio/` (68 mp3, `audio/manifest.json` gives the text of each): is the word
-   intelligible, is the pronunciation acceptable? Listen to `num-0` … `num-31` (counting form, e.g. "cumi na gatatu").
-4. Listen to a concatenated line (template part + number + part + number + finding clip, played by the app's
-   "Listen" button): are the gaps between clips acceptable?
-5. For each wrong sentence: write the correct Kinyarwanda in `catalog/catalog.json` (`rw`, keep the slots), set
-   `"status": "speaker_validated"` and add `"validatedBy": "<role>, <date>"`; re-record or regenerate its clip;
-   run `.venv/bin/python tools/catalog/validate_catalog.py`.
-Expected result: a list of sentences marked correct / odd / wrong, to be copied into `docs/PROGRESS.md`.
+How to record results: for each step write pass / fail, timings, phone model, Android and Chrome versions (or the
+speaker's role and date), then append them to `docs/PROGRESS.md` and update the README (§5.7 for timings, §10 and §12
+for anything that stops being "not tested").
 
-## Web app on a real Android phone (web-app agent, 2026-10-04)
+## 1. Web app on a real Android phone: P0 path, share target, real SMS
 
 Cannot be done here: no Android phone, no SIM card, no WhatsApp. What *was* verified here: the production build in
 headless Chromium (desktop Linux) with the real models, including offline reload (`pnpm --filter @echo/web e2e`,
@@ -29,6 +27,10 @@ only on the computer itself). Simplest: on the laptop, `pnpm build` then `pnpm -
 expose port 4173 through a temporary HTTPS tunnel the team controls, or copy `apps/web/dist/` to any static HTTPS host
 that sends the `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` headers
 (without them everything works on a single WASM thread, slower). Do not publish without the user's decision.
+
+**Or side-load the APK** (`bash tools/android/build-apk.sh` → `apps/android/dist/echo-debug.apk`, models bundled): copy it
+to the phone, allow "install unknown apps", install. Then skip steps 1–2 (no download, no HTTPS needed) and in step 5
+choose "Echo" in the Android share sheet; everything else is the same. Note which variant (APK or PWA) was tested.
 
 1. **First load (on Wi-Fi)**: open the URL. "Try it" shows "Downloading models once" with a progress bar (≈ 242 MB:
    Whisper base 80 MB + MiniLM 135 MB + runtime 27 MB), then "Ready: works offline". Note the time.
@@ -56,7 +58,7 @@ that sends the `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embed
 Record for each step: pass/fail, timings, phone model and Android/Chrome versions, and copy the results into
 `docs/PROGRESS.md`.
 
-## Performance on a low-end Android (SPEC 9 "Les performances") — evaluation agent
+## 2. Performance on a low-end Android (SPEC 9 "Les performances")
 
 The evaluation measures speed and memory on a laptop CPU and gives only an **estimate** for a low-end phone
 (`eval/results/RESULTS.md`, section Performance). This procedure replaces the estimate with a measurement.
@@ -64,8 +66,10 @@ The evaluation measures speed and memory on a laptop CPU and gives only an **est
 **Phone**: an entry-level Android already owned by a household (e.g. 2–3 GB RAM, Cortex-A53/A55-class CPU, Android 10+),
 Chrome up to date. Note model, RAM, CPU (Settings → About phone) and Chrome version.
 
-1. On a computer on the same Wi-Fi: `pnpm install && pnpm models:download && pnpm build && pnpm preview -- --host`
-   (or use the public demo link once deployed by the team).
+1. On a computer on the same Wi-Fi: `pnpm install && pnpm models:download && pnpm build && pnpm preview` (the preview server
+   already listens on the local network, port 4173). Plain `http://<laptop-ip>:4173` is not a secure origin on the phone, so the
+   service worker and microphone may be refused: use HTTPS as in section 1, or Chrome's `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
+   for that one address (test phone only).
 2. On the phone, open the app URL in Chrome, let the models download completely (progress bar), then switch the phone to
    **airplane mode**.
 3. Connect the phone by USB, enable USB debugging, open `chrome://inspect` on the computer and inspect the tab
@@ -82,3 +86,22 @@ Chrome up to date. Note model, RAM, CPU (Settings → About phone) and Chrome ve
 
 **Pass criteria** (proposed): a 30 s message is analysed in under 3 minutes in airplane mode without the tab being
 killed; the result is identical to the one obtained on the laptop for the same file (same findings).
+
+## 3. Kinyarwanda catalog: speaker check
+
+Cannot be done here: no Kinyarwanda speaker. Everything in `catalog/` is flagged
+`machine_translated_unvalidated`. Procedure for a speaker (guide, cooperative member, ~30 min):
+
+1. Open `catalog/README.md`, table "The frozen sentences" (29 lines: 21 findings, 8 recap templates). For each line,
+   read `rw` and the English/French source. Mark: correct / understandable but odd / wrong meaning.
+   Check first the known drifts listed under the table (P2, P3, P6, P7, P8, N5, unknown_topic, keep/fix "ku" vs "kuri").
+2. Read three full recap lines aloud with numbers, e.g. "Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bumvaga bakiriwe neza."
+   Is the word order natural once `{finding}` follows the colon?
+3. Listen to every clip in `catalog/audio/` (68 mp3, `audio/manifest.json` gives the text of each): is the word
+   intelligible, is the pronunciation acceptable? Listen to `num-0` … `num-31` (counting form, e.g. "cumi na gatatu").
+4. Listen to a concatenated line (template part + number + part + number + finding clip, played by the app's
+   "Listen" button): are the gaps between clips acceptable?
+5. For each wrong sentence: write the correct Kinyarwanda in `catalog/catalog.json` (`rw`, keep the slots), set
+   `"status": "speaker_validated"` and add `"validatedBy": "<role>, <date>"`; re-record or regenerate its clip;
+   run `.venv/bin/python tools/catalog/validate_catalog.py`.
+Expected result: a list of sentences marked correct / odd / wrong, to be copied into `docs/PROGRESS.md`.

@@ -384,3 +384,44 @@ settings (only the evaluated default model is shipped).
 **Remains**: measure on a real low-end Android (MANUAL_TESTS); README § Results to copy from `eval/results/RESULTS.md`
 (docs agent); re-run `pnpm eval -- --level 2 --level 3 --level report` whenever `catalog/catalog.json` examples change
 (the threshold file is regenerated).
+
+## 2026-10-04 — README, data sheet TODOs, manual tests (readme agent)
+
+**Built**
+- `README.md` (English, jury-facing) with the SPEC 11 sections in order: problem and users with the SPEC 13 sentence
+  filled (X = 48 %, Y = 88 %, definition stated, plus the 6 % vs 28 % wrong-answer context and the audio numbers), full
+  journey, what the AI does + why a simple tool is not enough + the Google Translate / guide / form / Echo table,
+  guardrails, measured results (tables copied from `eval/results/RESULTS.md`: FLEURS WER per language and model, level-2
+  P/R/F1, not-sure rate, error among accepted, per-language, confusion-matrix highlights, threshold curve and rule,
+  level 3 per SNR, Whisper choice, unknown topic, duplicates, Echo vs keywords, sizes, memory, 30 s timing with the
+  Android ESTIMATE labelled), data sheet summary + link, responsible AI, less-supported language (two answers), replicability
+  (catalog swap, cooperatives, costs, pilot plan), limitations (SPEC 11.10 + build findings), technical section
+  (architecture diagram, models, how to run incl. APK), and §12 "What is simulated / synthetic".
+- `docs/DATASHEET.md`: TODO slots filled from the manifests (Piper: 13 voices with per-voice clip counts and licenses,
+  80 clips, 389 s per condition, speeds 0.8–1.25, 5 conditions, demo samples; ESC-50: 48 clips × 5 s, 12 classes,
+  21 CC0 / 27 CC-BY sources, 20/10/5 dB SNR, event in 35/80 clips); Common Voice marked "not used"; whisper-small size
+  and FLEURS sample size added; "provisional" labels removed.
+- `docs/MANUAL_TESTS.md`: merged into one document (title, status table of the 3 hardware/person tests, then the
+  phone procedure, the performance procedure, the speaker check); fixed the perf step that used `pnpm preview -- --host`
+  (the `--` swallows flags; preview already listens on the LAN) and noted the secure-origin issue; added the APK variant.
+
+**Verified here (2026-10-04 03:03–03:12)**: `pnpm install --frozen-lockfile`, `pnpm models:download`, `pnpm test`
+(127 passed), `pnpm typecheck`, `pnpm smoke:models`, `pnpm build`, `pnpm --filter @echo/web e2e` (E2E PASSED), `pnpm eval`
+(full run, ~7 min with caches), `pnpm dev` (5173), `pnpm preview` (4173, COEP header), `validate_catalog.py`,
+`test_catalog.py`, `check_disjoint.py`. The eval re-run reproduced levels 1–3 exactly (only perf timings moved, the CPU was
+shared with the Android build); I restored the committed `eval/results/` and `docs/screenshots/` (rewritten by the runs)
+so the README matches the committed numbers. Not run by me: `build_kinyarwanda.py`, `make_eval_audio.sh` (long, rewrite
+other agents' outputs) and `tools/android/build-apk.sh`.
+
+**Deviations / notes**
+- The APK paragraphs (README §10, §11.1, §11.3, §12, MANUAL_TESTS §1) describe `apps/android` and `tools/android` as found
+  **uncommitted** in the working tree at 03:25 (Capacitor shell, share intent, no SEND_SMS, debug APK 157 MB built at 03:08
+  by the Android agent). If that work changes or is dropped, update those paragraphs.
+- Found while writing: the `not_understood` sentence says "{p} messages were not understood" while `{p}` counts not-sure
+  *chunks* (remarks); listed as a limitation (fix = change the catalog source to "remarks" and re-translate).
+- Unknown-topic false alerts: README uses RESULTS.md (0.6 % of months), not the 1.2 % of an earlier PROGRESS entry.
+- No SMS cost figure in RWF is given (not verified): README says "at most 3 SMS a month at the operator's normal rate"
+  (5-line recap measured with the shipped `splitSms`).
+
+**Remains**: the three manual tests in `docs/MANUAL_TESTS.md` (real phone + SMS, phone timing, speaker check); update
+README §5.7/§10/§12 when they are done; public deployment and making the repo public are the user's call.
