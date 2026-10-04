@@ -21,7 +21,7 @@ Ground rules for the recording (SPEC 0 and `CLAUDE.md`):
 | 0:35–1:20 | **2. AI capabilities and guardrails** | README §3 table (Echo vs Translate / guide / form), then the guardrails list (README §4); short shot of `catalog/catalog.json` frozen Kinyarwanda sentences | "Two small models run on the phone: Whisper base, 80 MB, turns a voice note into text and detects the language; a multilingual sentence model, 135 MB, plus a small classifier maps each remark to one of 21 findings. A keyword search can't: it counts 'the walk was not too long' as a complaint, and 28 % of what it counts is wrong; Echo's is 6 %. Guardrails: the host only ever sees frozen Kinyarwanda sentences, nothing generated; below 0.84 confidence or with an unclear negation, the remark is 'not sure — ask a person' and never counted; audio is deleted after transcription, names and numbers are scrubbed; a person presses Send on the SMS." |
 | 1:20–3:10 | **3. Tool demo (end to end)** | Screen recording, sequence below | Short captions per step (below). |
 | 3:10–3:50 | **4. Where it sits in the user's day + tech stack** | README §2 journey (numbered steps), then the architecture diagram of README §11.1 | "At the end of the visit, Noor's daughter hands the visitor a printed card. The visitor sends a WhatsApp voice note, later if there's no signal. At the weekend, the daughter shares the notes to Echo in one gesture; analysis runs offline in the background. Once a month Echo opens the SMS app with the recap in Kinyarwanda; she presses Send, Noor reads it on her basic phone, or listens to it on the smartphone. Stack: a Preact PWA, transformers.js and ONNX Runtime WebAssembly in a Web Worker, one TypeScript core shared by the app and the evaluation, IndexedDB, an optional Capacitor APK. Nothing runs on a server." |
-| 3:50–4:30 | **5. Your take — what localizing AI development means to us** | README §13 bullet points as text cards; end card with repo name and "prototype: synthetic data labelled" | Read README §13 in short form: "For us, localizing AI means deciding where the model stops. The host's language is 30 frozen sentences a Kinyarwanda speaker can rewrite and re-record in an afternoon, without any model. The models fit the phone the household already owns, offline. The data is created by each farm, for that farm. And a small model must say 'not sure' rather than guess. The trade-offs: it captures about half the remarks by itself, it needs about 3 GB of RAM, and everything we measured is synthetic until a pilot with real farms." |
+| 3:50–4:30 | **5. Your take — what localizing AI development means to us** | README §13 bullet points as text cards; end card with repo name and "prototype: synthetic data labelled" | Read README §13 in short form: "For us, localizing AI means deciding where the model stops. The host's language is 29 frozen recap sentences, 6 button labels and the number words, which a Kinyarwanda speaker can rewrite and re-record in an afternoon, without any model. The models fit the phone the household already owns, offline. The data is created by each farm, for that farm. And a small model must say 'not sure' rather than guess. The trade-offs: it captures about half the remarks by itself, on phones under 3 GB it loads one model at a time, and a real 2 GB phone is not yet measured, and everything we measured is synthetic until a pilot with real farms." |
 
 ### Problem sentence (SPEC 13, with measured numbers; read verbatim in segment 1)
 
@@ -51,17 +51,19 @@ Chrome, let the models load once (01-demo-loading → 02-demo-ready), then turn 
 | 8 | 2:28 | Open the keyword-vs-Echo comparison (04-compare-keywords-vs-echo) | "Same messages, keyword matching: more counts, more wrong ones." |
 | 9 | 2:38 | Open the Kinyarwanda recap with FR/EN glosses (05-recap-kinyarwanda); press **Listen** for two lines | "Only frozen catalog sentences. Kinyarwanda machine-translated, not yet validated by a speaker; synthetic voice." |
 | 10 | 2:50 | Press **Send SMS 1/N**: show the SMS app (or the `sms:` link) pre-filled; **do not send** | "A person presses Send. Echo never acts by itself." Optional: cut to `apps/android/screenshots/emulator-sms-app-prefilled.png`, captioned "Android 14 emulator". |
-| 11 | 2:57 | "To be read by a person" list (06-to-be-read), then the synthetic 3-month trends (07-trends-synthetic) | "Machine translation to be checked. History: synthetic." |
-| 12 | 3:04 | Visitor card (11-visitor-card), cooperative view (10-coop-synthetic) | "Printed card for visitors. Cooperative view: synthetic farms, nothing sent." |
+| 11 | 2:56 | Host view after analysing a shared voice note: the red WhatsApp-deletion reminder with its counter (14-whatsapp-reminder) | "The card promised the sound is deleted. Echo cannot delete WhatsApp's copy, so it reminds the host until she taps Done." |
+| 12 | 2:59 | "To be read by a person" list (06-to-be-read), then the synthetic 3-month trends (07-trends-synthetic) | "Machine translation to be checked. History: synthetic." |
+| 13 | 3:05 | Visitor card (11-visitor-card), cooperative view (10-coop-synthetic) | "Printed card for visitors. Cooperative view: synthetic farms, nothing sent." |
 
-Optional insert if time allows (replace step 12): `apps/android/screenshots/emulator-share-received-offline.png`,
+Optional insert if time allows (replace step 13): `apps/android/screenshots/emulator-share-received-offline.png`,
 captioned "APK on an Android 14 emulator, airplane mode: a shared voice note queued". Do not imply a phone.
 
 ## Stills available (no recording needed)
 
 `docs/screenshots/`: 01-demo-loading, 02-demo-ready, 03-message-result, 04-compare-keywords-vs-echo,
 05-recap-kinyarwanda, 06-to-be-read, 07-trends-synthetic, 08-demo-full, 09-host-app, 10-coop-synthetic,
-11-visitor-card, 12-offline, 13-offline-full. `apps/android/screenshots/`: emulator-share-received-offline,
+11-visitor-card, 12-offline, 13-offline-full, 14-whatsapp-reminder, 15-host-mode-a-kinyarwanda,
+16-review-list-english. `apps/android/screenshots/`: emulator-share-received-offline,
 emulator-sms-app-prefilled. `eval/results/coverage-error-curve.svg` (threshold choice, useful in segment 2).
 
 ## Checklist before upload

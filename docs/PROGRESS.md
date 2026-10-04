@@ -772,3 +772,16 @@ the e2e (new `16-review-list-english.png`).
 - The PII sentences are not a blind set (name list widened once after the first run): recall is optimistic.
 - A queue item that keeps failing blocks the closure of its month until the host removes it.
 - Possible next step: offer hosts on slow phones a setting to skip the English step.
+
+## 2026-10-04 — fix-docs-3 (README data table, stale numbers, video script)
+
+- README §6 "Data and models" table: three rows added from `docs/DATASHEET.md` — the PII scrubber's first-name list
+  (US Census 1990 public domain, INSEE Fichier des prénoms Licence Ouverte 2.0, Wikidata CC0; 6,154 names, 54 KB,
+  shipped in the app), Tatoeba (CC BY 2.0 FR, build time only) and the 52 synthetic PII check sentences, each with
+  what it does not cover.
+- README §11.3: `pnpm test` count 142 → 159 (re-run here: 159 passed; `pnpm typecheck` OK).
+- `docs/VIDEO_SCRIPT.md` segment 5: "29 frozen recap sentences, 6 button labels and the number words" instead of
+  "30 frozen sentences"; "on phones under 3 GB it loads one model at a time, a real 2 GB phone is not yet measured"
+  instead of "needs about 3 GB of RAM". Demo sequence: new step 11, the WhatsApp-deletion reminder
+  (14-whatsapp-reminder), later steps renumbered; stills list completed with screenshots 14–16.
+- No deviation from the spec; nothing remaining for this task.

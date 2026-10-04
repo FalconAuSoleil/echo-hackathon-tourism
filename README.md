@@ -421,6 +421,9 @@ The complete data sheet, with every license checked on its primary page (URL and
 | ESC-50 outdoor noise | CC BY-NC 3.0 (ESC-10 CC BY 3.0); clips kept only if Freesound source is CC0/CC-BY | 48 clips × 5 s, 12 classes, mixed at 20/10/5 dB SNR | Level 3 noise | Not recorded on a Rwandan farm; no wind on the mic |
 | Visitor feedbacks (**synthetic**, ours) | released with the project | 250 feedbacks, 137 KB | Levels 2 and 3 | Written by people who know the catalog |
 | Catalog examples (**synthetic**, ours) | released with the project | 756 sentences (21 findings × 9 × 4 languages) | Classifier training | Authored, not collected |
+| First-name list of the PII scrubber (`packages/core/src/given-names.ts`, **shipped in the app**): US Census 1990 first names, INSEE Fichier des prénoms (2023), Wikidata | Census public domain; INSEE Licence Ouverte / Etalab 2.0; Wikidata CC0 (only folded names redistributed) | 6,154 names, 54 KB shipped | `scrubPii` removes a listed name in any position, lowercase transcripts included | Old (1990) US list; Wikidata favours notable people; many names of the world are missing (Noor, Kwame were missed in the check); names that are common words (Grace, Claire, Pierre, Rose, Dolores…) are only removed by the context rules |
+| Tatoeba sentences (en, fr, de, es) | CC BY 2.0 FR | eng 1.9 M, fra 0.6 M, deu 0.7 M, spa 0.4 M sentences, **build time only** | Decides which first names are also common words per language; only the resulting name flags are shipped | Written, crowd-sourced sentences; lowercase counts are a proxy for "is a common word" |
+| PII check sentences (**synthetic**, ours) | released with the project | 52 sentences, 58 names, 4 spoken phone numbers | Level-2 check of the scrubber (`pnpm eval -- --level pii`) | Written by the team; not real names spoken through Whisper; the name list was widened once after the first run, so the recall is optimistic |
 | Kinyarwanda number words 0–31 (ours, hand-written from Omniglot, languagesandnumbers.com, Harvard ELIAS) | word forms are facts of the language, no text copied; clips MMS-TTS (CC BY-NC 4.0) | 32 words + 32 clips | Numbers spoken in the audio recap (SMS and screen use digits) | No noun-class agreement ("gatatu", not "abashyitsi batatu"); not validated by a speaker |
 
 **What the data does not cover:** there is no public corpus of visitor feedback on farm visits in Africa (we searched;
@@ -675,7 +678,7 @@ pnpm dev                           # web app with hot reload: http://localhost:5
 pnpm build                         # production build into apps/web/dist (~260 MB with models)
 pnpm preview                       # serve the build: http://localhost:4173 (COOP/COEP headers → WASM threads)
 
-pnpm test                          # vitest, all packages (core, models, web, eval: 142 tests)
+pnpm test                          # vitest, all packages (core, models, web, eval: 159 tests)
 pnpm typecheck                     # tsc on every package
 pnpm --filter @echo/web e2e        # after `pnpm build`: real models in headless Chromium, online then offline
                                    #   (first time: npx playwright install chromium; writes docs/screenshots/)
