@@ -3,6 +3,7 @@
 import {
   buildMonthlyRecap,
   clusterOffList,
+  localMonth,
   recapRwLines,
   recurringUnknownVisitors,
   reviewChunkCandidates,
@@ -19,12 +20,9 @@ import {
   type StoredMessage,
 } from "@echo/core";
 
-export function monthOf(iso: string): string {
-  return iso.slice(0, 7);
-}
-
+/** Mois courant, heure locale de l'appareil (même horloge que le mois des messages, voir core month.ts). */
 export function currentMonth(now = new Date()): string {
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return localMonth(now);
 }
 
 export function addMonths(month: string, delta: number): string {

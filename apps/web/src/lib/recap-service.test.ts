@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { DEFAULT_CONFIG, gsm7Length, validateCatalog, type ReviewChunk } from "@echo/core";
-import { addMonths, monthReport, reviewChunksToItems, smsParts, toMonthMessage } from "./recap-service.ts";
+import { DEFAULT_CONFIG, gsm7Length, monthOfReceived, validateCatalog, type ReviewChunk } from "@echo/core";
+import { addMonths, currentMonth, monthReport, reviewChunksToItems, smsParts, toMonthMessage } from "./recap-service.ts";
 import { syntheticCoopFarms, syntheticHistory } from "./synthetic.ts";
 
 const catalog = validateCatalog(JSON.parse(readFileSync(new URL("../../../../catalog/catalog.json", import.meta.url), "utf8")));
@@ -15,6 +15,23 @@ describe("recap service", () => {
   it("month arithmetic", () => {
     expect(addMonths("2026-01", -1)).toBe("2025-12");
     expect(addMonths("2026-10", 3)).toBe("2027-01");
+  });
+
+  it("the demo recap month is the month of the messages just run, in UTC-5 and UTC+2 at the month boundary", () => {
+    const tz = process.env.TZ;
+    try {
+      for (const [zone, iso, month] of [
+        ["America/New_York", "2026-11-01T02:30:00.000Z", "2026-10"], // 31 Oct, 21:30 local
+        ["Africa/Kigali", "2026-09-30T23:00:00.000Z", "2026-10"], // 1 Oct, 01:00 local
+      ] as const) {
+        process.env.TZ = zone;
+        expect(currentMonth(new Date(iso))).toBe(month);
+        expect(monthOfReceived(iso)).toBe(month); // month written by analyzeMessage
+      }
+    } finally {
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+    }
   });
 
   it("synthetic history makes the path a streak and the recap uses only catalog sentences", () => {

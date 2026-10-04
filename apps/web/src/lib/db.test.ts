@@ -29,13 +29,13 @@ describe("IndexedDB storage", () => {
     const emb = new Float32Array([0.6, 0.8]);
     await saveAnalysis(db, { ...toStoredMessage(analysis), id: "old", receivedAt: "2026-09-20T10:00:00.000Z", embedding: emb }, []);
     await saveAnalysis(db, { ...toStoredMessage(analysis), id: "new", receivedAt: "2026-10-03T10:00:00.000Z", embedding: emb }, []);
-    expect(await pruneExpiredEmbeddings(db, new Date("2026-10-04T12:00:00.000Z"))).toBe(1);
+    expect(await pruneExpiredEmbeddings(db, new Date(2026, 9, 4, 12))).toBe(1);
     const old = (await db.get("messages", "old"))!;
     expect("embedding" in old).toBe(false);
     expect(old).toMatchObject({ fingerprint: "abc", findings: [{ id: "P3", confidence: 0.9 }] });
     expect((await db.get("messages", "new"))!.embedding).toEqual(emb);
     // Idempotent ; le doublon exact par empreinte reste détectable (fenêtre gérée par le cœur).
-    expect(await pruneExpiredEmbeddings(db, new Date("2026-10-04T12:00:00.000Z"))).toBe(0);
+    expect(await pruneExpiredEmbeddings(db, new Date(2026, 9, 4, 12))).toBe(0);
     expect((await knownMessages(db)).find((k) => k.receivedAt?.startsWith("2026-09-20"))).toEqual({ fingerprint: "abc", receivedAt: "2026-09-20T10:00:00.000Z" });
   });
 
@@ -75,8 +75,8 @@ describe("IndexedDB storage", () => {
     const before = monthClustersFromReview("2026-09", await db.getAll("reviewChunks"), DEFAULT_CONFIG);
     expect(before.find((c) => c.recurring)?.distinctVisitors).toBe(3);
     // August still has a message in the queue: it waits for the next run.
-    await enqueue(db, { kind: "text", text: "x", receivedAt: "2026-08-31T23:00:00.000Z", via: "paste" });
-    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"), await queuedMonths(db))).toEqual(["2026-09"]);
+    await enqueue(db, { kind: "text", text: "x", receivedAt: new Date(2026, 7, 31, 23).toISOString(), via: "paste" }); // 31 Aug, 23:00 local
+    expect(await closeFinishedMonths(db, new Date(2026, 9, 4, 12), await queuedMonths(db))).toEqual(["2026-09"]);
     const rows = await db.getAll("reviewChunks");
     const septRows = rows.filter((r) => r.month === "2026-09");
     expect(septRows.every((r) => !("embedding" in r) && r.clusterId)).toBe(true);
@@ -84,7 +84,25 @@ describe("IndexedDB storage", () => {
     expect(rows.find((r) => r.id === "f:0")!.embedding).toBeDefined(); // pending in the queue
     // The closed month's recap reads the stored groups: same result as before, without any embedding.
     expect(monthClustersFromReview("2026-09", rows, DEFAULT_CONFIG)).toEqual(before);
-    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"), await queuedMonths(db))).toEqual([]);
-    expect(await closeFinishedMonths(db, new Date("2026-10-04T12:00:00.000Z"))).toEqual(["2026-08"]);
+    expect(await closeFinishedMonths(db, new Date(2026, 9, 4, 12), await queuedMonths(db))).toEqual([]);
+    expect(await closeFinishedMonths(db, new Date(2026, 9, 4, 12))).toEqual(["2026-08"]);
+  });
+
+  it("months use the device's local clock (UTC-5 on the evening of 31 October): October is not closed, the queue month is October", async () => {
+    const tz = process.env.TZ;
+    process.env.TZ = "America/New_York";
+    try {
+      const db = await openEchoDB("test-close-tz");
+      const evening = new Date("2026-11-01T02:30:00.000Z"); // 31 Oct, 21:30 local, already November in UTC
+      const c: ReviewChunk = { id: "g:0", messageId: "g", month: "2026-10", status: "off_list", text: "picking", mentionsGuide: false, reason: "below_floor", embedding: Float32Array.from([1, 0]) };
+      await saveAnalysis(db, { ...toStoredMessage(analysis), id: "g", month: "2026-10" }, [c]);
+      await enqueue(db, { kind: "text", text: "x", receivedAt: evening.toISOString(), via: "paste" });
+      expect([...(await queuedMonths(db))]).toEqual(["2026-10"]);
+      expect(await closeFinishedMonths(db, evening)).toEqual([]);
+      expect((await db.get("reviewChunks", "g:0"))!.embedding).toBeDefined();
+    } finally {
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+    }
   });
 });

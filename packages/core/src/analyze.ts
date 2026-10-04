@@ -8,6 +8,7 @@ import type { ChunkResult, DetectedLang, FindingId, FindingScore, MessageAnalysi
 import { audioInaudibleReason } from "./audio-stats.ts";
 import { checkDuplicate, fingerprint, type KnownMessage } from "./duplicates.ts";
 import { detectTextLanguage } from "./language.ts";
+import { monthOfReceived } from "./month.ts";
 import { detectNegation } from "./negation.ts";
 import { scrubPii } from "./pii.ts";
 import { segment } from "./segment.ts";
@@ -55,10 +56,6 @@ export function isPhantomTranscript(text: string): boolean {
   const t = text.trim();
   if (!/[\p{L}\p{N}]/u.test(t)) return true;
   return WHISPER_PHANTOMS.some((re) => re.test(t));
-}
-
-function monthOf(iso: string): string {
-  return iso.slice(0, 7);
 }
 
 /** Union des constats des morceaux : chaque constat une fois par message, avec sa meilleure confiance. */
@@ -158,7 +155,7 @@ export function withSegmentEnglish(a: MessageAnalysis, segments: readonly Transc
 
 export async function analyzeMessage(input: MessageInput, deps: AnalyzeDeps): Promise<MessageAnalysis> {
   const { config, matcher } = deps;
-  const month = monthOf(input.receivedAt);
+  const month = monthOfReceived(input.receivedAt);
   const t = input.transcript;
   const rawText = (input.source === "audio" ? t?.text : input.text) ?? "";
 

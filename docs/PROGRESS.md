@@ -785,3 +785,34 @@ the e2e (new `16-review-list-english.png`).
   instead of "needs about 3 GB of RAM". Demo sequence: new step 11, the WhatsApp-deletion reminder
   (14-whatsapp-reminder), later steps renumbered; stills list completed with screenshots 14–16.
 - No deviation from the spec; nothing remaining for this task.
+
+## 2026-10-04 — fix-web-app-3: one clock for months, visitor card wording
+
+**Built**
+- **One clock for months (SPEC 4.6, SPEC 8)**: new `packages/core/src/month.ts` with `localMonth(date)` (device
+  local time) and `monthOfReceived(iso)` (local month of a reception date). `analyzeMessage` now writes
+  `month = monthOfReceived(receivedAt)` (was the UTC `receivedAt.slice(0, 7)`); `currentMonth()` (recap-service, used
+  by Host, Demo and Coop) is `localMonth`; `closeFinishedMonths` uses `localMonth` (the UTC `utcMonth` is gone) and
+  `queuedMonths` uses `monthOfReceived`. A judge in UTC-5 on the evening of 31 October now sees the demo messages in
+  the October recap; in Rwanda a message at 01:00 on 1 October goes to October.
+- Tests: `month.test.ts` (UTC-5 and UTC+2 at the month boundary, by setting `TZ` at runtime), a recap-service test
+  (demo recap month = month written by the analysis, both zones), a db test (UTC-5, 31 Oct 21:30: queue month is
+  October, October not closed). The existing month-closure test now builds its dates in local time. The whole suite
+  was also run with `TZ=UTC`, `TZ=America/New_York` and `TZ=Pacific/Kiritimati`: all passed.
+- **Visitor card (SPEC 4.1, 4.7)**: each of the 4 languages now says "You can also send a written message." and
+  "Only anonymous counts may be shared with the farmers' cooperative." (FR/DE/ES equivalents in `Card.tsx`). The e2e
+  checks both sentences in all 4 languages; screenshot `11-visitor-card.png` re-taken. README §2 step 1 and §7
+  (consent) updated.
+
+**Verified**: `pnpm test` (168 passed, includes another agent's in-progress core tests), `pnpm typecheck`,
+`pnpm build`, `pnpm --filter @echo/web e2e` **PASSED** (52 checks).
+
+**Deviations**: none from the audit fix. Stored months of messages analysed before this change keep their UTC month
+(no migration; only messages near midnight at a month boundary differ). Months stay those of the phone's time zone:
+if the phone's clock or zone is wrong, so are the months.
+
+**Touched other areas (minimal)**: `packages/core` (`month.ts` + test, `analyze.ts` month line, `index.ts` export).
+README test counts were left to the agent currently changing the core tests.
+
+**Remains**: nothing for these two gaps. The new card sentences in DE/ES/FR were written by the team, not checked by
+native speakers.

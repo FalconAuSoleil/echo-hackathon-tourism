@@ -1,7 +1,7 @@
 // Stockage sur l'appareil uniquement (IndexedDB), exactement ce que SPEC 6 autorise (docs/ARCHITECTURE.md §7).
 // Utilisé par l'interface ET par le service worker (Web Share Target → file d'attente).
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import { DEFAULT_CONFIG, closeMonthReviewChunks, expireMessageEmbedding, isClosedMonth, type AnalysisConfig, type KnownMessage, type RecapLine, type ReviewChunk, type StoredMessage } from "@echo/core";
+import { DEFAULT_CONFIG, closeMonthReviewChunks, expireMessageEmbedding, isClosedMonth, localMonth, monthOfReceived, type AnalysisConfig, type KnownMessage, type RecapLine, type ReviewChunk, type StoredMessage } from "@echo/core";
 
 export interface QueueItem {
   id: string;
@@ -148,11 +148,6 @@ export async function pruneExpiredEmbeddings(db: EchoDatabase, now = new Date(),
   return n;
 }
 
-/** Mois courant sur la même horloge que `month` des fiches (date ISO, UTC). */
-export function utcMonth(now = new Date()): string {
-  return now.toISOString().slice(0, 7);
-}
-
 /**
  * Ferme les mois terminés (SPEC 6) : pour chaque mois avant le mois courant dont des morceaux « À faire lire »
  * ont encore leur embedding, les sujets inconnus sont regroupés une fois (`clusterId`, `clusterRecurring`
@@ -166,7 +161,7 @@ export async function closeFinishedMonths(
   pendingMonths: ReadonlySet<string> = new Set(),
   config: Pick<AnalysisConfig, "offListClusterThreshold" | "offListMinVisitors" | "unknownTopicSources"> = DEFAULT_CONFIG,
 ): Promise<string[]> {
-  const current = utcMonth(now);
+  const current = localMonth(now); // même horloge que `month` des fiches (heure locale)
   const tx = db.transaction("reviewChunks", "readwrite");
   const byMonth = new Map<string, ReviewChunk[]>();
   for (const c of await tx.store.getAll()) {
@@ -185,7 +180,7 @@ export async function closeFinishedMonths(
 
 /** Mois des messages encore dans la file (date de réception). */
 export async function queuedMonths(db: EchoDatabase): Promise<Set<string>> {
-  return new Set((await db.getAll("queue")).map((q) => q.receivedAt.slice(0, 7)));
+  return new Set((await db.getAll("queue")).map((q) => monthOfReceived(q.receivedAt)));
 }
 
 /** Efface toutes les données Echo de l'appareil (réglages compris si `includeSettings`). */

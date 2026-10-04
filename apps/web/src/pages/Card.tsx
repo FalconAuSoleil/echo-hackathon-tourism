@@ -3,14 +3,17 @@ import { getSettings } from "../lib/db.ts";
 import { db } from "../lib/host-store.ts";
 
 // Texte de la carte (SPEC 4.1), rédigé par l'équipe dans les 4 langues visiteur. La phrase de consentement
-// est explicite : envoyer le message vaut accord.
+// est explicite : envoyer le message vaut accord. La carte dit aussi que les messages écrits sont acceptés et que seuls
+// des chiffres anonymes peuvent aller à la coopérative (si l'hôte y consent, SPEC 4.7).
 export const CARD_TEXT = [
   {
     lang: "en",
     name: "English",
     title: "How was your visit?",
     body: "Tell us in 30 seconds what you liked and what was missing. Send a WhatsApp voice message to this number.",
+    written: "You can also send a written message.",
     privacy: "The sound is deleted after analysis, and your name is not kept.",
+    coop: "Only anonymous counts may be shared with the farmers' cooperative.",
     consent: "By sending this message, you agree that it is analysed in this way.",
   },
   {
@@ -18,7 +21,9 @@ export const CARD_TEXT = [
     name: "Français",
     title: "Comment s'est passée votre visite ?",
     body: "Dites-nous en 30 secondes ce que vous avez aimé et ce qui a manqué. Envoyez un message vocal WhatsApp à ce numéro.",
+    written: "Vous pouvez aussi envoyer un message écrit.",
     privacy: "Le son est effacé après analyse, et votre nom n'est pas conservé.",
+    coop: "Seuls des chiffres anonymes peuvent être partagés avec la coopérative des agriculteurs.",
     consent: "En envoyant ce message, vous acceptez qu'il soit analysé de cette façon.",
   },
   {
@@ -26,7 +31,9 @@ export const CARD_TEXT = [
     name: "Deutsch",
     title: "Wie war Ihr Besuch?",
     body: "Sagen Sie uns in 30 Sekunden, was Ihnen gefallen hat und was gefehlt hat. Schicken Sie eine WhatsApp-Sprachnachricht an diese Nummer.",
+    written: "Sie können auch eine schriftliche Nachricht senden.",
     privacy: "Die Aufnahme wird nach der Auswertung gelöscht, und Ihr Name wird nicht gespeichert.",
+    coop: "Nur anonyme Zahlen dürfen an die Genossenschaft der Landwirte weitergegeben werden.",
     consent: "Mit dem Senden dieser Nachricht stimmen Sie dieser Auswertung zu.",
   },
   {
@@ -34,7 +41,9 @@ export const CARD_TEXT = [
     name: "Español",
     title: "¿Qué tal su visita?",
     body: "Cuéntenos en 30 segundos qué le gustó y qué faltó. Envíe un mensaje de voz de WhatsApp a este número.",
+    written: "También puede enviar un mensaje escrito.",
     privacy: "El audio se borra después del análisis y su nombre no se guarda.",
+    coop: "Solo se pueden compartir recuentos anónimos con la cooperativa de agricultores.",
     consent: "Al enviar este mensaje, acepta que se analice de esta manera.",
   },
 ] as const;
@@ -77,10 +86,10 @@ export function Card() {
             <div class="lang" lang={t.lang} key={t.lang}>
               <h3>{t.name}</h3>
               <p>
-                <strong>{t.title}</strong> {t.body}
+                <strong>{t.title}</strong> {t.body} {t.written}
               </p>
               <p style={{ fontSize: "0.9rem" }}>
-                {t.privacy} <strong>{t.consent}</strong>
+                {t.privacy} {t.coop} <strong>{t.consent}</strong>
               </p>
             </div>
           ))}

@@ -89,9 +89,11 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
 
 1. **Collection.** At the end of the visit the host hands the visitor a **printed card** in English, French, German
    and Spanish (`#/card` in the app, printable): "Tell us in 30 seconds what you liked and what was missing. Send a
-   WhatsApp voice message to this number. The sound is deleted after analysis and your name is not kept." Sending the
-   message is the visitor's consent, and the card says so. The visitor uses their own phone; with no signal at the
-   farm, WhatsApp sends it later on its own. Written messages are accepted too (same path, no transcription).
+   WhatsApp voice message to this number. You can also send a written message. The sound is deleted after analysis,
+   and your name is not kept. Only anonymous counts may be shared with the farmers' cooperative." Sending the message
+   is the visitor's consent, and the card says so (screenshot `docs/screenshots/11-visitor-card.png`). The visitor
+   uses their own phone; with no signal at the farm, WhatsApp sends it later on its own. Written messages take the
+   same path, without transcription.
 2. **Reception.** Messages arrive on the smartphone that holds the farm's number. Whoever has it **shares** them to
    Echo in one gesture (Android share sheet → Echo, via the Web Share Target of the installed app), or imports a file
    / pastes text. Echo puts them in a queue. From here on, nothing needs the internet. After analysis, Echo keeps a
@@ -438,7 +440,8 @@ a person, off-list topics) and, with the host's consent, aggregated counts per c
 ## 7. Responsible AI
 
 **Consent.** The printed visitor card states that sending a message is consent, that the sound is deleted after
-analysis and that the name is not kept (four languages). That promise rests on the heuristic scrubber, which
+analysis, that the name is not kept and that only anonymous counts may be shared with the farmers' cooperative
+(four languages). That promise rests on the heuristic scrubber, which
 removed 90 % of names in our synthetic check, not all of them (§10). Sending is voluntary and from the visitor's own phone.
 Cooperative sharing is a separate host consent, **off by default**, revocable in Settings.
 

@@ -199,6 +199,19 @@ try {
   await page.waitForTimeout(300);
   await page.goto(BASE + "/#/host");
   await page.getByTestId("inbox").waitFor();
+  // Un message écrit est nettoyé AVANT d'entrer dans la file : rien en clair même s'il attend des jours.
+  await page.getByTestId("host-text").fill("My name is Anna, +250 788 000 111. The meal was great.");
+  await page.getByTestId("host-add-text").click();
+  await page.waitForFunction(() => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("1 waiting"), null, { timeout: 10_000 });
+  const queued = (await page.evaluate(`(async () => {
+    const db = await new Promise((res, rej) => { const r = indexedDB.open("echo"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    return await new Promise((res) => { const r = db.transaction("queue").objectStore("queue").getAll(); r.onsuccess = () => res(r.result); });
+  })()`)) as { text?: string }[];
+  report.queuedPaste = queued.map((q) => q.text);
+  check(queued.length === 1 && queued[0]!.text === "My name is [nom], [numéro]. The meal was great.", `pasted text scrubbed before it enters the queue (${JSON.stringify(queued[0]?.text)})`);
+  check(!/Anna|788|000 111/.test(JSON.stringify(queued)), "no name or phone number in the IndexedDB queue");
+  await page.getByTestId("inbox").getByRole("button", { name: "Remove" }).click();
+  await page.waitForFunction(() => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("0 waiting"), null, { timeout: 10_000 });
   await page.getByTestId("host-text").fill("The coffee tasting was wonderful, but the toilets were dirty. My name is John Smith, call me on +44 7700 900123.");
   await page.getByTestId("host-add-text").click();
   await page.getByTestId("host-file").setInputFiles(join(WEB, "public/samples/de-roasting-path.wav"));
@@ -328,6 +341,12 @@ try {
   await page.screenshot({ path: join(SHOTS, "10-coop-synthetic.png"), fullPage: true });
   await page.goto(BASE + "/#/card");
   await page.getByTestId("visitor-card").waitFor();
+  const cardText = (await page.getByTestId("visitor-card").textContent()) ?? "";
+  check(
+    ["written message", "message écrit", "schriftliche Nachricht", "mensaje escrito"].every((w) => cardText.includes(w)) &&
+      ["anonymous counts", "chiffres anonymes", "anonyme Zahlen", "recuentos anónimos"].every((w) => cardText.includes(w)),
+    "visitor card says written messages are accepted and only anonymous counts may go to the cooperative (4 languages)",
+  );
   await page.screenshot({ path: join(SHOTS, "11-visitor-card.png"), fullPage: true });
 
   // ---------- 4. Hors ligne ----------
