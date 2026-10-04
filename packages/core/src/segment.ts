@@ -37,6 +37,24 @@ const LEADING_SUBORDINATORS: Record<string, string[]> = {
 
 const COORD_MIN_WORDS = 3;
 
+/** Connecteurs de cause / conséquence : coupure systématique (« trop long parce qu'on a attendu »), connecteur retiré. */
+export const CAUSAL_SPLITTERS: Record<string, string[]> = {
+  en: ["because", "so that"],
+  fr: ["parce que", "parce qu", "car"],
+  de: ["weil", "denn", "deshalb", "darum"],
+  es: ["porque", "ya que", "así que"],
+};
+
+export interface SegmentOptions {
+  /** Virgule seule (sans connecteur) : coupure si chaque côté a au moins ce nombre de mots ; 0 = jamais. */
+  commaMinWords: number;
+  /** Coupure sur les connecteurs de cause / conséquence (CAUSAL_SPLITTERS). */
+  causal: boolean;
+}
+
+/** Découpage historique (avant la tâche echo-recall) : ni virgule seule, ni causalité. */
+export const LEGACY_SEGMENT_OPTIONS: SegmentOptions = { commaMinWords: 0, causal: false };
+
 const ABBREVIATIONS = [
   "mr", "mrs", "ms", "dr", "st", "etc", "e.g", "i.e", "vs", "approx", "mme", "mlle", "m", "env", "cf",
   "z.b", "bzw", "usw", "ca", "evtl", "u.a", "sr", "sra", "srta", "ud", "uds", "p.ej", "aprox", "no",
@@ -72,11 +90,11 @@ function wordCount(s: string): number {
 }
 
 function cleanClause(s: string): string {
-  return s.replace(/^[\s,;:–—\-]+|[\s,;:–—\-]+$/gu, "").trim();
+  return s.replace(/^[\s,;:–—\-']+|[\s,;:–—\-]+$/gu, "").trim();
 }
 
 /** Découpe une phrase en propositions. */
-export function splitClauses(sentence: string, lang: DetectedLang): string[] {
+export function splitClauses(sentence: string, lang: DetectedLang, options: SegmentOptions = LEGACY_SEGMENT_OPTIONS): string[] {
   let pieces: string[] = [sentence];
 
   // Tirets et deux-points isolés : séparateurs de propositions.
@@ -93,11 +111,35 @@ export function splitClauses(sentence: string, lang: DetectedLang): string[] {
   const adv = new RegExp(`(?<![${L}])(?:${alternation(connectorsFor(CLAUSE_SPLITTERS, lang))})(?![${L}])`, "iu");
   pieces = pieces.flatMap((p) => p.split(new RegExp(adv.source, "giu")));
 
+  // Cause / conséquence : coupure systématique, le connecteur est retiré.
+  if (options.causal) {
+    const cause = new RegExp(`(?<![${L}])(?:${alternation(connectorsFor(CAUSAL_SPLITTERS, lang))})(?![${L}])`, "giu");
+    pieces = pieces.flatMap((p) => p.split(cause));
+  }
+
   // Coordinations : seulement si les deux côtés sont des propositions assez longues.
   const coord = new RegExp(`(,?)\\s+(?:${alternation(connectorsFor(COORDINATORS, lang))})(?![${L}])`, "giu");
   pieces = pieces.flatMap((p) => splitOnCoordinators(p, coord));
 
+  // Virgule seule entre deux propositions assez longues (« la plantation très belle, on a appris plein de choses »).
+  if (options.commaMinWords > 0) pieces = pieces.flatMap((p) => splitOnCommas(p, options.commaMinWords));
+
   return pieces.map(cleanClause).filter((p) => /[\p{L}\p{N}]/u.test(p));
+}
+
+function splitOnCommas(text: string, min: number): string[] {
+  const parts = text.split(/,\s+/u);
+  const out: string[] = [];
+  let cur = parts[0] ?? "";
+  for (let i = 1; i < parts.length; i++) {
+    const next = parts[i]!;
+    if (wordCount(cur) >= min && wordCount(next) >= min) {
+      out.push(cur);
+      cur = next;
+    } else cur = `${cur}, ${next}`;
+  }
+  out.push(cur);
+  return out;
 }
 
 function splitOnCoordinators(text: string, coord: RegExp): string[] {
@@ -120,10 +162,10 @@ function splitOnCoordinators(text: string, coord: RegExp): string[] {
 }
 
 /** Phrases puis propositions, avec leurs index. */
-export function segment(text: string, lang: DetectedLang): Segment[] {
+export function segment(text: string, lang: DetectedLang, options: SegmentOptions = LEGACY_SEGMENT_OPTIONS): Segment[] {
   const out: Segment[] = [];
   splitSentences(text).forEach((sentence, sentenceIndex) => {
-    splitClauses(sentence, lang).forEach((clause, clauseIndex) => {
+    splitClauses(sentence, lang, options).forEach((clause, clauseIndex) => {
       out.push({ text: clause, sentenceIndex, clauseIndex });
     });
   });

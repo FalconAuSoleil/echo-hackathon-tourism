@@ -49,4 +49,13 @@ describe("detectNegation", () => {
   it("renvoie les marqueurs repérés", () => {
     expect(neg("We couldn't buy coffee", "en").cues).toEqual(["n't"]);
   });
+  it("« sans hésiter » et ses équivalents ne sont pas des négations (echo-recall)", () => {
+    expect(detectNegation("Je recommande sans hésiter", "fr").negated).toBe(false);
+    expect(detectNegation("I would recommend it without hesitation", "en").negated).toBe(false);
+    expect(detectNegation("Wir würden ohne zu zögern wiederkommen", "de").negated).toBe(false);
+    expect(detectNegation("Lo recomiendo sin dudarlo", "es").negated).toBe(false);
+    // une vraie négation dans la même phrase reste détectée
+    expect(detectNegation("Sans hésiter, mais le repas n'était pas bon", "fr").negated).toBe(true);
+    expect(detectNegation("sans eau ni ombre", "fr").negated).toBe(true);
+  });
 });

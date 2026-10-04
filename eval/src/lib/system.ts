@@ -30,6 +30,7 @@ useLocalModels(MODELS_DIR);
 export const EMBEDDERS: Record<string, string> = {
   minilm: "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
   e5: "Xenova/multilingual-e5-small",
+  mpnet: "Xenova/paraphrase-multilingual-mpnet-base-v2",
 };
 
 export function loadCatalog(): Catalog {

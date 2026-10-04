@@ -26,10 +26,10 @@ const FR_NE_PLUS = /(?<![a-z])(?:ne\s+|n')[a-z']+(?:\s+[a-z']+)?\s+plus(?![a-z])
  * retirées avant la détection.
  */
 const NON_NEGATING: Record<string, string[]> = {
-  en: ["not only", "no doubt", "without a doubt", "without doubt", "never forget", "will never forget", "never seen such", "can't wait", "cannot wait", "couldn't be happier", "could not be happier", "couldn't have been better", "no wonder", "can't recommend enough", "cannot recommend enough", "can't thank you enough", "not to be missed"],
-  fr: ["non seulement", "pas seulement", "sans doute", "sans aucun doute", "n'oublierai jamais", "oublierai jamais", "ne manquez pas", "a ne pas manquer", "a ne pas rater"],
-  de: ["nicht nur", "ohne zweifel", "zweifellos", "nie vergessen", "niemals vergessen", "kann es kaum erwarten"],
-  es: ["no solo", "no solamente", "sin duda", "sin ninguna duda", "nunca olvidare", "no me lo olvidare", "no te lo pierdas", "no hay que perderselo"],
+  en: ["not only", "no doubt", "without a doubt", "without doubt", "never forget", "will never forget", "never seen such", "can't wait", "cannot wait", "couldn't be happier", "could not be happier", "couldn't have been better", "no wonder", "can't recommend enough", "cannot recommend enough", "can't thank you enough", "not to be missed", "without hesitation", "without hesitating", "without a second thought", "no hesitation"],
+  fr: ["non seulement", "pas seulement", "sans doute", "sans aucun doute", "n'oublierai jamais", "oublierai jamais", "ne manquez pas", "a ne pas manquer", "a ne pas rater", "sans hesiter", "sans hesitation", "sans aucune hesitation"],
+  de: ["nicht nur", "ohne zweifel", "zweifellos", "nie vergessen", "niemals vergessen", "kann es kaum erwarten", "ohne zu zogern", "ohne zogern"],
+  es: ["no solo", "no solamente", "sin duda", "sin ninguna duda", "nunca olvidare", "no me lo olvidare", "no te lo pierdas", "no hay que perderselo", "sin dudarlo", "sin dudar", "sin pensarlo", "sin pensarlo dos veces"],
 };
 
 /**

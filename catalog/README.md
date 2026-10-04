@@ -9,7 +9,7 @@ generated at runtime: the Kinyarwanda was produced **once**, offline, by `tools/
 
 | File | Content |
 |---|---|
-| `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 9 synthetic example phrasings × 4 visitor languages (756 in total), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31; ui: 6 mode A labels (listen, send_sms, analyse, recap_month, delete_whatsapp, deleted), no audio. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
+| `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 15 synthetic example phrasings × 4 visitor languages (1,260 in total: 9 original + 6 added on 2026-10-04 by the echo-recall task), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31; ui: 6 mode A labels (listen, send_sms, analyse, recap_month, delete_whatsapp, deleted), no audio. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
 | `audio/*.mp3` | 67 pre-generated clips (MMS-TTS kin, mono 16 kHz 24 kbit/s, ~360 KiB in total): 21 finding sentences, 14 fixed parts of templates, 32 numbers. `audio/manifest.json` lists text, spoken text and duration of each clip. |
 | `translation-log.json` | Every translation attempt: source (fr, en), raw NLLB output, back-translations, similarity scores, slot check, which attempt was kept. |
 | `flores-check.json` | (not produced yet) our own chrF++ measure of the same NLLB model on FLORES-200 devtest, written by `tools/catalog/flores_check.py`. |
@@ -22,12 +22,13 @@ N1 is the **way to the farm** (road, steep climb, hard to find), N3 the **visit 
 **too short / rushed**, N8 **thirst, sun, no break** during the visit, N9 **waiting / late start**, N2 **prices
 unclear or told late** (not "too expensive"), N6 **meal missing or too small** vs P4 meal enjoyed, N10 **could not
 buy** vs P9 **wants to buy**. They are strictly separate from the evaluation set (`eval/data/feedback.jsonl`; `eval/data/check_disjoint.py`
-passes). Distinctness check with the app's MiniLM (`tools/catalog/check_examples.py`): for 98.0 % of the 756
-examples the nearest other example belongs to the same finding; the 15 exceptions are mostly two-word fragments
+passes). Distinctness check with the app's MiniLM (`tools/catalog/check_examples.py`): for 98.7 % of the 1,260
+examples the nearest other example belongs to the same finding (98.0 % of the first 756); the 17 exceptions are mostly two-word fragments
 ("tolle verkostung" ~ "tolle aussicht", "Die Führung war zu kurz." ~ "… zu lang." at 0.74), which is why core
 needs its negation and margin rules and the evaluation calibrates the threshold. Negative findings may be phrased
 with a negation ("there was no shade"); no example is a polarity-inverted phrasing of its finding (core rule).
-The authored source of truth is `tools/catalog/examples_positive.py`, `examples_negative.py` and `keywords.py`;
+The authored source of truth is `tools/catalog/examples_positive.py`, `examples_negative.py`, `examples_extra.py` (the 6 added per
+finding and language, written from the finding definitions, never from the evaluation corpus) and `keywords.py`;
 `build_kinyarwanda.py --stages content` copies them into `catalog.json`.
 
 ## How the Kinyarwanda was produced (SPEC 5)

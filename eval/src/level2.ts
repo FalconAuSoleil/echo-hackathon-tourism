@@ -5,7 +5,7 @@
 //    d'erreur parmi les réponses acceptées) et du plancher « hors liste ».
 // 3. Rapport sur la partie test, avec le chemin livré (analyzeMessage de @echo/core), comparé aux mots-clés.
 // 4. Sujets inconnus (cueillette), doublons, négations ; seuils écrits dans packages/core/src/calibration.ts.
-import { writeFileSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   analyzeMessage,
@@ -21,7 +21,7 @@ import {
 import { loadFeedback, rng, shuffle, splitCorpus, type Feedback } from "./lib/corpus.ts";
 import { round, writeJson } from "./lib/io.ts";
 import { aligned, evaluate, evaluateByLang, summary, type SystemOutput } from "./lib/metrics.ts";
-import { RESULTS_DIR, ROOT } from "./lib/paths.ts";
+import { MODELS_DIR, RESULTS_DIR, ROOT } from "./lib/paths.ts";
 import { KEYWORD_SET_NAMES, loadKeywordSet, primaryKeywordSet } from "./lib/keyword-sets.ts";
 import {
   EMBEDDERS,
@@ -39,10 +39,22 @@ import {
   type Variant,
 } from "./lib/system.ts";
 
-/** Règle de choix du seuil, fixée avant de regarder la partie test. */
-export const MAX_ACCEPTED_ERROR = 0.05;
+/**
+ * Règle de choix du seuil, fixée avant de regarder la partie test. 5 % jusqu'au 2026-10-04 ; relevée à 8 % par la
+ * tâche echo-recall (décision produit : erreur parmi les réponses acceptées ≤ 10 %, cible ≤ 8 %, pour capter plus de
+ * remarques). Expériences et choix, sur la calibration seulement : eval/results/experiments/log.md.
+ */
+export const MAX_ACCEPTED_ERROR = 0.08;
+/** Ancienne borne, encore rapportée pour comparaison. */
+export const PREVIOUS_MAX_ACCEPTED_ERROR = 0.05;
 /** Part minimale des négations qui annulent un constat correctement non comptées (SPEC 7), sur la calibration. */
-export const MIN_NEGATION_ACCURACY = 0.85;
+export const MIN_NEGATION_ACCURACY = 1;
+/**
+ * 0,85 jusqu'au 2026-10-04. Relevée à 1 par la tâche echo-recall, en même temps que la borne d'erreur : un seuil plus
+ * bas ne doit laisser passer AUCUNE des négations qui annulent un constat de la calibration (16/16 avec l'ancienne
+ * configuration), pour que le garde-fou de négation ne s'affaiblisse pas.
+ */
+export const PREVIOUS_MIN_NEGATION_ACCURACY = 0.85;
 /** Seuil de regroupement : part max de paires d'exemples de constats différents au-dessus du seuil. */
 export const MAX_CROSS_TOPIC_MERGE = 0.01;
 /**
@@ -51,6 +63,10 @@ export const MAX_CROSS_TOPIC_MERGE = 0.01;
  * jamais le signal ; il n'existe pas d'autre sujet récurrent annoté pour valider ce choix à l'aveugle (limite).
  */
 export const UNKNOWN_TOPIC_SOURCES = "off_list_and_unsure" as const;
+function hasModel(id: string): boolean {
+  return existsSync(join(MODELS_DIR, id, "onnx", "model_quantized.onnx"));
+}
+
 export const THRESHOLDS = Array.from({ length: 71 }, (_, i) => round(0.3 + i * 0.01, 2)); // 0.30 … 1.00
 
 export const VARIANTS: Variant[] = [
@@ -63,17 +79,29 @@ export const VARIANTS: Variant[] = [
   // Régression logistique sur les embeddings des exemples du catalogue (ajoutée après la 1re mesure),
   // avec marge de négation 0 (règle stricte du cœur) ou relâchée.
   ...(["minilm", "e5"] as const).flatMap((embedder) =>
-    (embedder === "minilm" ? [1e-3, 3e-4, 1e-4, 3e-5] : [3e-4, 1e-4, 3e-5]).flatMap((l2) =>
-      [0, 0.05, 0.1].map((negationMargin): Variant => ({
+    (embedder === "minilm" ? [1e-3, 3e-4, 1e-4, 3e-5, 1e-5] : [3e-4, 1e-4, 3e-5]).flatMap((l2) =>
+      // Marge négative (echo-recall) : règle de négation PLUS stricte (les exemples de même négation doivent battre
+      // ceux de négation opposée d'au moins |marge|) ; jamais plus permissive que la règle stricte, donc sélectionnable.
+      (embedder === "minilm" ? [0, -0.02, -0.05, 0.05, 0.1] : [0, 0.05, 0.1]).map((negationMargin): Variant => ({
         name: `linear-${embedder}-l2=${l2}-neg${negationMargin}`, embedder, scoring: "linear", aggregation: "max", crossLingual: true, l2, negationMargin,
         // Marge relâchée : meilleure sur la calibration, mais sur la partie test les négations qui annulent un
         // constat passaient beaucoup plus souvent (62 % de bonnes décisions contre 85 % avec la règle stricte,
         // 1re exécution du 2026-10-04). La calibration n'a que 16 passages de ce type : trop peu pour la contrainte.
         // Décision de sécurité prise APRÈS avoir vu la partie test : ces variantes restent mesurées, jamais retenues.
-        selectable: negationMargin === 0,
+        selectable: negationMargin <= 0,
       })),
     ),
   ),
+  // paraphrase-multilingual-mpnet-base-v2 (echo-recall) : nettement meilleur sur la calibration, mais 296 Mo et
+  // ~1,4 Go de mémoire de pointe en WebAssembly (contre ~0,64 Go pour MiniLM) : ne tient pas sur un téléphone de 2 Go
+  // (eval/results/experiments/log.md). Mesuré et rapporté, jamais retenu. Ignoré si le modèle n'est pas téléchargé.
+  ...(hasModel(EMBEDDERS.mpnet!)
+    ? [3e-4, 1e-4, 3e-5].flatMap((l2) =>
+        [0, -0.02].map((negationMargin): Variant => ({
+          name: `linear-mpnet-l2=${l2}-neg${negationMargin}`, embedder: "mpnet", scoring: "linear", aggregation: "max", crossLingual: true, l2, negationMargin, selectable: false,
+        })),
+      )
+    : []),
 ];
 
 const toMap = (outs: SystemOutput[]) => new Map(outs.map((o) => [o.id, o]));
@@ -100,9 +128,24 @@ export function sweep(feedbacks: readonly Feedback[], prepared: ReadonlyMap<stri
 export type SweepPoint = ReturnType<typeof sweep>[number];
 
 /** Seuil retenu : capture max parmi les seuils dont l'erreur parmi les acceptées ≤ max (et au moins 20 acceptées). */
-export function chooseThreshold(curve: readonly SweepPoint[], maxErr = MAX_ACCEPTED_ERROR): SweepPoint | undefined {
-  const ok = curve.filter((p) => p.acceptedErrorRate <= maxErr && p.accepted >= 20 && p.negationCancelsAccuracy >= MIN_NEGATION_ACCURACY);
+export function chooseThreshold(curve: readonly SweepPoint[], maxErr = MAX_ACCEPTED_ERROR, minNeg = MIN_NEGATION_ACCURACY): SweepPoint | undefined {
+  const ok = curve.filter((p) => p.acceptedErrorRate <= maxErr && p.accepted >= 20 && p.negationCancelsAccuracy >= minNeg);
   return ok.sort((a, b) => b.captureRate - a.captureRate || a.threshold - b.threshold)[0];
+}
+
+/**
+ * Tolérance de capture entre variantes (echo-recall, choisie après avoir vu les chiffres de la calibration, jamais
+ * ceux du test) : parmi les variantes dont la capture est à moins de 2 points de la meilleure (≈ 2-3 remarques sur 130,
+ * sous la résolution de la mesure), on prend celle dont l'erreur parmi les réponses acceptées est la plus basse.
+ */
+export const CAPTURE_TOLERANCE = 0.02;
+
+/** Classement des variantes : capture max à CAPTURE_TOLERANCE près, puis erreur minimale, puis capture. */
+export function rankVariants<T extends { chosen: SweepPoint | null }>(rows: readonly T[]): T[] {
+  const ok = rows.filter((r) => r.chosen);
+  const top = Math.max(...ok.map((r) => r.chosen!.captureRate));
+  const near = (r: T) => r.chosen!.captureRate >= top - CAPTURE_TOLERANCE - 1e-9;
+  return [...ok].sort((a, b) => Number(near(b)) - Number(near(a)) || (near(a) ? a.chosen!.acceptedErrorRate - b.chosen!.acceptedErrorRate : 0) || b.chosen!.captureRate - a.chosen!.captureRate);
 }
 
 /**
@@ -279,14 +322,15 @@ export async function duplicates(feedbacks: readonly Feedback[], deps: { catalog
   };
 }
 
-function writeCoreCalibration(cfg: AnalysisConfig, meta: { embeddingModel: string; calibration: SweepPoint; test: { acceptedErrorRate: number; captureRate: number }; catalogExamples: number; date: string; variant: string }) {
+/** Écrit packages/core/src/calibration.ts (lu par DEFAULT_CONFIG). `test` absent : partie test pas encore mesurée. */
+export function writeCoreCalibration(cfg: AnalysisConfig, meta: { embeddingModel: string; calibration: SweepPoint; test?: { acceptedErrorRate: number; captureRate: number }; catalogExamples: number; date: string; variant: string; generatedBy?: string }) {
   const pct = (x: number) => (x * 100).toFixed(1);
-  const ts = `// GÉNÉRÉ par \`pnpm eval -- --level 2\` (eval/src/level2.ts) le ${meta.date}. Ne pas modifier à la main :
+  const ts = `// GÉNÉRÉ par \`${meta.generatedBy ?? "pnpm eval -- --level 2"}\` (eval/src/level2.ts) le ${meta.date}. Ne pas modifier à la main :
 // relancer l'évaluation. Seuils calibrés sur la moitié « calibration » du corpus SYNTHÉTIQUE
 // (eval/data/feedback.jsonl), règle : part des remarques captées maximale sous la contrainte
 // « erreur parmi les réponses acceptées ≤ ${MAX_ACCEPTED_ERROR * 100} % » et négations qui annulent ≥ ${MIN_NEGATION_ACCURACY * 100} %. Variante retenue : ${meta.variant}.
 // Calibration : erreur ${pct(meta.calibration.acceptedErrorRate)} %, capture ${pct(meta.calibration.captureRate)} %, couverture ${pct(meta.calibration.coverage)} %.
-// Partie test réservée : erreur ${pct(meta.test.acceptedErrorRate)} %, capture ${pct(meta.test.captureRate)} %. Détails : eval/results/RESULTS.md.
+// ${meta.test ? `Partie test réservée : erreur ${pct(meta.test.acceptedErrorRate)} %, capture ${pct(meta.test.captureRate)} %. Détails : eval/results/RESULTS.md.` : "Partie test réservée : pas encore mesurée avec cette configuration (à faire : pnpm eval -- --level 2)."}
 
 export const CALIBRATION = {
   scoring: ${JSON.stringify(cfg.scoring)} as "similarity" | "linear",
@@ -299,6 +343,8 @@ export const CALIBRATION = {
   aggregation: ${JSON.stringify(cfg.aggregation)} as "max" | "topk_mean",
   topK: ${cfg.topK},
   crossLingual: ${cfg.crossLingual},
+  clauseCommaMinWords: ${cfg.clauseCommaMinWords},
+  clauseCausalSplit: ${cfg.clauseCausalSplit},
   offListClusterThreshold: ${cfg.offListClusterThreshold},
   unknownTopicSources: ${JSON.stringify(cfg.unknownTopicSources)} as "off_list" | "off_list_and_unsure",
   /** Modèle d'embedding avec lequel ces seuils ont été calibrés (les seuils n'ont de sens qu'avec lui). */
@@ -345,10 +391,8 @@ export async function runLevel2(opts: { log: (s: string) => void; variants?: str
     variantResults.push({ variant: v, floor: floor.floor, chosen: pick ?? null, curveCalibration: curveCal });
     log(`[level2] ${v.name}: floor ${floor.floor} ${pick ? `t=${pick.threshold} capture ${(pick.captureRate * 100).toFixed(1)} % err ${(pick.acceptedErrorRate * 100).toFixed(1)} % cov ${(pick.coverage * 100).toFixed(1)} % neg ${pick.negationCancelsAccuracy}` : "no threshold meets the constraints"}`);
   }
-  const ranked = variantResults
-    .filter((r) => r.chosen && (r.variant as Variant).selectable !== false)
-    .sort((a, b) => (b.chosen as SweepPoint).captureRate - (a.chosen as SweepPoint).captureRate || (a.chosen as SweepPoint).acceptedErrorRate - (b.chosen as SweepPoint).acceptedErrorRate);
-  const best = ranked[0] ?? variantResults[0]!;
+  const ranked = rankVariants(variantResults.filter((r) => (r.variant as Variant).selectable !== false) as { variant: Variant; chosen: SweepPoint | null }[]);
+  const best = (ranked[0] as Record<string, unknown> | undefined) ?? variantResults[0]!;
   const bestVariant = best.variant as Variant;
   // Aucun seuil ne respecte les contraintes : on prend le seuil d'erreur minimale (signalé dans les résultats).
   const bestPoint =
@@ -419,7 +463,10 @@ export async function runLevel2(opts: { log: (s: string) => void; variants?: str
   const date = new Date().toISOString().slice(0, 10);
   const calibrationOut = {
     synthetic: true,
-    rule: `off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= ${MAX_ACCEPTED_ERROR * 100}%, >= 20 accepted answers and cancelling-negation accuracy >= ${MIN_NEGATION_ACCURACY * 100}%; variant (embedding model, scoring, L2, negation margin) = best capture under that rule`,
+    maxAcceptedError: MAX_ACCEPTED_ERROR,
+    minNegationAccuracy: MIN_NEGATION_ACCURACY,
+    captureTolerance: CAPTURE_TOLERANCE,
+    rule: `off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= ${MAX_ACCEPTED_ERROR * 100}%, >= 20 accepted answers and cancelling-negation accuracy >= ${MIN_NEGATION_ACCURACY * 100}%; variant (embedding model, scoring, L2, negation margin) = lowest error among the selectable variants whose capture under that rule is within ${CAPTURE_TOLERANCE * 100} points of the best`,
     split: { seed: 20261004, calibration: calibration.length, test: test.length, stratifiedBy: "language x main category (picking, off-list, ambiguous, cancelling negation, inherent negation, multi-finding, single)" },
     variant: bestVariant,
     embeddingModel: EMBEDDERS[bestVariant.embedder],

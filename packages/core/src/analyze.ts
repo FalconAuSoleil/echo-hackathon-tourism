@@ -231,7 +231,7 @@ export async function analyzeMessage(input: MessageInput, deps: AnalyzeDeps): Pr
   else if (t && t.confidence < config.minTranscriptConfidence) wholeReason = "message_low_confidence";
 
   // 6. Découpage, négation, guide, similarité.
-  const segs = segment(scrubbedText, lang);
+  const segs = segment(scrubbedText, lang, { commaMinWords: config.clauseCommaMinWords, causal: config.clauseCausalSplit });
   const negations = segs.map((s) => detectNegation(s.text, lang));
   const matches = await matcher.match(
     segs.map((s, i) => ({ text: s.text, negation: negations[i]! })),

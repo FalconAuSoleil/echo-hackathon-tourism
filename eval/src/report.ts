@@ -36,7 +36,7 @@ export function level3LangTable(r: J): string {
 }
 
 // --- Courbe SVG (statique, fond clair explicite pour rester lisible dans un rendu sombre) ---
-function curveSvg(cal: J[], test: J[], chosen: number, kw: { coverage: number; err: number } | undefined, label: string): string {
+function curveSvg(cal: J[], test: J[], chosen: number, kw: { coverage: number; err: number } | undefined, label: string, maxErr = 0.05): string {
   const W = 720, H = 420, L = 64, R = 24, T = 48, B = 56;
   const x = (v: number) => L + v * (W - L - R);
   const maxY = 0.4;
@@ -55,7 +55,7 @@ function curveSvg(cal: J[], test: J[], chosen: number, kw: { coverage: number; e
     return `<circle cx="${cx}" cy="${cy}" r="7" fill="none" stroke="${color}" stroke-width="2"/><line x1="${cx + 7}" y1="${cy}" x2="${lx - 4}" y2="${ly - 4}" stroke="#a8a7a1" stroke-width="1"/><text x="${lx}" y="${ly}" font-size="12" fill="#0b0b0b">${text}</text>`;
   };
   const kwMark = kw ? `<rect x="${x(kw.coverage) - 6}" y="${y(kw.err) - 6}" width="12" height="12" fill="#52514e" rx="2"><title>Keyword baseline: chunks with a hit ${pct(kw.coverage)}, error among accepted ${pct(kw.err)}</title></rect><text x="${x(kw.coverage) - 10}" y="${y(kw.err) - 12}" text-anchor="end" font-size="12" fill="#0b0b0b">keywords (no threshold)</text>` : "";
-  const bound = `<line x1="${L}" x2="${W - R}" y1="${y(0.05)}" y2="${y(0.05)}" stroke="#a8a7a1" stroke-dasharray="4 4"/><text x="${W - R}" y="${y(0.05) - 6}" text-anchor="end" font-size="11" fill="#52514e">5 % bound (calibration rule)</text>`;
+  const bound = `<line x1="${L}" x2="${W - R}" y1="${y(maxErr)}" y2="${y(maxErr)}" stroke="#a8a7a1" stroke-dasharray="4 4"/><text x="${W - R}" y="${y(maxErr) - 6}" text-anchor="end" font-size="11" fill="#52514e">${maxErr * 100} % bound (calibration rule)</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="Inter, system-ui, sans-serif" role="img" aria-label="Coverage versus error among accepted answers as the acceptance threshold varies">
 <rect width="${W}" height="${H}" fill="#fcfcfb"/>
 <text x="${L}" y="24" font-size="15" font-weight="600" fill="#0b0b0b">Echo: share of chunks accepted vs error among accepted (SYNTHETIC level 2)</text>
@@ -118,7 +118,7 @@ export function runReport(log: (s: string) => void = console.log) {
     w("95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but about one counted answer in");
     w("four is wrong (negations such as \"the walk was not too long\" count as complaints, a \"delicious coffee\" counts as a meal, …),");
     w("and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate near the");
-    w("5 % target, and routes the rest to a person. The keyword lists were written by the same author as the synthetic corpus,");
+    w(`${(l2.calibration.maxAcceptedError ?? 0.05) * 100} % bound of the calibration rule, and routes the rest to a person. The keyword lists were written by the same author as the synthetic corpus,`);
     w("which favours the baseline (eval/keywords/README.md).");
     w();
     const sets = l2.keywordSets as Record<string, J> | undefined;
@@ -204,12 +204,16 @@ export function runReport(log: (s: string) => void = console.log) {
     w("on the calibration half, but on the test half cancelling negations (\"the path was not too long\") slipped through far more");
     w("often (≈ 62 % handled correctly vs ≈ 85 % with the strict rule). The calibration half has only 16 such passages, too few for");
     w("the negation constraint to catch it, so after seeing this we excluded them from selection for safety (a decision informed by");
-    w("the test half, stated here). The parameter stays in the core at 0.");
+    w("the test half, stated here). A positive (relaxed) margin is never selected; a negative margin makes the rule stricter and is");
+    w("selectable. The `mpnet` variants (Xenova/paraphrase-multilingual-mpnet-base-v2, 296 MB, ~1.4 GB peak memory in WebAssembly");
+    w("against ~0.64 GB for MiniLM) are measured but not selectable: too heavy for a 2 GB phone (eval/results/experiments/log.md).");
+    w("Since 2026-10-04 (echo-recall): error bound 8 % (was 5 %), cancelling negations 100 % on the calibration half (was 85 %),");
+    w("and among variants within 2 capture points of the best, the lowest error wins; previous numbers: eval/results/experiments/log.md.");
     w();
     w(table(["Variant", "Calibration: threshold", "capture", "error", "Test: capture", "error [95 % CI]", "F1", "Test: cancelling negations OK"],
       l2.variants.map((v: J) => {
         const t = l2.variantsOnTest.find((x: J) => x.variant === v.variant);
-        return [v.selectable === false ? `${v.variant} (not selectable)` : v.variant, v.chosen ? v.chosen.threshold : "none ≤ 5 %", v.chosen ? pct(v.chosen.captureRate) : "–", v.chosen ? pct(v.chosen.acceptedErrorRate) : "–", t ? pct(t.test.captureRate) : "–", t ? `${pct(t.test.acceptedErrorRate)} ${ci(t.test.acceptedErrorCi95)}` : "–", t ? num(t.test.f1) : "–", t ? pct(t.test.negationCancelsAccuracy, 0) : "–"];
+        return [v.selectable === false ? `${v.variant} (not selectable)` : v.variant, v.chosen ? v.chosen.threshold : `none ≤ ${(l2.calibration.maxAcceptedError ?? 0.05) * 100} %`, v.chosen ? pct(v.chosen.captureRate) : "–", v.chosen ? pct(v.chosen.acceptedErrorRate) : "–", t ? pct(t.test.captureRate) : "–", t ? `${pct(t.test.acceptedErrorRate)} ${ci(t.test.acceptedErrorCi95)}` : "–", t ? num(t.test.f1) : "–", t ? pct(t.test.negationCancelsAccuracy, 0) : "–"];
       })));
     w();
     w("![coverage vs error curve](coverage-error-curve.svg)");
@@ -446,7 +450,7 @@ export function runReport(log: (s: string) => void = console.log) {
   if (l2) {
     const kwPoint = { coverage: l2.keywords.test.all.chunks.coverage, err: l2.keywords.test.all.answers.acceptedErrorRate };
     const chosen = l2.calibration.scoring === "linear" ? l2.calibration.acceptProbability : l2.calibration.acceptThreshold;
-    writeFileSync(join(RESULTS_DIR, "coverage-error-curve.svg"), curveSvg(l2.curves.calibration, l2.curves.test, chosen, kwPoint, `${l2.calibration.variant.name}, probability threshold 0.30–1.00`));
+    writeFileSync(join(RESULTS_DIR, "coverage-error-curve.svg"), curveSvg(l2.curves.calibration, l2.curves.test, chosen, kwPoint, `${l2.calibration.variant.name}, probability threshold 0.30–1.00`, l2.calibration.maxAcceptedError ?? 0.05));
   }
   log("[report] eval/results/RESULTS.md written");
 }

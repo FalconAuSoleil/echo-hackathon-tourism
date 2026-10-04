@@ -10,8 +10,22 @@ const STOPWORDS: Record<VisitorLang, string[]> = {
   es: ["el", "la", "los", "las", "y", "es", "fue", "era", "nosotros", "yo", "de", "un", "una", "muy", "pero", "no", "con", "para", "usted", "este", "esta", "mi", "nuestro", "demasiado", "que", "del", "al", "se", "gracias", "nos", "hay", "todo"],
 };
 
+/**
+ * Mots outils fréquents ajoutés (tâche echo-recall) : prépositions, pronoms, auxiliaires. Pas de mots de contenu
+ * propres au corpus d'évaluation ; un mot partagé entre langues (« a », « in ») n'est mis que dans une langue au plus.
+ */
+const MORE_STOPWORDS: Record<VisitorLang, string[]> = {
+  en: ["thank", "thanks", "you", "us", "all", "are", "an", "on", "at", "what", "will", "just", "from", "been", "by", "or", "if", "can", "be", "she", "he", "her", "his", "did", "didn't", "wasn't", "much", "more", "lot", "could", "should", "time", "everything", "next"],
+  fr: ["que", "qui", "ne", "dans", "sur", "sont", "ont", "ai", "ca", "tout", "bien", "plus", "comme", "aussi", "ete", "deja", "elle", "ils", "vos", "leur", "etaient", "avons", "sommes", "peu", "beaucoup", "fois", "rien", "jamais", "encore", "chez", "apres", "avant"],
+  de: ["auf", "im", "sind", "man", "wie", "noch", "nur", "gerne", "gern", "bei", "aus", "einen", "einem", "mir", "mich", "alles", "waren", "kein", "keine", "nichts", "viel", "zum", "zur", "wenn", "dass", "doch", "immer", "etwas", "bitte"],
+  es: ["lo", "su", "sus", "por", "como", "pero", "ya", "estaba", "estuvo", "tan", "poco", "mucho", "todos", "fuimos", "hubo", "nada", "nunca", "otra", "vez", "tambien", "despues", "antes", "aqui", "nuestra", "ella", "ellos"],
+};
+for (const lang of Object.keys(MORE_STOPWORDS) as VisitorLang[]) STOPWORDS[lang].push(...MORE_STOPWORDS[lang].filter((w) => !STOPWORDS[lang].includes(w)));
+
 const HINTS: { re: RegExp; lang: VisitorLang; weight: number }[] = [
   { re: /[ñ¿¡]/u, lang: "es", weight: 2 },
+  // á í ó ú : accents aigus sur a/i/o/u, propres à l'espagnol parmi les quatre langues (le français a é, pas á/í/ó/ú).
+  { re: /[áíóú]/u, lang: "es", weight: 1 },
   { re: /[ßäöü]/u, lang: "de", weight: 2 },
   { re: /[çèêàùœ]/u, lang: "fr", weight: 1.5 },
 ];

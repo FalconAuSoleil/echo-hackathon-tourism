@@ -136,6 +136,16 @@ describe("mode linear (régression logistique sur les exemples)", () => {
     expect(decideChunk([rawP("N8", 0.9, 0.6, 0.8)], plain, loose)).toMatchObject({ status: "not_sure", reason: "negation" });
     expect(decideChunk([rawP("N1", 0.9, -1, 0.8)], plain, { ...lin, negationMargin: 5 })).toMatchObject({ status: "not_sure", reason: "negation" });
   });
+  it("negationMargin négative : règle plus stricte, les exemples de même négation doivent l'emporter d'au moins |marge|", () => {
+    const strict = { ...lin, negationMargin: -0.02 };
+    const neg: NegationInfo = { negated: true, uncertain: false, cues: ["kein"] };
+    // quasi-égalité (0,596 contre 0,590) : acceptée par la règle stricte (marge 0), refusée avec -0,02
+    expect(decideChunk([rawP("N9", 0.83, 0.596, 0.59)], neg, lin)).toMatchObject({ status: "matched" });
+    expect(decideChunk([rawP("N9", 0.83, 0.596, 0.59)], neg, strict)).toMatchObject({ status: "not_sure", reason: "negation" });
+    expect(decideChunk([rawP("N9", 0.83, 0.7, 0.59)], neg, strict)).toMatchObject({ status: "matched" });
+    // constat sans exemple de négation opposée : non concerné
+    expect(decideChunk([rawP("P1", 0.83, 0.7, -1)], plain, strict)).toMatchObject({ status: "matched" });
+  });
   it("le matcher entraîne le classifieur sur les exemples et le réutilise s'il est fourni", async () => {
     const embed = fakeEmbedder();
     const m = await createMatcher(testCatalog(), embed, lin);

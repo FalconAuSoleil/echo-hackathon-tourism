@@ -1,0 +1,4 @@
+{"modelId":"Xenova/paraphrase-multilingual-MiniLM-L12-v2","mode":"node","filesMB":135.4,"baseHwmMB":58,"optLevel":"default","loadSec":0.69,"msPerSentence1t":5.8,"peakHwmMB":622}
+{"modelId":"Xenova/paraphrase-multilingual-MiniLM-L12-v2","mode":"wasm","filesMB":135.4,"baseHwmMB":60,"optLevel":"default","loadSec":0.43,"msPer32Tokens1t":21.2,"peakHwmMB":643}
+{"modelId":"Xenova/paraphrase-multilingual-mpnet-base-v2","mode":"node","filesMB":295.7,"baseHwmMB":61,"optLevel":"default","loadSec":0.89,"msPerSentence1t":16.2,"peakHwmMB":835}
+{"modelId":"Xenova/paraphrase-multilingual-mpnet-base-v2","mode":"wasm","filesMB":295.7,"baseHwmMB":60,"optLevel":"default","loadSec":0.75,"msPer32Tokens1t":70.3,"peakHwmMB":1397}

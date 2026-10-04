@@ -35,6 +35,7 @@ CACHE = ROOT / "tools" / "cache"
 os.environ.setdefault("HF_HOME", str(CACHE / "hf"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from examples_extra import EXTRA_EXAMPLES  # noqa: E402
 from examples_negative import NEGATIVE_EXAMPLES  # noqa: E402
 from examples_positive import POSITIVE_EXAMPLES  # noqa: E402
 from keywords import KEYWORDS  # noqa: E402
@@ -81,7 +82,8 @@ def stage_content(cat: dict) -> None:
     examples = {**POSITIVE_EXAMPLES, **NEGATIVE_EXAMPLES}
     for f in cat["findings"]:
         fid = f["id"]
-        f["examples"] = {lang: list(examples[fid][lang]) for lang in LANGS}
+        # 9 exemples d'origine + 6 ajoutés (examples_extra.py, tâche echo-recall), tous synthétiques.
+        f["examples"] = {lang: list(examples[fid][lang]) + list(EXTRA_EXAMPLES.get(fid, {}).get(lang, [])) for lang in LANGS}
         f["examplesSynthetic"] = True
         f["keywords"] = {lang: list(KEYWORDS[fid][lang]) for lang in LANGS}
     cat["provenance"]["examples"] = "synthetic"

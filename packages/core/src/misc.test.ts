@@ -129,6 +129,12 @@ describe("detectTextLanguage", () => {
     expect(detectTextLanguage("Der Weg war zu lang, aber der Kaffee war gut").lang).toBe("de");
     expect(detectTextLanguage("El camino era demasiado largo pero el café muy rico").lang).toBe("es");
     expect(detectTextLanguage("Njia ilikuwa ndefu sana").lang).toBe("unknown");
+    // echo-recall : á/í/ó/ú signalent l'espagnol, mots outils fréquents ajoutés
+    expect(detectTextLanguage("Duró poco, una pena").lang).toBe("es");
+    expect(detectTextLanguage("Thanks for everything").lang).toBe("en");
+    expect(detectTextLanguage("Bien reçus, merci").lang).toBe("fr");
+    expect(detectTextLanguage("Alles prima, gerne").lang).toBe("de");
+    expect(detectTextLanguage("Murakoze cyane").lang).toBe("unknown");
   });
 });
 

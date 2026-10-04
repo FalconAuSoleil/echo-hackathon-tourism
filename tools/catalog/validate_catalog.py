@@ -2,7 +2,7 @@
 """Valide catalog/catalog.json : schéma JSON (catalog/catalog.schema.json) + règles de SPEC 5.
 
 Règles vérifiées en plus du schéma :
-- 21 constats, 8 à 10 exemples synthétiques par langue visiteur, aucun exemple en double (même entre constats) ;
+- 21 constats, 8 à 16 exemples synthétiques par langue visiteur, aucun exemple en double (même entre constats) ;
 - chaque phrase kinyarwanda : non vide, statut « non validée », rétro-traductions fr et en, score présent ;
 - emplacements : ceux du modèle présents exactement une fois dans le kinyarwanda, aucun chiffre en dur,
   {finding} en fin de ligne pour les modèles qui l'utilisent, aucun emplacement dans les phrases de constat ;
@@ -46,8 +46,8 @@ def validate(cat: dict, schema: dict, base: Path) -> list[str]:
         fid = f["id"]
         for lang in ("en", "fr", "de", "es"):
             ex = f["examples"][lang]
-            if not 8 <= len(ex) <= 10:
-                errors.append(f"{fid}: {len(ex)} examples in {lang} (expected 8-10)")
+            if not 8 <= len(ex) <= 16:
+                errors.append(f"{fid}: {len(ex)} examples in {lang} (expected 8-16)")
             for e in ex:
                 key = e.strip().lower()
                 if key in seen_examples:

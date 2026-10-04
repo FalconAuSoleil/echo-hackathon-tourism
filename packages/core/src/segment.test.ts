@@ -59,3 +59,19 @@ describe("segment", () => {
     expect(texts("Le maïs était bon", "fr")).toEqual(["Le maïs était bon"]);
   });
 });
+
+describe("options de découpage (echo-recall, désactivées par défaut)", () => {
+  const legacy = (t: string, lang: string) => segment(t, lang).map((s) => s.text);
+  const withOpts = (t: string, lang: string, o: { commaMinWords: number; causal: boolean }) => segment(t, lang, o).map((s) => s.text);
+  it("virgule seule : coupure si chaque côté a au moins N mots, jamais dans une énumération courte", () => {
+    const t = "The plantation was really lovely, we learned how the coffee grows";
+    expect(legacy(t, "en")).toEqual([t]);
+    expect(withOpts(t, "en", { commaMinWords: 3, causal: false })).toEqual(["The plantation was really lovely", "we learned how the coffee grows"]);
+    expect(withOpts("Great coffee, the food was good", "en", { commaMinWords: 3, causal: false })).toEqual(["Great coffee, the food was good"]);
+  });
+  it("connecteurs de cause : coupure et connecteur retiré, y compris « parce qu'on »", () => {
+    expect(withOpts("The visit was too long because we waited an hour", "en", { commaMinWords: 0, causal: true })).toEqual(["The visit was too long", "we waited an hour"]);
+    expect(withOpts("C'était trop long parce qu'on a attendu", "fr", { commaMinWords: 0, causal: true })).toEqual(["C'était trop long", "on a attendu"]);
+    expect(legacy("The visit was too long because we waited an hour", "en")).toEqual(["The visit was too long because we waited an hour"]);
+  });
+});

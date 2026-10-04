@@ -1,0 +1,926 @@
+{
+  "synthetic": true,
+  "note": "Calibration half only (eval/src/experiments/select.ts). The held-out test half was not evaluated.",
+  "rule": "same as level2.ts: Youden off-list floor, then max calibration capture with accepted-answer error <= 8%, >= 20 accepted, cancelling-negation accuracy >= 100%; best selectable variant = lowest error among those within 2 points of the best capture; at5 = previous rule (<= 5%, negations >= 85%)",
+  "catalogExamples": 1260,
+  "chosen": {
+    "variant": "linear-minilm-l2=0.00003-neg0",
+    "embeddingModel": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+    "acceptProbability": 0.82,
+    "linearL2": 0.00003,
+    "negationMargin": 0,
+    "offListThreshold": 0.62,
+    "offListClusterThreshold": 0.57,
+    "calibration": {
+      "threshold": 0.82,
+      "coverage": 0.3684,
+      "acceptedErrorRate": 0.039,
+      "accepted": 77,
+      "captureRate": 0.5385,
+      "precision": 0.9589,
+      "recall": 0.5512,
+      "f1": 0.7,
+      "notSureRate": 0.3636,
+      "negationCancelsAccuracy": 1
+    }
+  },
+  "variants": [
+    {
+      "variant": "similarity-minilm-max",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.87,
+        "capture": 0.1385,
+        "err": 0.05,
+        "notSure": 0.6459,
+        "accepted": 20,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.87,
+        "capture": 0.1385,
+        "err": 0.05,
+        "notSure": 0.6459,
+        "accepted": 20,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "similarity-minilm-max-samelang",
+      "selectable": true,
+      "floor": 0.51,
+      "at8": null,
+      "at5": null
+    },
+    {
+      "variant": "similarity-minilm-top3",
+      "selectable": true,
+      "floor": 0.59,
+      "at8": null,
+      "at5": null
+    },
+    {
+      "variant": "similarity-e5-max",
+      "selectable": true,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.94,
+        "capture": 0.2154,
+        "err": 0.0667,
+        "notSure": 0.4163,
+        "accepted": 30,
+        "neg": 1
+      },
+      "at5": null
+    },
+    {
+      "variant": "similarity-e5-top3",
+      "selectable": true,
+      "floor": 0.88,
+      "at8": null,
+      "at5": null
+    },
+    {
+      "variant": "linear-minilm-l2=0.001-neg0",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.47,
+        "capture": 0.4538,
+        "err": 0.0313,
+        "notSure": 0.4258,
+        "accepted": 64,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.47,
+        "capture": 0.4538,
+        "err": 0.0313,
+        "notSure": 0.4258,
+        "accepted": 64,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.001-neg-0.02",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.36,
+        "capture": 0.5308,
+        "err": 0.0759,
+        "notSure": 0.3541,
+        "accepted": 79,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.39,
+        "capture": 0.5154,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.001-neg-0.05",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.35,
+        "capture": 0.5308,
+        "err": 0.0759,
+        "notSure": 0.3541,
+        "accepted": 79,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.38,
+        "capture": 0.5154,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.001-neg0.05",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.59,
+        "capture": 0.3462,
+        "err": 0,
+        "notSure": 0.512,
+        "accepted": 46,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.47,
+        "capture": 0.5,
+        "err": 0.0423,
+        "notSure": 0.3923,
+        "accepted": 71,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.001-neg0.1",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.59,
+        "capture": 0.3462,
+        "err": 0,
+        "notSure": 0.512,
+        "accepted": 46,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.47,
+        "capture": 0.5,
+        "err": 0.0423,
+        "notSure": 0.3923,
+        "accepted": 71,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0003-neg0",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.63,
+        "capture": 0.4769,
+        "err": 0.0299,
+        "notSure": 0.4115,
+        "accepted": 67,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.4769,
+        "err": 0.0299,
+        "notSure": 0.4115,
+        "accepted": 67,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0003-neg-0.02",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.52,
+        "capture": 0.5308,
+        "err": 0.075,
+        "notSure": 0.3493,
+        "accepted": 80,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.4615,
+        "err": 0.0308,
+        "notSure": 0.4211,
+        "accepted": 65,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0003-neg-0.05",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.51,
+        "capture": 0.5231,
+        "err": 0.0759,
+        "notSure": 0.3541,
+        "accepted": 79,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.54,
+        "capture": 0.5077,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0003-neg0.05",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.76,
+        "capture": 0.3923,
+        "err": 0.0182,
+        "notSure": 0.4689,
+        "accepted": 55,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.5231,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0003-neg0.1",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.76,
+        "capture": 0.3923,
+        "err": 0.0182,
+        "notSure": 0.4689,
+        "accepted": 55,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.5231,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0001-neg0",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.73,
+        "capture": 0.5,
+        "err": 0.0548,
+        "notSure": 0.3828,
+        "accepted": 73,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.74,
+        "capture": 0.5,
+        "err": 0.0417,
+        "notSure": 0.3876,
+        "accepted": 72,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0001-neg-0.02",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.62,
+        "capture": 0.5538,
+        "err": 0.0723,
+        "notSure": 0.3349,
+        "accepted": 83,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.74,
+        "capture": 0.4923,
+        "err": 0.0423,
+        "notSure": 0.3923,
+        "accepted": 71,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0001-neg-0.05",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.62,
+        "capture": 0.5462,
+        "err": 0.0617,
+        "notSure": 0.3445,
+        "accepted": 81,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.68,
+        "capture": 0.5077,
+        "err": 0.0405,
+        "notSure": 0.378,
+        "accepted": 74,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0001-neg0.05",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.87,
+        "capture": 0.4077,
+        "err": 0.0175,
+        "notSure": 0.4593,
+        "accepted": 57,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.77,
+        "capture": 0.5308,
+        "err": 0.04,
+        "notSure": 0.3732,
+        "accepted": 75,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.0001-neg0.1",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.87,
+        "capture": 0.4077,
+        "err": 0.0175,
+        "notSure": 0.4593,
+        "accepted": 57,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.77,
+        "capture": 0.5308,
+        "err": 0.04,
+        "notSure": 0.3732,
+        "accepted": 75,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00003-neg0",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.82,
+        "capture": 0.5385,
+        "err": 0.039,
+        "notSure": 0.3636,
+        "accepted": 77,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.82,
+        "capture": 0.5385,
+        "err": 0.039,
+        "notSure": 0.3636,
+        "accepted": 77,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00003-neg-0.02",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.75,
+        "capture": 0.5462,
+        "err": 0.0732,
+        "notSure": 0.3397,
+        "accepted": 82,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.82,
+        "capture": 0.5308,
+        "err": 0.0395,
+        "notSure": 0.3684,
+        "accepted": 76,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00003-neg-0.05",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.75,
+        "capture": 0.5385,
+        "err": 0.0625,
+        "notSure": 0.3493,
+        "accepted": 80,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.78,
+        "capture": 0.5385,
+        "err": 0.039,
+        "notSure": 0.3636,
+        "accepted": 77,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00003-neg0.05",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.94,
+        "capture": 0.3923,
+        "err": 0.0182,
+        "notSure": 0.4689,
+        "accepted": 55,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.82,
+        "capture": 0.5846,
+        "err": 0.0476,
+        "notSure": 0.3301,
+        "accepted": 84,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00003-neg0.1",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.94,
+        "capture": 0.3923,
+        "err": 0.0182,
+        "notSure": 0.4689,
+        "accepted": 55,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.82,
+        "capture": 0.5846,
+        "err": 0.0476,
+        "notSure": 0.3301,
+        "accepted": 84,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00001-neg0",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.91,
+        "capture": 0.4923,
+        "err": 0.029,
+        "notSure": 0.4019,
+        "accepted": 69,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.9,
+        "capture": 0.4923,
+        "err": 0.0429,
+        "notSure": 0.3971,
+        "accepted": 70,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00001-neg-0.02",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.83,
+        "capture": 0.5462,
+        "err": 0.0741,
+        "notSure": 0.3445,
+        "accepted": 81,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.88,
+        "capture": 0.5308,
+        "err": 0.0395,
+        "notSure": 0.3684,
+        "accepted": 76,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00001-neg-0.05",
+      "selectable": true,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.83,
+        "capture": 0.5385,
+        "err": 0.0633,
+        "notSure": 0.3541,
+        "accepted": 79,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.85,
+        "capture": 0.5308,
+        "err": 0.0395,
+        "notSure": 0.3684,
+        "accepted": 76,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00001-neg0.05",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.98,
+        "capture": 0.2923,
+        "err": 0,
+        "notSure": 0.5359,
+        "accepted": 41,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.91,
+        "capture": 0.5308,
+        "err": 0.04,
+        "notSure": 0.3732,
+        "accepted": 75,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-minilm-l2=0.00001-neg0.1",
+      "selectable": false,
+      "floor": 0.62,
+      "at8": {
+        "threshold": 0.98,
+        "capture": 0.2923,
+        "err": 0,
+        "notSure": 0.5359,
+        "accepted": 41,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.91,
+        "capture": 0.5308,
+        "err": 0.04,
+        "notSure": 0.3732,
+        "accepted": 75,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0003-neg0",
+      "selectable": true,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.4,
+        "capture": 0.2538,
+        "err": 0,
+        "notSure": 0.3923,
+        "accepted": 34,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.3,
+        "capture": 0.4154,
+        "err": 0.0339,
+        "notSure": 0.2727,
+        "accepted": 59,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0003-neg0.05",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.4,
+        "capture": 0.2692,
+        "err": 0,
+        "notSure": 0.3828,
+        "accepted": 36,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.3,
+        "capture": 0.4462,
+        "err": 0.0469,
+        "notSure": 0.2488,
+        "accepted": 64,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0003-neg0.1",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.4,
+        "capture": 0.2769,
+        "err": 0,
+        "notSure": 0.378,
+        "accepted": 37,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.3,
+        "capture": 0.4538,
+        "err": 0.0462,
+        "notSure": 0.244,
+        "accepted": 65,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0001-neg0",
+      "selectable": true,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.65,
+        "capture": 0.2231,
+        "err": 0,
+        "notSure": 0.4115,
+        "accepted": 30,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.43,
+        "capture": 0.4769,
+        "err": 0.0441,
+        "notSure": 0.2297,
+        "accepted": 68,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0001-neg0.05",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.65,
+        "capture": 0.2308,
+        "err": 0,
+        "notSure": 0.4067,
+        "accepted": 31,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.44,
+        "capture": 0.5231,
+        "err": 0.0405,
+        "notSure": 0.201,
+        "accepted": 74,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.0001-neg0.1",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.65,
+        "capture": 0.2385,
+        "err": 0,
+        "notSure": 0.4019,
+        "accepted": 32,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.44,
+        "capture": 0.5308,
+        "err": 0.04,
+        "notSure": 0.1962,
+        "accepted": 75,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.00003-neg0",
+      "selectable": true,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.84,
+        "capture": 0.2154,
+        "err": 0,
+        "notSure": 0.4163,
+        "accepted": 29,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.6,
+        "capture": 0.4692,
+        "err": 0.0448,
+        "notSure": 0.2344,
+        "accepted": 67,
+        "neg": 0.9375
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.00003-neg0.05",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.84,
+        "capture": 0.2231,
+        "err": 0,
+        "notSure": 0.4115,
+        "accepted": 30,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.4615,
+        "err": 0.0455,
+        "notSure": 0.2392,
+        "accepted": 66,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-e5-l2=0.00003-neg0.1",
+      "selectable": false,
+      "floor": 0.91,
+      "at8": {
+        "threshold": 0.84,
+        "capture": 0.2308,
+        "err": 0,
+        "notSure": 0.4067,
+        "accepted": 31,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.63,
+        "capture": 0.4692,
+        "err": 0.0448,
+        "notSure": 0.2344,
+        "accepted": 67,
+        "neg": 0.875
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.0003-neg0",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.47,
+        "capture": 0.5615,
+        "err": 0.0714,
+        "notSure": 0.2153,
+        "accepted": 84,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.54,
+        "capture": 0.5538,
+        "err": 0.05,
+        "notSure": 0.2344,
+        "accepted": 80,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.0003-neg-0.02",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.47,
+        "capture": 0.5538,
+        "err": 0.0723,
+        "notSure": 0.2201,
+        "accepted": 83,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.56,
+        "capture": 0.5385,
+        "err": 0.039,
+        "notSure": 0.2488,
+        "accepted": 77,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.0001-neg0",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.6,
+        "capture": 0.5692,
+        "err": 0.0706,
+        "notSure": 0.2105,
+        "accepted": 85,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.65,
+        "capture": 0.5538,
+        "err": 0.0494,
+        "notSure": 0.2297,
+        "accepted": 81,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.0001-neg-0.02",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.6,
+        "capture": 0.5615,
+        "err": 0.0714,
+        "notSure": 0.2153,
+        "accepted": 84,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.65,
+        "capture": 0.5462,
+        "err": 0.05,
+        "notSure": 0.2344,
+        "accepted": 80,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.00003-neg0",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.73,
+        "capture": 0.5538,
+        "err": 0.0723,
+        "notSure": 0.2201,
+        "accepted": 83,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.77,
+        "capture": 0.5462,
+        "err": 0.05,
+        "notSure": 0.2344,
+        "accepted": 80,
+        "neg": 1
+      }
+    },
+    {
+      "variant": "linear-mpnet-l2=0.00003-neg-0.02",
+      "selectable": false,
+      "floor": 0.69,
+      "at8": {
+        "threshold": 0.73,
+        "capture": 0.5462,
+        "err": 0.0732,
+        "notSure": 0.2249,
+        "accepted": 82,
+        "neg": 1
+      },
+      "at5": {
+        "threshold": 0.8,
+        "capture": 0.5308,
+        "err": 0.0395,
+        "notSure": 0.2536,
+        "accepted": 76,
+        "neg": 1
+      }
+    }
+  ],
+  "date": "2026-10-04"
+}

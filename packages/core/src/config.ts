@@ -18,14 +18,21 @@ export interface AnalysisConfig {
   linearEpochs: number;
   /**
    * Mode "linear" : accord de négation toléré à cette marge près (cosinus). 0 = règle stricte (les exemples de
-   * même négation doivent être au moins aussi proches que ceux de négation opposée). Calibré par l'évaluation
-   * sous contrainte : les négations qui annulent un constat ne doivent pas passer plus souvent.
+   * même négation doivent être au moins aussi proches que ceux de négation opposée). Négatif = encore plus strict
+   * (ils doivent l'emporter d'au moins |marge|). Calibré par l'évaluation sous contrainte : les négations qui
+   * annulent un constat ne doivent pas passer plus souvent ; une marge positive (relâchée) n'est jamais retenue.
    */
   negationMargin: number;
   /** Mode "similarity" : score ≥ acceptThreshold : le morceau est rattaché au constat. */
   acceptThreshold: number;
   /** Score < offListThreshold pour tous les constats : « hors liste ». Entre les deux : « pas sûr ». */
   offListThreshold: number;
+  /**
+   * Découpage (SPEC 4.3 étape 4) : virgule seule entre deux propositions d'au moins N mots chacune (0 = jamais),
+   * et coupure sur les connecteurs de cause / conséquence. Choisis sur la moitié calibration (eval/results/experiments/).
+   */
+  clauseCommaMinWords: number;
+  clauseCausalSplit: boolean;
   /** Au plus 2 constats par morceau (SPEC 4.3). */
   maxFindingsPerChunk: number;
   /** Écart max entre le 1er et le 2e score pour retenir aussi le 2e constat. */
@@ -76,6 +83,8 @@ export const DEFAULT_CONFIG: AnalysisConfig = {
   negationMargin: CALIBRATION.negationMargin,
   acceptThreshold: CALIBRATION.acceptThreshold,
   offListThreshold: CALIBRATION.offListThreshold,
+  clauseCommaMinWords: CALIBRATION.clauseCommaMinWords,
+  clauseCausalSplit: CALIBRATION.clauseCausalSplit,
   maxFindingsPerChunk: 2,
   secondFindingMargin: 0.08,
   aggregation: CALIBRATION.aggregation,

@@ -899,3 +899,51 @@ by the e2e.
   sentence unchanged.
 - **Verified**: `pnpm test` (172 passed); typecheck clean for every package except a type error in an untracked
   file of another agent (`eval/src/experiments/threshold-strategies.ts`), not touched here.
+
+## 2026-10-04 — echo-recall: more remarks captured on the calibration half, error kept low
+
+All measures on the **calibration half** only (125 synthetic feedbacks, 130 remarks); the held-out half was not
+evaluated. Details, every run and the old numbers: `eval/results/experiments/log.md`, `diagnosis.md`, `runs.jsonl`,
+`selection.json`, `embedder-cost.jsonl`.
+
+**Diagnosis** (`eval/src/experiments/diagnose.ts`): with the previous configuration (46.2 % captured, 4.5 % wrong) the
+lost remarks were: under the probability threshold 34 (16 with the right finding first), negation-agreement rule 15,
+below the off-list floor 13, message language not recognised 4, uncertain negation 2, wrong finding 2; clause
+splitting 5 (merged chunks); the two-finding cap never.
+
+**Built**
+- Catalog: 504 new synthetic examples (6 per finding and language, 756 → 1,260), written from the finding definitions
+  in `tools/catalog/examples_extra.py`, merged by `build_kinyarwanda.py --stages content`. No negation cue in positive
+  examples; two negated examples removed after review because they could absorb cancelling negations. Disjoint from the
+  corpus (`check_disjoint.py` OK after rewriting 4 accidental near-duplicates), `validate_catalog.py` OK (limit 8–10 →
+  8–16 per language), distinctness 98.7 %, Kinyarwanda / templates / numbers / ui / audio unchanged.
+- Core: idioms that are not negations ("sans hésiter", "without hesitation", "ohne zu zögern", "sin dudarlo"…);
+  language detection of written messages with more function words and á/í/ó/ú as a Spanish hint (unknown messages on
+  the calibration half 9 → 7; unknown language still makes the whole message "not sure"); clause-splitting options
+  (`clauseCommaMinWords`, `clauseCausalSplit`) measured and left **off**; negative `negationMargin` = stricter rule.
+- Eval: `level2.ts` rule changed and shared with `select.ts`: error bound 8 % (was 5 %), cancelling negations 100 % on
+  the calibration half (was 85 %), and among variants within 2 capture points of the best the lowest error; new
+  variants (L2 1e-5, margins −0.02 / −0.05; mpnet measured, not selectable). `report.ts` prints the bound from
+  `level2.json`. `writeCoreCalibration` exported.
+- Shipped configuration (`packages/core/src/calibration.ts`, written by `select.ts --write`): MiniLM, linear,
+  L2 3e-5, probability ≥ 0.82, off-list floor 0.62, cluster threshold 0.57. Calibration half: **53.8 % captured, 3.9 %
+  error among accepted**, 36.4 % not-sure chunks, 16/16 cancelling negations (was 46.2 % / 4.5 % / 42.6 % / 16/16).
+- Rejected, with numbers in the log: margin and agreement acceptance rules, per-language thresholds (worse in 2-fold
+  CV), comma splitting (−8 to −14 points), `paraphrase-multilingual-mpnet-base-v2` (≈ 69 % captured at 7.8 % error with
+  floor 0.59, but ~1.4 GB peak memory in WebAssembly vs ~0.64 GB for MiniLM: does not fit a 2 GB phone).
+
+**Verified**: `pnpm test` (176 passed), `pnpm typecheck`, `pnpm build` (1,260 example embeddings precomputed),
+`tools/catalog/test_catalog.py`, `validate_catalog.py`, `check_examples.py`, `eval/data/check_disjoint.py`.
+
+**Deviations**: the selection rule (8 % bound, 100 % negations, 2-point tolerance) was decided after looking at
+calibration numbers (never test numbers); it is stated in `level2.ts`, `log.md` and the generated `calibration.ts`.
+`tools/catalog/build_kinyarwanda.py` and `validate_catalog.py` touched (catalog tooling) to merge and accept the new
+examples. `eval/results/RESULTS.md`, `level2.json`, `thresholds.json` and the README still describe the previous
+configuration (48 % / 6 % on the held-out half).
+
+**Remains**
+- Run the held-out evaluation once with this configuration: `pnpm eval -- --level 2 --level 3 --level pii --level report`
+  (re-selects with the same rule; the PII over-scrub count on the catalog changes too), then update the README problem
+  sentence, the catalog counts (756 → 1,260) and `docs/VIDEO_SCRIPT.md` from its output.
+- mpnet as an option for phones with ≥ 3 GB, after a real-phone memory measurement (thresholds are model-specific).
+- Off-list floor: 14 of the 60 remarks still lost fall under the Youden floor 0.62, 9 of them English.
