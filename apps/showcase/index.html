@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Echo · Visitors leave, their words stay</title>
+  <meta name="description" content="Follow one visitor's voice note from a coffee farm in the Rwandan highlands to the host's monthly recap in Kinyarwanda. Everything runs offline, on a phone." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="progress" aria-hidden="true"><span></span></div>
+
+  <!-- 0. Ouverture -->
+  <header class="hero">
+    <div class="photo kenburns" style="--img: url(photos/hero-hills.jpg)"></div>
+    <div class="veil veil-bottom"></div>
+    <nav class="topbar">
+      <span class="brand">echo</span>
+      <span class="tag">Small AI for Development · Tourism track</span>
+    </nav>
+    <div class="hero-text">
+      <p class="eyebrow reveal">Rwandan highlands · a coffee farm</p>
+      <h1 class="reveal">Visitors leave.<br /><em>Their words stay.</em></h1>
+      <p class="lead reveal">Echo turns visitors' voice notes, in their own language, into a monthly recap in Kinyarwanda for the host. Offline, on a phone the household already owns.</p>
+    </div>
+    <a class="scroll-cue" href="#noor">Follow one message <span>↓</span></a>
+  </header>
+
+  <!-- 1. Noor -->
+  <section id="noor" class="split">
+    <div class="split-photo"><div class="photo" style="--img: url(photos/homestead.jpg)"></div></div>
+    <div class="split-text">
+      <p class="eyebrow reveal">Meet the host</p>
+      <h2 class="reveal">Noor, 38. Two hectares of coffee, a basic phone, no Wi-Fi.</h2>
+      <div class="facts reveal">
+        <div><b>2 ha</b><span>coffee above,<br />maize and beans below</span></div>
+        <div><b>6–7</b><span>visitors a month,<br />by word of mouth</span></div>
+        <div><b>1</b><span>basic phone<br />for calls and SMS</span></div>
+      </div>
+      <blockquote class="reveal">Once they leave, Noor never learns what they liked, what was missing, or what is worth building on.</blockquote>
+      <p class="fine reveal">Noor is the reference user of the World Bank brief. Visitors come with a local guide who translates.</p>
+    </div>
+  </section>
+
+  <!-- 2. La visite -->
+  <section class="fullbleed" id="visit">
+    <div class="photo" style="--img: url(photos/roasting.jpg); background-position: 80% center"></div>
+    <div class="veil veil-left"></div>
+    <div class="fb-text">
+      <p class="eyebrow reveal">Saturday, 11 a.m.</p>
+      <h2 class="reveal">Lena, from Hamburg, roasts coffee over the fire with Noor's family.</h2>
+      <p class="reveal">She loves it. The road up from the village, much less. She'll never say so to Noor's face.</p>
+      <p class="badge reveal">Lena is a synthetic visitor</p>
+    </div>
+  </section>
+
+  <!-- 3. La carte -->
+  <section class="card-section">
+    <div class="card-copy">
+      <p class="eyebrow reveal">Before she leaves</p>
+      <h2 class="reveal">Noor hands her a small printed card.</h2>
+      <p class="reveal">Four languages. One WhatsApp number. Sending the message <em>is</em> the consent, and the card says what happens to it.</p>
+    </div>
+    <div class="paper reveal" id="paper">
+      <div class="paper-langs">
+        <button data-lang="en" class="on">EN</button><button data-lang="fr">FR</button><button data-lang="de">DE</button><button data-lang="es">ES</button>
+      </div>
+      <h3 id="card-title">How was your visit?</h3>
+      <p id="card-body">Tell us in 30 seconds what you liked and what was missing. Send a WhatsApp voice message to this number.</p>
+      <p class="paper-number">WhatsApp · +250 7•• ••• •••</p>
+      <ul>
+        <li id="card-privacy">The sound is deleted after analysis, and your name is not kept.</li>
+        <li id="card-coop">By sending this message, you agree that it is analysed in this way.</li>
+      </ul>
+      <div class="paper-stamp">Noor's coffee farm</div>
+    </div>
+  </section>
+
+  <!-- 4. Le message vocal -->
+  <section class="fullbleed tall" id="voice">
+    <div class="photo" style="--img: url(photos/red-path.jpg)"></div>
+    <div class="veil veil-left"></div>
+    <div class="fb-text">
+      <p class="eyebrow reveal">On the road back</p>
+      <h2 class="reveal">No signal. She records seven seconds anyway.</h2>
+      <p class="reveal">WhatsApp sends it on its own, an hour later, when the bus reaches the main road.</p>
+      <p class="fine reveal">Press play: this is the actual test sample Echo analyses (synthetic voice, Piper TTS).</p>
+    </div>
+    <div class="phone reveal" id="wa-phone">
+      <div class="phone-status"><span>11:52</span><span class="nosignal" id="signal">No service</span></div>
+      <div class="wa-head"><div class="wa-avatar">N</div><div><b>Noor's coffee farm</b><span>WhatsApp</span></div></div>
+      <div class="wa-body">
+        <div class="wa-bubble">
+          <button class="play" id="play-voice" aria-label="Play the voice note">▶</button>
+          <canvas class="wave" id="wave-wa" width="440" height="64"></canvas>
+          <div class="wa-meta"><span>0:07</span><span class="ticks" id="ticks">🕓</span></div>
+        </div>
+        <p class="wa-note" id="wa-note">Waiting for network…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Hors ligne -->
+  <section class="offline" id="offline">
+    <div class="airplane reveal" id="airplane">
+      <span class="ap-icon">✈</span>
+      <span class="ap-label">Airplane mode</span>
+      <span class="toggle"><i></i></span>
+    </div>
+    <h2 class="reveal">From here on, <em>nothing</em> needs the internet.</h2>
+    <p class="reveal">On the household smartphone, one tap shares the voice note to Echo. Two small models already live in the phone's storage.</p>
+    <div class="models reveal">
+      <div><b>Whisper base</b><span>listens · 80 MB</span></div>
+      <div><b>MiniLM</b><span>understands meaning · 135 MB</span></div>
+      <div><b>No server</b><span>no account · no login</span></div>
+    </div>
+  </section>
+
+  <!-- 6. L'analyse, étape par étape -->
+  <section class="pipeline" id="pipeline" style="--steps: 6">
+    <div class="pipeline-sticky">
+      <div class="pipeline-head">
+        <p class="eyebrow">Inside the phone</p>
+        <h2>Seven seconds of German, in six steps.</h2>
+      </div>
+      <div class="pipeline-grid">
+        <ol class="steps" id="steps">
+          <li data-i="0"><b>Listen</b><span>Whisper transcribes and detects the language.</span></li>
+          <li data-i="1"><b>Forget the voice</b><span>The audio is deleted, the buffer zero-filled.</span></li>
+          <li data-i="2"><b>Remove who said it</b><span>Names, phone numbers, e-mails, @handles: scrubbed before anything is stored.</span></li>
+          <li data-i="3"><b>Cut into ideas</b><span>Sentences, then clauses: "but", "mais", "aber", "pero"…</span></li>
+          <li data-i="4"><b>Match the meaning</b><span>Each idea is compared with 21 known findings, in any of 4 languages. Counted only if confident and the negation agrees.</span></li>
+          <li data-i="5"><b>Keep only the count</b><span>The words of a counted remark are not kept. Just +1.</span></li>
+        </ol>
+        <div class="stage" id="stage" data-step="0">
+          <div class="stage-top">
+            <span class="lang-pill"><i></i> Deutsch · detected</span>
+            <span class="offline-pill">✈ offline</span>
+          </div>
+          <div class="stage-wave"><canvas class="wave" id="wave-stage" width="900" height="120"></canvas><span class="zero">audio deleted · 0x00 0x00 0x00 0x00</span></div>
+          <div class="transcript" id="transcript">
+            <span class="clause c1">Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht.</span>
+            <span class="clause c2">Aber der Weg vom Dorf bis hierher war viel zu lang.</span>
+            <span class="scan"></span>
+          </div>
+          <div class="scrub-note">names 0 · phone numbers 0 · e-mails 0 · handles 0</div>
+          <div class="findings">
+            <div class="finding pos"><span class="code">P3</span><b>Roasting or tasting enjoyed</b><span class="conf"><i></i>above 0.82</span><span class="plus">+1</span></div>
+            <div class="finding neg"><span class="code">N1</span><b>Path or access too long</b><span class="conf"><i></i>above 0.82</span><span class="plus">+1</span></div>
+          </div>
+          <p class="stage-aside">“The walk was <u>not</u> too long at all” would <b>not</b> count as N1. A keyword list would.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Le mois -->
+  <section class="month" id="month">
+    <div class="photo dim" style="--img: url(photos/dusk.jpg)"></div>
+    <div class="month-sticky">
+      <div class="month-head">
+        <p class="eyebrow">A month later</p>
+        <h2>Seven messages. Four languages. <em>Three people want the same thing, and Echo doesn't know it yet.</em></h2>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <p class="cluster-note"><b>Same wish, three languages, three visitors:</b> picking the coffee cherries. Echo has no validated sentence for it, so it never names it. It tells Noor: a new topic is coming back, ask someone to read these.</p>
+      <div class="legend">
+        <span class="lg pos">counted, liked</span>
+        <span class="lg neg">counted, problem</span>
+        <span class="lg unsure">not sure: never counted, ask a person</span>
+        <span class="lg off">unknown topic</span>
+      </div>
+      <p class="fine month-fine">Messages 1 to 5 are Echo's synthetic test samples; 6 and 7 are written for this page. Labels are the expected results. In this story, the path was already the top problem last month.</p>
+    </div>
+  </section>
+
+  <!-- 8. Le récap -->
+  <section class="recap" id="recap">
+    <div class="recap-copy">
+      <p class="eyebrow reveal">First of the month</p>
+      <h2 class="reveal">Noor's basic phone buzzes.</h2>
+      <p class="reveal">Three SMS, in Kinyarwanda, sent from the household smartphone with no internet. She can also listen to it.</p>
+      <button class="listen reveal" id="listen"><span>▶</span> Jya utega amatwi <small>Listen</small></button>
+      <label class="gloss-toggle reveal"><input type="checkbox" id="gloss" checked /> English gloss (demo only, the host never sees it)</label>
+      <ol class="recap-lines" id="recap-lines"></ol>
+      <p class="fine reveal">Every sentence comes from a frozen catalog with numbers in slots. Nothing is generated, so nothing can be invented. Kinyarwanda is machine-translated and not yet validated by a speaker; voice: MMS-TTS.</p>
+    </div>
+    <div class="nokia reveal" id="nokia">
+      <div class="nokia-ear"></div>
+      <div class="nokia-screen">
+        <div class="lcd-top"><span>▂▄▆</span><span>SMS 1/3</span><span>▮▮▮</span></div>
+        <div class="lcd-from">Echo · Noor's farm</div>
+        <div class="lcd-text" id="lcd-text"></div>
+      </div>
+      <div class="nokia-keys">
+        <span></span><span class="ok"></span><span></span>
+        <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>*</i><i>0</i><i>#</i>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Noor décide -->
+  <section class="fullbleed decide">
+    <div class="photo kenburns" style="--img: url(photos/volcano-hills.jpg)"></div>
+    <div class="veil veil-bottom"></div>
+    <div class="decide-text">
+      <h2 class="reveal">Echo never acts.<br /><em>Noor decides.</em></h2>
+      <p class="reveal">Maybe she arranges a lift from the village. Maybe cherry picking becomes part of the visit. The tool counts and says when it is unsure; the host chooses.</p>
+    </div>
+  </section>
+
+  <!-- 10. Chiffres -->
+  <section class="numbers">
+    <div class="stats">
+      <div class="reveal"><b>0</b><span>servers doing analysis</span></div>
+      <div class="reveal"><b>0</b><span>accounts, logins, cloud bills</span></div>
+      <div class="reveal"><b>4 → 1</b><span>visitor languages to the host's language</span></div>
+      <div class="reveal"><b>6.5 %</b><span>of Echo's counted remarks are wrong.<br />A keyword list: 30 %.</span></div>
+    </div>
+    <p class="numbers-note reveal">Measured on a held-out synthetic corpus with the shipped code. When it is not sure, Echo does not guess: it asks a person.</p>
+    <div class="cta reveal">
+      <a class="btn" id="try-app" href="http://localhost:4173/">Try the real app</a>
+      <a class="btn ghost" href="#">Back to the hills ↑</a>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Prototype honesty.</b> Lena, the visitors, their voices (Piper TTS) and the month shown here are synthetic. Noor is the brief's reference user. The Kinyarwanda is machine-translated and not validated by a speaker. Nothing has been tested with a real host yet.</p>
+    <p class="credits" id="credits">Photos: </p>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

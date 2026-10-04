@@ -1007,3 +1007,14 @@ configuration (48 % / 6 % on the held-out half).
 - Earlier in this pass (commit 7eceb87): README §5.4 and the "Remains" line said "two conditions" above the 8 % bound;
   corrected to 20, 10 and 5 dB plus the level-3 text.
 - No evaluation number changed; no held-out run.
+
+## Showcase page (apps/showcase)
+- New static one-page story for the jury (`pnpm --filter @echo/showcase dev`, port 4180; `build` → `apps/showcase/dist/`).
+  It follows the journey of README §2 with one message: card → WhatsApp voice note → offline → transcription,
+  audio deletion, scrubbing, clauses, findings → a month of 7 messages (not sure, unknown topic from 3 visitors) →
+  Kinyarwanda recap (3 SMS, split as `splitSms` does) → "Noor decides".
+- No analysis runs on this page: everything is scripted. Real assets: the `de-roasting-path` sample (its waveform is
+  drawn from the file), the frozen catalog sentences and their MMS-TTS clips, the card texts. Messages 6 and 7, Lena
+  and the month are synthetic and labelled as such on the page.
+- Photos: Wikimedia Commons, CC BY / CC BY-SA, credited in the footer (`public/photos/CREDITS.json`). The roasting
+  photo is from Ethiopia; the others are from Rwanda.

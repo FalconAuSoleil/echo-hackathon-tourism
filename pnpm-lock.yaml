@@ -34,6 +34,12 @@ importers:
         specifier: ^8.5.2
         version: 8.5.2
 
+  apps/showcase:
+    devDependencies:
+      vite:
+        specifier: ^8.0.0
+        version: 8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(terser@5.51.2)(tsx@4.23.15)
+
   apps/web:
     dependencies:
       '@capacitor/core':
