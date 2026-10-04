@@ -113,7 +113,6 @@ let lenaPeaks = null;
 const redrawLena = () => {
   if (!lenaPeaks) return;
   drawWave($("#wave-wa"), lenaPeaks, voice.currentTime / (voice.duration || 1), "rgba(244,236,220,0.45)", "#f4ecdc");
-  drawWave($("#wave-stage"), lenaPeaks);
 };
 peaksOf(VOICE).then((p) => {
   lenaPeaks = p;
@@ -137,28 +136,6 @@ onceVisible($("#wa-phone"), 0.6, () =>
   }, 2600),
 );
 onceVisible($("#airplane"), 0.8, () => $("#airplane").classList.add("on"));
-
-// ---------- Dans le téléphone : quatre étapes pilotées par le défilement ----------
-const pipeline = $("#pipeline");
-const stage = $("#stage");
-const stepItems = [...document.querySelectorAll("#steps li")];
-document.querySelectorAll("#transcript .clause").forEach((clause, ci) => {
-  const words = clause.textContent.split(" ");
-  clause.innerHTML = words.map((w, i) => `<span class="w" style="transition-delay:${(ci * 12 + i) * 70}ms">${w}</span>`).join(" ");
-});
-onceVisible(stage, 0.4, () => stage.classList.add("live"));
-function progressIn(section) {
-  const r = section.getBoundingClientRect();
-  return Math.min(1, Math.max(0, -r.top / Math.max(r.height - innerHeight, 1)));
-}
-function onScrollPipeline() {
-  const step = Math.min(stepItems.length - 1, Math.floor(progressIn(pipeline) * stepItems.length));
-  if (stage.dataset.step !== String(step)) stage.dataset.step = String(step);
-  stepItems.forEach((li, i) => {
-    li.classList.toggle("now", i === step);
-    li.classList.toggle("done", i < step);
-  });
-}
 
 // ---------- SMS sur un téléphone basique ----------
 function typeSms(nokia, parts) {
@@ -212,78 +189,7 @@ function stopPlaying() {
   playing = null;
 }
 
-// ---------- Le mois : sept messages regroupés en cinq lignes ----------
 const MONTH = "2026-10";
-const MSGS = [
-  { lang: "DE", kind: "voice note", text: transcriptOf["de-roasting-path"], chips: [["pos", "Loved the roasting"], ["neg", "Path too long"]], findings: ["P3", "N1"] },
-  { lang: "EN", kind: "voice note", text: transcriptOf["en-picking"], chips: [["off", "Something new"]], off: true },
-  { lang: "FR", kind: "voice note", text: transcriptOf["fr-ambiguous"], chips: [["unsure", "Not sure"]], notSure: 1 },
-  { lang: "DE", kind: "voice note", text: transcriptOf["de-picking"], chips: [["off", "Something new"]], off: true },
-  { lang: "ES", kind: "written", text: "Tostar el café con la familia fue lo mejor del viaje. Pero el camino desde el pueblo se nos hizo eterno.", chips: [["pos", "Loved the roasting"], ["neg", "Path too long"]], findings: ["P3", "N1"] },
-  { lang: "FR", kind: "voice note", text: transcriptOf["fr-picking"], chips: [["off", "Something new"]], off: true },
-  { lang: "EN", kind: "written", text: "Tasting the coffee we had just roasted was unforgettable. The rest was maybe a bit much at times?", chips: [["pos", "Loved the roasting"], ["unsure", "Not sure"]], findings: ["P3"], notSure: 1 },
-];
-const monthRecap = buildMonthlyRecap(
-  {
-    month: MONTH,
-    messages: [
-      // Le mois précédent, le chemin était déjà cité : d'où « depuis 2 mois ».
-      { id: "prev", month: "2026-09", status: "analyzed", findings: ["N1"], notSureCount: 0 },
-      ...MSGS.map((m, i) => ({ id: String(i), month: MONTH, status: "analyzed", findings: m.findings ?? [], notSureCount: m.notSure ?? 0 })),
-    ],
-    recurringUnknownVisitors: MSGS.filter((m) => m.off).length,
-  },
-  catalog,
-);
-const refs = (pred) => MSGS.map((m, i) => (pred(m) ? `#${i + 1}` : null)).filter(Boolean).join(" ");
-const GROUP_OF = {
-  volume: (l) => ({ cls: "vol", n: l.slots.n, unit: "messages", title: "Messages this month" }),
-  keep: (l) => ({ cls: "pos", n: l.slots.k, unit: `of ${l.slots.n}`, title: "Loved the coffee roasting", refs: refs((m) => m.findings?.includes("P3")) }),
-  fix_streak: (l) => ({ cls: "neg", n: l.slots.k, unit: `of ${l.slots.n}`, title: `The path is too long, ${l.slots.x} months in a row`, refs: refs((m) => m.findings?.includes("N1")) }),
-  unknown_topic: (l) => ({ cls: "off", n: l.slots.k, unit: "visitors", title: "Something new keeps coming back: ask someone to read it", refs: refs((m) => m.off) }),
-  not_understood: (l) => ({ cls: "unsure", n: l.slots.p, unit: "remarks", title: "Not sure what they meant: ask someone", refs: refs((m) => m.notSure) }),
-};
-
-const month = $("#month");
-$("#msgs").innerHTML = MSGS.map(
-  (m, i) => `<article class="msg">
-    <div class="msg-top"><span><b>${m.lang}</b> · ${m.kind}</span><span>#${i + 1}</span></div>
-    <p>${esc(m.text)}</p>
-    <div class="chips">${m.chips.map(([c, l]) => `<span class="chip ${c}">${l}</span>`).join("")}</div>
-  </article>`,
-).join("");
-$("#groups").innerHTML = monthRecap.lines
-  .map((l) => {
-    const g = GROUP_OF[l.templateId](l);
-    return `<div class="grp ${g.cls}">
-      <div class="grp-n">${g.n}<small>${g.unit}</small></div>
-      <div class="grp-title">${g.title}${g.refs ? `<span class="refs">from ${g.refs}</span>` : ""}</div>
-      <div class="grp-rw">${esc(l.rw)}</div>
-    </div>`;
-  })
-  .join("");
-const msgEls = [...$("#msgs").children];
-const grpEls = [...$("#groups").children];
-const monthSteps = [...document.querySelectorAll("#month-steps li")];
-const monthNokia = $("#nokia");
-const monthSms = splitSms(recapRwLines(monthRecap), 160, { numbered: true });
-let monthSent = false;
-function onScrollMonth() {
-  const p = progressIn(month);
-  msgEls.forEach((el, i) => el.classList.toggle("shown", p > 0.01 + i * 0.03));
-  const phase = p < 0.25 ? 0 : p < 0.45 ? 1 : p < 0.68 ? 2 : 3;
-  month.classList.toggle("judged", phase >= 1);
-  month.classList.toggle("grouped", phase >= 2);
-  month.classList.toggle("sent", phase >= 3);
-  monthSteps.forEach((li, i) => li.classList.toggle("on", i === phase));
-  if (phase >= 3 && !monthSent) {
-    monthSent = true;
-    typeSms(monthNokia, monthSms);
-  }
-}
-$("#listen").addEventListener("click", (e) =>
-  playLines(monthRecap.lines, (li) => grpEls.forEach((el, j) => el.classList.toggle("speaking", j === li)), e.currentTarget),
-);
 
 // ---------- Simulation : à vous d'être le visiteur ----------
 // results : ce que le modèle est censé comprendre de chaque idée, dans l'ordre des idées produites par segment().
@@ -527,8 +433,6 @@ fetch("photos/CREDITS.json")
 
 function onScroll() {
   onScrollProgress();
-  onScrollPipeline();
-  onScrollMonth();
 }
 addEventListener("scroll", onScroll, { passive: true });
 addEventListener("resize", onScroll);

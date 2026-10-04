@@ -1024,3 +1024,6 @@ configuration (48 % / 6 % on the held-out half).
   by `splitSms`. The link to the PWA is replaced by a "Your turn" simulator: 9 synthetic voice samples and 2 written
   messages with a name / phone number, run through the real `scrubPii` and `segment` in the browser; the findings of
   each idea are the expected results, prepared in advance and labelled so; the end-of-month recap uses the real code.
+- Third pass (team request): removed the "Inside the phone", "A month later", "Noor decides" and numbers sections; the
+  page is now the story up to the voice note, "What it takes", then the simulator. Unused photos (dusk, volcano hills)
+  removed from `public/photos/` and their credits.
