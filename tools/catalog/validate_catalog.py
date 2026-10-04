@@ -85,6 +85,15 @@ def validate(cat: dict, schema: dict, base: Path) -> list[str]:
                 elif clip:
                     errors += check_file(f"template {t['id']}", clip, base)
 
+    for u in cat.get("ui", []):
+        k = u["kinyarwanda"]
+        where = f"ui {u['id']}"
+        errs = check_sentence(where, k, u["slots"], base)
+        # Les libellés n'ont pas (encore) de clip : seule l'absence d'audio est tolérée.
+        errors += [e for e in errs if e != f"{where}: audio missing"]
+        if sorted(SLOT_RE.findall(k["rw"])) != sorted(u["slots"]):
+            errors.append(f"{where}: slots in rw differ from declared {u['slots']}")
+
     nums = cat.get("numbers") or {}
     for i in range(32):
         e = nums.get(str(i))

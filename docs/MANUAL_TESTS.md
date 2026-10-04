@@ -47,11 +47,23 @@ choose "Echo" in the Android share sheet; everything else is the same. Note whic
    goes to 0 as soon as the transcription ends; the message appears under "What is stored" with findings only
    (no text). In Chrome DevTools (USB remote debugging) → Application → IndexedDB → `echo`: `queue` is empty,
    `messages` rows have no text, `reviewChunks` only contain not-sure / off-list chunks without names or numbers.
+6b. **Delete the original in WhatsApp (consent, SPEC 4.1)**: right after step 6, the host app shows a red reminder
+   "1 voice note still to delete. Delete the original voice note in WhatsApp now: the visitor card promised that the
+   sound is deleted after analysis". In WhatsApp, long-press the voice note → Delete → Delete for me. Back in Echo,
+   tap "Done, I deleted them in WhatsApp": the reminder disappears. Expected: the counter counts every shared or
+   imported voice note analysed since the last "Done" (not written messages, not recordings made in Echo), it survives
+   closing and reopening Echo, and it does not appear before the analysis is saved (if Echo is killed during analysis,
+   the host must still have the original to share it again). Note whether the host actually deletes the voice notes
+   and how long it takes her.
 7. **Real SMS (P0, SPEC 14)**: Settings → host's phone number = the basic phone's number. Host app → recap →
    "Send SMS 1/2". Expected: the Android SMS app opens with the Kinyarwanda text; press Send (airplane mode off,
    Wi-Fi off, mobile network on: SMS needs only the SIM). Repeat for each part. On the basic phone, check that the
    text arrives complete and readable (GSM-7, no garbled characters), and note the number of SMS billed.
 8. **Listen**: tap "Listen (Kinyarwanda)" in airplane mode: the clips play one after the other.
+8b. **Mode A labels**: Settings → "Mode A". Host app: the buttons Analyse, Listen, Send SMS, the recap title and the
+   WhatsApp reminder show a frozen Kinyarwanda label with an icon (machine translated, not validated). With a
+   Kinyarwanda-only host, check that she can run Analyse → Listen → (delete in WhatsApp) without help; note every
+   label she does not understand (fix it with the speaker check, § 3).
 9. **PIN**: Settings → set a PIN → close and reopen Echo → "Host app" asks for the PIN; "Try it" stays open.
 10. **Visitor card**: Visitor card → Print → "Save as PDF" or a real printer: the four languages fit on one page.
 
@@ -92,7 +104,9 @@ killed; the result is identical to the one obtained on the laptop for the same f
 Cannot be done here: no Kinyarwanda speaker. Everything in `catalog/` is flagged
 `machine_translated_unvalidated`. Procedure for a speaker (guide, cooperative member, ~30 min):
 
-1. Open `catalog/README.md`, table "The frozen sentences" (29 lines: 21 findings, 8 recap templates). For each line,
+1. Open `catalog/README.md`, table "The frozen sentences" (29 lines: 21 findings, 8 recap templates), and the 6 host-app
+   labels in `catalog/catalog.json` → `ui` (listen, send_sms, analyse, recap_month, delete_whatsapp, deleted; check
+   `delete_whatsapp` first: NLLB first rendered "delete" as "Funga" = close/lock, see `tools/catalog/sources.py`). For each line,
    read `rw` and the English/French source. Mark: correct / understandable but odd / wrong meaning.
    Check first the known drifts listed under the table (P2, P3, P6, P7, P8, N5, unknown_topic, keep/fix "ku" vs "kuri").
 2. Read three full recap lines aloud with numbers, e.g. "Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bumvaga bakiriwe neza."
@@ -109,8 +123,9 @@ Expected result: a list of sentences marked correct / odd / wrong, to be copied 
 ## 4. Android APK on a real phone (apps/android)
 
 Already checked on an Android 14 emulator (see `apps/android/README.md`): offline start, share intent (voice note and
-text), `sms:` opening Google Messages prefilled, transcription with 3 GB of RAM. A 2 GB emulator ran out of memory
-during transcription. Still to check on real hardware:
+text), `sms:` opening Google Messages prefilled, transcription with 3 GB of RAM. A 2 GB emulator first ran out of memory
+during transcription with both models loaded; Echo now loads one model at a time on phones that report ≤ 2 GB
+(Settings → Memory). Still to check on real hardware:
 
 1. Build (`bash tools/android/build-apk.sh`) or take `apps/android/dist/echo-debug.apk` (~150 MB). Copy it to a
    low-end phone (2–3 GB RAM, Android 8+), allow "install unknown apps" for the file manager, install.
@@ -120,7 +135,9 @@ during transcription. Still to check on real hardware:
    Host app with "1 shared item added to the queue" and the voice note listed. Repeat with Echo already open, then with a
    forwarded text message. Share 2 voice notes at once: expected "2 shared items".
 4. Tap "Analyse N messages offline". Write down the on-device time per message (SPEC 9 performance). If Echo shows
-   "Echo ran out of memory and restarted", write it down with the phone's RAM. That is the 2 GB limit seen on the emulator.
+   "Echo ran out of memory and restarted", write it down with the phone's RAM. Settings → Memory shows the mode in use
+   ("one model at a time" on a phone that reports ≤ 2 GB); if a 3 GB phone runs out of memory in automatic mode, set
+   "One model at a time" and retry. Then delete the original voice notes in WhatsApp as the reminder asks (§ 1 step 6b).
 5. Record a message in Try it: Android asks for the microphone permission once. Expected: recording works, and refusing
    the permission shows an error without a crash.
 6. Recap → enter the host's number → "Send SMS". Expected: the phone's SMS app opens with the number and the
@@ -129,3 +146,6 @@ during transcription. Still to check on real hardware:
    Settings → Apps → Echo → Permissions lists only Microphone).
 7. Privacy: Settings → Apps → Echo → Storage: after the analysis, the cache must not grow with each share
    (shared copies are deleted). `adb shell run-as org.echo.feedback ls cache/share` (debug build) should be empty.
+8. Airplane mode badge: with airplane mode on, the badge at the top says "Offline" (read from Android through the
+   Capacitor Network plugin; the WebView's `navigator.onLine` stays true). Turn airplane mode off: it says "Online"
+   within a few seconds.

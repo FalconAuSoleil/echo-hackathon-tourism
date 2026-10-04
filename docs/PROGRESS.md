@@ -628,3 +628,64 @@ finding:P3,template:unknown_topic,template:not_understood`; `validate_catalog.py
   I committed only my hunks (their work stays uncommitted for them). The `--only` run kept their `ui` entries.
 - `docs/screenshots/05-recap-kinyarwanda.png` still shows the old sentences: re-take it with the web e2e
   (`pnpm --filter @echo/web e2e`) → web/docs agent.
+
+## 2026-10-04 — audit fixes: memory on 2 GB phones, WhatsApp deletion reminder, APK offline badge, mode A labels (fix-web-app-1)
+
+**Built**
+- **One model at a time** (`apps/web/src/lib/worker-client.ts`, `worker/analysis.worker.ts`, `lib/host-store.ts`): the
+  worker loads Whisper ("asr") and MiniLM + catalog ("nlp") on demand. Memory mode `one_model_at_a_time` (automatic when
+  `navigator.deviceMemory` ≤ 2, or Settings → Memory, or `?memory=low|normal|auto`) runs each model in its own worker
+  and **terminates** the worker before loading the other model (terminating frees the WebAssembly memory; a session
+  `dispose` does not shrink a wasm heap, so no `packages/models` change was needed). Otherwise one worker keeps both
+  (unchanged speed on laptops). The host queue now runs in two steps: Whisper transcribes every voice note (audio Blob
+  deleted right after each transcription), then the similarity model analyses transcripts and texts. Core: new
+  `transcribeAudioMessage` (step 1 alone); `analyzeAudioMessage` = `analyzeMessage(await transcribeAudioMessage(...))`,
+  same results (test `packages/core/src/audio.test.ts`). Requests are serialised in the client, so a swap never cuts a
+  request. Model box and Settings show the mode.
+- **WhatsApp deletion reminder** (SPEC 4.1 card promise): settings counter `whatsappToDelete` (a number only),
+  increased after the analysis of each shared or imported voice note is saved (`originalStaysInWhatsapp`,
+  `addWhatsappToDelete` in `lib/db.ts`); red persistent banner on the host page "N voice notes still to delete. Delete
+  the original voice note in WhatsApp now: the visitor card promised that the sound is deleted after analysis", with
+  "Done, I deleted them in WhatsApp" resetting it. In mode A the banner and the button also carry the frozen
+  Kinyarwanda labels.
+- **Offline badge in the APK** (`lib/network.ts`): inside Capacitor the badge follows `@capacitor/network`
+  (`getStatus` + `networkStatusChange`), in the browser `navigator.onLine`. Bug found on the emulator and fixed: the
+  Capacitor plugin is a Proxy that answers `then`, so returning it from an async function made the promise hang forever
+  (the badge never updated); it is now wrapped. `@capacitor/network` added to apps/web and apps/android (android area:
+  `package.json`, the two `cap sync` gradle files; minimal change needed for the native plugin).
+- **Mode A labels**: catalog `ui` section (6 labels: listen, send_sms, analyse, recap_month, delete_whatsapp {n},
+  deleted) through the same NLLB + back-translation pipeline (`UI_SOURCES` in `tools/catalog/sources.py`, `--only
+  ui:<id>`), all `machine_translated_unvalidated`, all ≥ 0.75; schema, Python validator, core `validateCatalog` +
+  `uiLabel()`. `delete_whatsapp` first came back "Funga…" = "Lock/Close" with a passing 0.77: source reworded ("You
+  must delete…", 0.97). Shown with SVG icons on the host page when mode A is selected (`ui/HostLabel.tsx`); English
+  chrome stays for helpers and the demo. Also fixed in `build_kinyarwanda.py`: a translate-only run reset every
+  number's `audio` to null (now kept when the number word is unchanged).
+
+**Verified here**
+- `pnpm test` (142), `pnpm typecheck`, `validate_catalog.py`, `test_catalog.py`, `pnpm build`,
+  `pnpm --filter @echo/web e2e` **PASSED** with new checks: reminder count 1 after the imported wav, mode A shows the 6
+  Kinyarwanda labels, "Done" clears the reminder, `?memory=low` batch of 2 voice + 1 text: never both models in one
+  worker (peak 1, 2 worker swaps), 3 more messages stored, reminder counts 2. Screenshots 14 and 15.
+- **Android 14 emulator** (debug APK rebuilt, airplane mode, `navigator.deviceMemory` = 2 → automatic one model at a
+  time). Caveat: on this system image the emulator raises a 2048 MB request (or `hw.ramSize = 2048`) to **2560 MB**
+  (MemTotal 2.42 GiB); the earlier "2 GB" run most likely had the same. Results: Try-it German sample analysed, 30.8 s
+  on-device (Whisper 30.2 s incl. English translation, 50 s from the tap with two model swaps); host queue of 3 voice
+  notes transcribed then analysed in 84 s, 3 stored, reminder 3. Renderer never killed; **peak renderer RSS 1.66 GB**
+  (PSS 1.64 GB, PSS + zram swap up to 2.34 GB), MemAvailable down to 57 MB (`/proc/<pid>/smaps_rollup` polled each
+  second via `adb root`). Badge: Offline → airplane off → Online → airplane on → Offline.
+  Screenshots `apps/android/screenshots/low-memory-host-batch.png`, `airplane-badge-offline.png`.
+
+**Deviations / notes**
+- whisper-tiny for ≤ 2 GB phones not offered (fails the FLEURS rule fr/de); the renderer still peaks ~1.6 GB with one
+  model, so a real 2 GB phone stays unmeasured and borderline (README §5.7, §10).
+- If the app is killed between the two steps, that run's transcripts are lost (never stored, audio already deleted);
+  the reminder only counts saved analyses, so the WhatsApp originals can be shared again.
+- Emulator findings for the android owner: `dumpsys meminfo <renderer pid>` killed the isolated renderer 3 times in a
+  row (the app then gave up); after `adb install -r` the first launch runs the previous web build (service worker
+  updates in the background); on the very first launch after install the precomputed catalog vectors were once not
+  used (embedded on device instead), fine on the next launch.
+- On this emulator `navigator.onLine` did follow airplane mode in my runs (the android agent saw it stay true); the badge
+  no longer depends on it inside the APK.
+
+**Remains**: real 2 GB phone (memory, timing), whether hosts actually delete WhatsApp originals, speaker check of the 6
+labels → `docs/MANUAL_TESTS.md` (§ 1 steps 6b/8b, § 3, § 4 steps 4 and 8).

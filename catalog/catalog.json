@@ -2789,5 +2789,165 @@
       "source": "counting form, hand-written from public references",
       "status": "machine_translated_unvalidated"
     }
-  }
+  },
+  "ui": [
+    {
+      "id": "listen",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "Jya utega amatwi",
+        "source": {
+          "fr": "Écouter",
+          "en": "Listen"
+        },
+        "backTranslation": {
+          "fr": "Écoutez attentivement",
+          "en": "Listen carefully"
+        },
+        "similarity": 0.833,
+        "similarityDetail": {
+          "fr": 0.8604,
+          "en": 0.833
+        },
+        "translatedFrom": "fr",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "send_sms",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "Yohereza ubutumwa",
+        "source": {
+          "fr": "Envoyer le message",
+          "en": "Send the message"
+        },
+        "backTranslation": {
+          "fr": "Envoyez un message",
+          "en": "Send a message"
+        },
+        "similarity": 0.9513,
+        "similarityDetail": {
+          "fr": 0.9679,
+          "en": 0.9513
+        },
+        "translatedFrom": "en",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "analyse",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "Gusuzuma ubutumwa",
+        "source": {
+          "fr": "Analyser les messages",
+          "en": "Analyse the messages"
+        },
+        "backTranslation": {
+          "fr": "L'examen du message",
+          "en": "Examining the Message"
+        },
+        "similarity": 0.8221,
+        "similarityDetail": {
+          "fr": 0.9041,
+          "en": 0.8221
+        },
+        "translatedFrom": "fr",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "recap_month",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "Ingingo z'ingenzi z'uku kwezi",
+        "source": {
+          "fr": "Le résumé de ce mois",
+          "en": "The summary of this month"
+        },
+        "backTranslation": {
+          "fr": "Les points forts du mois",
+          "en": "Highlights of the Month"
+        },
+        "similarity": 0.7825,
+        "similarityDetail": {
+          "fr": 0.7825,
+          "en": 0.8754
+        },
+        "translatedFrom": "fr",
+        "attempts": 2,
+        "chosenAttempt": 2,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "delete_whatsapp",
+      "slots": [
+        "n"
+      ],
+      "kinyarwanda": {
+        "rw": "Ugomba gukuraho ubutumwa bw'ijwi {n} muri WhatsApp.",
+        "source": {
+          "fr": "Il faut effacer {n} messages vocaux dans WhatsApp.",
+          "en": "You must delete {n} voice messages in WhatsApp."
+        },
+        "backTranslation": {
+          "fr": "Vous devez supprimer 17 messages vocaux de WhatsApp.",
+          "en": "You must delete 17 voice messages from WhatsApp."
+        },
+        "similarity": 0.9662,
+        "similarityDetail": {
+          "fr": 0.9662,
+          "en": 0.9888
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    },
+    {
+      "id": "deleted",
+      "slots": [],
+      "kinyarwanda": {
+        "rw": "Ubutumwa burakurwaho",
+        "source": {
+          "fr": "Les messages sont effacés",
+          "en": "The messages are deleted"
+        },
+        "backTranslation": {
+          "fr": "Le message est supprimé",
+          "en": "The message is removed"
+        },
+        "similarity": 0.8598,
+        "similarityDetail": {
+          "fr": 0.9204,
+          "en": 0.8598
+        },
+        "translatedFrom": "en",
+        "attempts": 1,
+        "chosenAttempt": 1,
+        "backTranslationCheck": "passed",
+        "audio": null,
+        "status": "machine_translated_unvalidated"
+      }
+    }
+  ]
 }

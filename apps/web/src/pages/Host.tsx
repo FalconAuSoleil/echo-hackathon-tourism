@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import { DEFAULT_CONFIG } from "@echo/core";
 import { findingLabel, langName, type StaticData } from "../lib/assets.ts";
 import { addFiles, addText, db, host, processQueue, refresh, removeQueued, updateSettings } from "../lib/host-store.ts";
+import { HostLabel, Icon } from "../ui/HostLabel.tsx";
 import { currentMonth, monthReport, reviewChunksToItems, toMonthMessage } from "../lib/recap-service.ts";
 import { verifyPin } from "../lib/pin.ts";
 import { ModelBox } from "../ui/ModelBox.tsx";
@@ -49,6 +50,8 @@ export function Host({ data }: { data: StaticData }) {
     [st.messages, st.review, month],
   );
   const monthMsgs = st.messages.filter((m) => m.month === month);
+  const modeA = st.settings.mode === "A";
+  const toDelete = st.settings.whatsappToDelete ?? 0;
   const monthReview = st.review.filter((c) => c.month === month);
 
   return (
@@ -62,6 +65,27 @@ export function Host({ data }: { data: StaticData }) {
           Change it in <a href="#/settings">Settings</a>.
         </p>
       </section>
+
+      {toDelete > 0 && (
+        <section class="whatsapp-reminder" data-testid="whatsapp-reminder" role="status">
+          {modeA && (
+            <p style={{ margin: "0 0 0.4rem", fontSize: "1.1rem" }}>
+              <HostLabel catalog={data.catalog} id="delete_whatsapp" rw n={toDelete} en="" />
+            </p>
+          )}
+          <p style={{ margin: 0 }}>
+            <Icon id="delete_whatsapp" size={18} /> <strong class="count" data-testid="whatsapp-count">{toDelete}</strong> voice note{toDelete === 1 ? "" : "s"} still
+            to delete. <strong>Delete the original voice note{toDelete === 1 ? "" : "s"} in WhatsApp now:</strong> the visitor card promised that the sound is
+            deleted after analysis. Echo has already deleted its own copy, but it cannot delete the one in WhatsApp (long-press the voice note in the chat →
+            Delete → Delete for me).
+          </p>
+          <p style={{ margin: "0.5rem 0 0" }}>
+            <button class="secondary" onClick={() => void updateSettings({ whatsappToDelete: 0 })} data-testid="whatsapp-done">
+              {modeA ? <HostLabel catalog={data.catalog} id="deleted" rw en="Done, I deleted them in WhatsApp" gloss /> : "Done, I deleted them in WhatsApp"}
+            </button>
+          </p>
+        </section>
+      )}
 
       {shared && (
         <p class="notice info" data-testid="shared-notice">
@@ -102,6 +126,11 @@ export function Host({ data }: { data: StaticData }) {
         </button>
 
         <h3 style={{ marginTop: "0.8rem" }}>Queue: {st.queue.length} waiting</h3>
+        {st.transcribed > 0 && (
+          <p class="muted" data-testid="transcribed-waiting">
+            {st.transcribed} voice message{st.transcribed === 1 ? "" : "s"} transcribed (audio already deleted), waiting for the analysis step.
+          </p>
+        )}
         {st.queue.length > 0 && (
           <ul class="chunks">
             {st.queue.map((q) => (
@@ -128,9 +157,23 @@ export function Host({ data }: { data: StaticData }) {
           onClick={() => void processQueue()}
           data-testid="host-process"
         >
-          {st.processing ? "Analysing on this device…" : `Analyse ${st.queue.length} message${st.queue.length === 1 ? "" : "s"} offline`}
+          {st.processing ? (
+            (st.processingLabel ?? "Analysing on this device…")
+          ) : (
+            <HostLabel
+              catalog={data.catalog}
+              id="analyse"
+              rw={modeA}
+              gloss={glosses}
+              en={`Analyse ${st.queue.length} message${st.queue.length === 1 ? "" : "s"} offline`}
+            />
+          )}
+          {!st.processing && modeA && ` (${st.queue.length})`}
         </button>
-        <p class="muted" style={{ fontSize: "0.82rem" }}>Voice files are deleted as soon as they are transcribed. Names, phone numbers and e-mails are removed before anything is stored.</p>
+        <p class="muted" style={{ fontSize: "0.82rem" }}>
+          Voice files are deleted from Echo as soon as they are transcribed. Names, phone numbers and e-mails are removed before anything is stored.
+          Voice messages are transcribed first, then analysed, so only one model is in memory at a time on a phone with 2 GB.
+        </p>
       </section>
 
       {progress.stage !== "ready" && <ModelBox manifest={data.manifest} compact />}
@@ -141,7 +184,9 @@ export function Host({ data }: { data: StaticData }) {
 
       <section class="card">
         <div class="row" style={{ justifyContent: "space-between" }}>
-          <h2 style={{ margin: 0 }}>2. Monthly recap</h2>
+          <h2 style={{ margin: 0 }}>
+            2. <HostLabel catalog={data.catalog} id="recap_month" rw={modeA} en="Monthly recap" gloss={glosses} />
+          </h2>
           <select value={month} onChange={(e) => setMonth((e.target as HTMLSelectElement).value)} style={{ width: "auto" }}>
             {months.map((m) => (
               <option key={m} value={m}>
@@ -158,6 +203,7 @@ export function Host({ data }: { data: StaticData }) {
       <RecapView
         report={report}
         glosses={glosses}
+        {...(modeA ? { hostLabels: { catalog: data.catalog, gloss: glosses } } : {})}
         phone={st.settings.hostPhone}
         onPhoneChange={(p) => void updateSettings({ hostPhone: p })}
         onSmsOpened={() => void db().then((d) => d.put("recaps", { month, lines: report.recap.lines, builtAt: new Date().toISOString(), smsOpenedAt: new Date().toISOString() }))}

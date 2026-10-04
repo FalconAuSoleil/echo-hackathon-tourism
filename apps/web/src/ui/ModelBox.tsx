@@ -92,7 +92,21 @@ export function ModelBox({ manifest, compact = false }: { manifest: AssetsManife
       {info && !compact && (
         <p class="muted" style={{ fontSize: "0.82rem" }}>
           Loaded in {(info.loadMs / 1000).toFixed(1)} s{info.modelStorage === "apk-assets" ? " from the app's own files (not copied)" : ""}, {info.backend.threads} thread{info.backend.threads > 1 ? "s" : ""}. Catalog examples:{" "}
-          {info.examples.count}, {info.examples.source === "precomputed" ? `embeddings precomputed at build time with the same model and checked on this device (cosine ${info.examples.check})` : "embedded on this device"}.
+          {info.examples ? (
+            <>
+              {info.examples.count},{" "}
+              {info.examples.source === "precomputed" ? `embeddings precomputed at build time with the same model and checked on this device (cosine ${info.examples.check})` : "embedded on this device"}.
+            </>
+          ) : (
+            "not loaded yet."
+          )}{" "}
+          Memory:{" "}
+          <span data-testid="memory-mode">
+            {analysis.memory === "one_model_at_a_time"
+              ? "one model at a time (low-memory phone: Whisper and the similarity model are never loaded together)"
+              : "both models kept loaded"}
+          </span>
+          .
           Decision threshold:{" "}
           {manifest.thresholds.scoring === "linear"
             ? `classifier probability ≥ ${manifest.thresholds.acceptProbability}`

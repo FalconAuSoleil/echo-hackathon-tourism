@@ -12,7 +12,9 @@ and there are no accounts and no login.
 > farms, and the Kinyarwanda (machine-translated, **not validated by a speaker**). Every one is labelled in the UI
 > and listed in [§12 What is simulated / synthetic](#12-what-is-simulated--synthetic). Nothing was tested on a real
 > Android phone or with a real SMS yet: see [`docs/MANUAL_TESTS.md`](docs/MANUAL_TESTS.md). The APK was tested on an
-> Android 14 **emulator** only, and with 2 GB of RAM the emulator killed the analysis for lack of memory (§10).
+> Android 14 **emulator** only. With both models loaded, its smallest configuration ("2 GB", in fact 2.5 GB) killed the
+> analysis for lack of memory; Echo now loads one model at a time on such phones and the same configuration analyses
+> messages, with little memory to spare (§5.7, §10).
 
 | | |
 |---|---|
@@ -46,7 +48,9 @@ reviews and messages" to tell the operator "what visitors keep returning to, wha
 
 **Who Echo is for:** small rural tourism hosts with no platform and no staff (farm visits, homestays, craftspeople).
 Two modes:
-- **Mode A**: the host has an Android phone, even an entry-level one. Everything happens on it.
+- **Mode A**: the host has an Android phone, even an entry-level one. Everything happens on it. The host app's key
+  buttons (Analyse, Listen, Send SMS, the recap title and the WhatsApp reminder) then also show frozen Kinyarwanda
+  labels from the catalog with an icon (machine translated, not validated; English stays for helpers and the demo).
 - **Mode B**: the host has only a basic phone, like Noor. The analysis runs on the household smartphone; the host
   receives the monthly recap **by SMS** on her basic phone and can listen to it on the smartphone. Noor (mode B) is
   the reference case.
@@ -90,7 +94,9 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    farm, WhatsApp sends it later on its own. Written messages are accepted too (same path, no transcription).
 2. **Reception.** Messages arrive on the smartphone that holds the farm's number. Whoever has it **shares** them to
    Echo in one gesture (Android share sheet → Echo, via the Web Share Target of the installed app), or imports a file
-   / pastes text. Echo puts them in a queue. From here on, nothing needs the internet.
+   / pastes text. Echo puts them in a queue. From here on, nothing needs the internet. After analysis, Echo keeps a
+   red reminder with a counter, "N voice notes still to delete: delete the original voice notes in WhatsApp now", until
+   the host taps "Done": the card promised the sound is deleted, and Echo cannot delete WhatsApp's copy itself.
 3. **Offline analysis on the phone** (Web Worker, models from the phone's own cache):
    1. **Whisper base** transcribes and detects the language (our own detection pass; transformers.js has none).
    2. **The audio is deleted** from the queue as soon as transcription ends, and the buffer is zero-filled.
@@ -140,7 +146,8 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
 The **"Try it" web demo** (`#/`, default page) runs the same pipeline with no account: 10 one-click synthetic voice
 samples, a 30 s recorder, typed text, per-message transcript / language / chunks / findings with confidence /
 not-sure in orange / off-list apart, a keyword-vs-Echo comparison, the Kinyarwanda recap with FR/EN glosses and a
-Listen button, 3 synthetic months of history with trends, the "To be read by a person" list, an "Offline" badge and a
+Listen button, 3 synthetic months of history with trends, the "To be read by a person" list, an "Offline" badge (in the APK it reads Android's real network state
+through the Capacitor Network plugin, since the WebView's `navigator.onLine` stays true in airplane mode) and a
 model box ("everything runs on this device", sizes). After the first load it works with the network cut (tested in
 headless Chromium, §11.4).
 
@@ -341,17 +348,22 @@ The keyword lists were written by the same author as the synthetic corpus, which
 | Catalog + Kinyarwanda audio | 67 MP3 clips, ~360 KiB |
 | Side-loadable debug APK (models bundled) | ~150 MB (157 MB file). **On the phone: the installed APK (150 MB) + ~36 MB of app data**: the models are read in place from the APK, not copied (the data is the service worker's copy of the app shell and the 27 MB WebAssembly runtime). Measured on the Android 14 emulator: app data 267 MB before this fix (models copied into Cache Storage), 36 MB after. Cost: reading the 118 MB MiniLM file from the APK takes ~1.4–1.6 s vs ~0.7 s from Cache Storage (emulator) |
 | Memory (laptop, Node process, whisper-base) | 885 MB after loading, **peak 1.2 GB** (native runtime libraries + file buffers) |
-| Memory in the APK's WebView (**Android 14 emulator**, not a phone) | renderer ≈ **1.55 GB** once both models are loaded. **2 GB of RAM: the renderer was killed by low memory during transcription** (the app now restarts the page with a message); **3 GB: works** |
+| Memory in the APK's WebView (**Android 14 emulator**, not a phone) | Both models loaded: renderer ≈ **1.55 GB**; with "2 GB" of RAM the renderer was killed by low memory during transcription; 3 GB works. **One model at a time** (automatic when the browser reports ≤ 2 GB, 2026-10-04 re-test, "2 GB" setting: the emulator raises a 2048 MB request to 2560 MB on this system image, MemTotal 2.42 GiB): renderer **peak RSS 1.66 GB** (PSS 1.64 GB; PSS + swap up to 2.34 GB, the rest in zram), lowest MemAvailable 57 MB, **renderer never killed** |
 | 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.3 s** (4.3 s with the English translation for the review list); 8 threads: 4.7 s / 5.2 s on a shared CPU |
 | 30 s message, **low-end Android: ESTIMATE, not measured** | **~33–87 s** (~43–114 s with translation) = 1-thread laptop time × measured WebAssembly overhead (×3.3) × assumed 3–8× per-core gap |
 | In the browser (headless Chromium, this laptop) | first load 11 s from localhost; the 10 demo samples (≈ 51 s of audio) analysed in 25 s; offline reload ready in 3 s |
-| APK on an **Android 14 emulator** (KVM, 2 vCPUs, airplane mode; emulator, not a phone; WASM on 1 thread in the APK) | offline start with the bundled models: 2 GB 29 s first load then 10–11 s, 3 GB 19 s. With 3 GB: a **6 s sample transcribed and matched in 18.4 s**; a shared `.opus` voice note analysed from the queue in 6.5 s. With 2 GB: no result (renderer killed, see above) |
+| APK on an **Android 14 emulator** (KVM, 2 vCPUs, airplane mode; emulator, not a phone; WASM on 1 thread in the APK) | offline start with the bundled models: 2 GB 29 s first load then 10–11 s, 3 GB 19 s. With 3 GB: a **6 s sample transcribed and matched in 18.4 s**; a shared `.opus` voice note analysed from the queue in 6.5 s. "2 GB" with both models: no result (renderer killed). "2 GB" with one model at a time: the 6 s German sample in 30.8 s on-device (Whisper 30.2 s with the English translation; 50 s from the tap, including two model swaps); a queue of 3 voice notes (6–8 s each) transcribed, then analysed, in 84 s from the tap, all three stored (screenshot `apps/android/screenshots/low-memory-host-batch.png`) |
 
 Messages are processed in a background queue, so minutes per message would still be usable for 6–7 messages a month,
 but the phone timing must be measured: an emulator on a laptop CPU says little about a low-end phone's CPU or its
-memory killer. Procedure in [`docs/MANUAL_TESTS.md`](docs/MANUAL_TESTS.md). The 2 GB emulator result means Echo, as
-shipped, needs about 3 GB of RAM; lowering it (loading MiniLM only after Whisper, or whisper-tiny on small phones) is
-not done.
+memory killer. Procedure in [`docs/MANUAL_TESTS.md`](docs/MANUAL_TESTS.md). **Memory on small phones**: when the
+browser reports ≤ 2 GB (`navigator.deviceMemory`, which reports 2 for a 3 GB phone too) or when Settings → Memory says
+so, the host app transcribes the whole queue with Whisper first, then analyses: each model runs in its own Web Worker
+and the worker is terminated before the other model is loaded (terminating a worker returns all its WebAssembly memory,
+which disposing a session does not). The end-to-end test checks that no worker ever holds both models. The renderer
+still peaks around 1.6 GB on the emulator with one model (loading buffers, the WebAssembly runtime, the page), so a real
+2 GB phone remains to be measured; whisper-tiny for such phones was **not** added (it fails our FLEURS rule for fr/de,
+§5.1).
 
 ## 6. Data sheet
 
@@ -414,7 +426,13 @@ Cooperative sharing is a separate host consent, **off by default**, revocable in
 | Anything in the cloud | **Nothing**: no server, no analytics, models served from the app's own origin | – |
 | Cooperative | Counts per finding only, never text, never guide remarks; prototype sends nothing (synthetic farms) | – |
 
-The WhatsApp message itself stays in WhatsApp on the farm phone: Echo cannot delete it there; the household decides.
+The WhatsApp message itself stays in WhatsApp on the farm phone, and Echo cannot delete it there. Since the card
+promises that the sound is deleted after analysis, the host app shows a persistent reminder after each analysed
+shared or imported voice note: "N voice notes still to delete. Delete the original voice notes in WhatsApp now"
+(in Kinyarwanda too in mode A), with a counter that only goes back to zero when the host taps "Done, I deleted them
+in WhatsApp". The counter is a number only (no message id, no sender) and is increased only once the analysis is
+saved, so a voice note lost to a crash can still be shared again. Whether the household actually deletes them is a
+human step we cannot enforce; it is part of the phone test in `docs/MANUAL_TESTS.md` (§ 1 step 6b).
 The end-to-end test checks that IndexedDB contains no name, no phone number and no full text after analysis, and that
 no English translation is stored for a message with a counted chunk (the German sample).
 
@@ -531,14 +549,20 @@ Found during the build:
   messages counts twice for the unknown-topic rule.
 - **Date of a message = import time** (WhatsApp does not pass the send date when sharing).
 - **The cooperative view is local and synthetic**: no channel sends a farm's counts to the cooperative yet.
-- **No Swahili UI**; only the evaluated Whisper base is shipped (no smaller-model option in settings).
+- **No Swahili UI**; only the evaluated Whisper base is shipped (no smaller-model option in settings; whisper-tiny
+  fails the FLEURS rule for fr/de).
 - **Whisper base mishears some clauses** (the first German demo take turned "hinauf zur Farm" into "in Naufzur fahren",
   and the "path too long" clause fell to "not sure"; the sample was re-written and re-taken), which is safe but lowers
   capture.
-- **Memory: a 2 GB phone is probably not enough.** On the Android 14 emulator with 2 GB of RAM, the WebView renderer
-  (≈ 1.55 GB with both models loaded) **was killed by low memory during transcription**: no message could be analysed
-  (the app now restarts the page with a message instead of dying). With 3 GB it worked (6 s sample in 18.4 s). Not
-  measured on a real phone, whose memory killer may behave differently; ~1.2 GB peak in the laptop's Node process.
+- **Memory: a 2 GB phone is borderline.** On the Android 14 emulator's smallest configuration ("2 GB": the emulator raises a 2048 MB request to 2560 MB on this system image, MemTotal 2.42 GiB),
+  with both models loaded the WebView renderer (≈ 1.55 GB) **was killed by low memory during transcription**. Echo now
+  keeps one model at a time on phones that report ≤ 2 GB: on the same configuration the renderer peaked at 1.66 GB
+  resident and was not killed, and a 3-voice-note queue was analysed, but free memory fell to 57 MB, and the
+  emulator's 2.42 GiB is more than a real 2 GB phone has. With 3 GB it worked with both models (6 s sample in 18.4 s).
+  Not measured on a real phone, whose memory killer may behave differently; ~1.2 GB peak in the laptop's Node process.
+  If the app is killed between the transcription step and the analysis step, the transcripts of that run are lost
+  (they are never stored and the audio is already deleted); the WhatsApp originals are still there to share again,
+  since the deletion reminder only counts saved analyses.
   (Disk is no longer the issue: in the APK the models are read in place from the APK's assets, ~186 MB in all on
   the phone; in the browser PWA they are downloaded once into Cache Storage, ≈ 242 MB.)
 - **Common Voice not used**; FLEURS is read speech, so accent variety is limited.
@@ -655,11 +679,14 @@ Step-by-step phone tests, including airplane mode, WhatsApp sharing and the real
 
 `pnpm install`, `pnpm models:download`, `pnpm test` (127 passed), `pnpm typecheck`, `pnpm smoke:models`,
 `pnpm build`, `pnpm --filter @echo/web e2e` (**E2E PASSED**: 10 samples through the real models, recap, SMS link,
-host queue with audio deleted, no PII in IndexedDB, then network cut + reload: app, models and analysis work offline)
+host queue with audio deleted, no PII in IndexedDB, WhatsApp-deletion reminder and its counter, mode A Kinyarwanda
+labels, a low-memory queue run that never holds both models in one worker, then network cut + reload: app, models and analysis work offline)
 and `pnpm eval`. Android 14 emulator (KVM, 2 vCPUs, airplane mode), debug APK installed: offline start with the
 bundled models, cold-start share of an `.opus` voice note queued and its cache copy deleted, text share queued,
 `sms:` opens Google Messages pre-filled, 6 s sample analysed in 18.4 s with 3 GB of RAM, **renderer killed by low
-memory during transcription with 2 GB** (screenshots in `apps/android/screenshots/`). Not verifiable here: anything
+memory during transcription with "2 GB"** when both models were loaded; with one model at a time (re-test 2026-10-04)
+the same configuration analysed a sample and a 3-voice-note queue without losing the renderer; the "Offline" badge
+follows airplane mode on/off through the Capacitor Network plugin (screenshots in `apps/android/screenshots/`). Not verifiable here: anything
 on a real phone, a real SMS, a real WhatsApp share.
 
 ## 12. What is simulated / synthetic
@@ -675,7 +702,7 @@ on a real phone, a real SMS, a real WhatsApp share.
 | Cooperative view | **Simulated**: 11 synthetic farms generated on the phone; nothing is sent anywhere | Coop page notice, Settings |
 | Low-end Android timing | **Estimate**, not a measurement | RESULTS.md, §5.7 |
 | Real SMS, WhatsApp share, airplane mode on a phone | **Implemented but not tested on real hardware** (share, airplane mode and the `sms:` link were exercised on an emulator only) | `docs/MANUAL_TESTS.md` |
-| Android APK | **Tested on an Android 14 emulator, not on a real phone**: works with 3 GB of RAM; with 2 GB the renderer is killed while transcribing | §5.7, §10, §11.4 |
+| Android APK | **Tested on an Android 14 emulator, not on a real phone**: works with 3 GB of RAM; with the "2 GB" (2.5 GB) configuration it works only with one model at a time (automatic there), with little memory to spare | §5.7, §10, §11.4 |
 | Thresholds | Real calibration, but **on synthetic data** | Model box in the app |
 
 What is real: the models run for real on the device (no mock in the app), the analysis, the recap, the SMS link, the
@@ -701,6 +728,6 @@ stops, and handing the rest to the people who live there.
   a person" rather than guess, and leave every decision to the host.
 
 The trade-offs we accept: Echo captures only about half of the remarks by itself; its visitor languages are those
-Whisper handles (not Kinyarwanda or Swahili); two of our build-time tools are non-commercial; the phone needs about
-3 GB of RAM (emulator measurement, §10); and everything we measured is on synthetic data until a pilot with real
+Whisper handles (not Kinyarwanda or Swahili); two of our build-time tools are non-commercial; on a phone with less
+than 3 GB of RAM it runs one model at a time and is slower, and a real 2 GB phone is unmeasured (§10); and everything we measured is on synthetic data until a pilot with real
 farms (§9).

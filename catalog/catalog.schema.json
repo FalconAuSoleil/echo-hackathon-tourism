@@ -34,6 +34,11 @@
     "languages": { "type": "array", "items": { "$ref": "#/$defs/visitorLang" } },
     "findings": { "type": "array", "minItems": 21, "maxItems": 21, "items": { "$ref": "#/$defs/finding" } },
     "templates": { "type": "array", "items": { "$ref": "#/$defs/template" } },
+    "ui": {
+      "type": "array",
+      "description": "Frozen labels of the host app (mode A), machine translated offline like the recap sentences.",
+      "items": { "$ref": "#/$defs/uiLabel" }
+    },
     "numbers": {
       "type": "object",
       "additionalProperties": {
@@ -79,6 +84,15 @@
         "examplesSynthetic": { "const": true },
         "keywords": { "$ref": "#/$defs/perLang" },
         "kinyarwanda": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/kinyarwanda" }] }
+      }
+    },
+    "uiLabel": {
+      "type": "object",
+      "required": ["id", "slots", "kinyarwanda"],
+      "properties": {
+        "id": { "enum": ["listen", "send_sms", "analyse", "recap_month", "delete_whatsapp", "deleted"] },
+        "slots": { "type": "array", "items": { "enum": ["n"] } },
+        "kinyarwanda": { "$ref": "#/$defs/kinyarwanda" }
       }
     },
     "template": {

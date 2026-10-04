@@ -50,11 +50,20 @@ results, not real-phone results (x86 under KVM, software GPU):
 | Share intent, cold start: `.opus` voice note (`audio/ogg`) → "1 shared item added to the queue", cache copy deleted | yes | – |
 | Share intent, app already open: text → queued; bare link → ignored | yes | yes |
 | `sms:` link → Google Messages opens with the number and the Kinyarwanda body filled in, nothing sent | yes | – |
-| Sample 6 s clip transcribed and matched (Try it) | **no: renderer killed by low memory** (the app restarts the page) | yes, 18.4 s on the device |
+| Sample 6 s clip transcribed and matched (Try it), both models loaded | **no: renderer killed by low memory** (the app restarts the page) | yes, 18.4 s on the device |
+| Same, one model at a time (automatic: `navigator.deviceMemory` = 2), 2026-10-04 | yes, 30.8 s on the device (50 s from the tap, two model swaps); renderer peak RSS 1.66 GB, not killed | – |
+| Queue of 3 voice notes, one model at a time: all transcribed, then all analysed | yes, 84 s from the tap, 3 stored, reminder "3 voice notes to delete in WhatsApp" | – |
+| "Offline" badge follows airplane mode on → off → on (Capacitor Network plugin) | yes | – |
 | Shared `.opus` voice note analysed from the queue | – | yes, 6.5 s (Whisper 6.4 s) |
 
 The WebView renderer holds ~1.55 GB once both models are loaded (single-threaded WASM: no cross-origin isolation in
-the Capacitor local server). A 2 GB phone is therefore not enough as things stand, while 3 GB worked.
+the Capacitor local server). The web app now keeps one model at a time when the phone reports ≤ 2 GB (Settings →
+Memory to force it): on the "2 GB" emulator the renderer then peaks at ~1.66 GB resident (PSS + zram swap up to
+2.34 GB, MemAvailable down to 57 MB) and survives. Note: on this system image the emulator raises a 2048 MB request
+to 2560 MB (MemTotal 2.42 GiB), so "2 GB" here is more than a real 2 GB phone; measure on one (`docs/MANUAL_TESTS.md`).
+Measure memory with `/proc/<pid>/smaps_rollup` (`adb root`): `dumpsys meminfo` on the renderer's pid killed the
+isolated renderer three times in a row in our runs, which made the app give up. After `adb install -r`, the first
+launch still runs the previous web build (the service worker updates in the background); the second launch runs the new one.
 Screenshots: `screenshots/`. Driving the WebView: `tools/android/webview-probe.mjs` (DevTools protocol, debug build).
 
 Not testable here: a real phone, real WhatsApp, the microphone, a real SIM. See `docs/MANUAL_TESTS.md` § 4.

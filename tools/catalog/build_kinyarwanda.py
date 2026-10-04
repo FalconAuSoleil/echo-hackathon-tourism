@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from examples_negative import NEGATIVE_EXAMPLES  # noqa: E402
 from examples_positive import POSITIVE_EXAMPLES  # noqa: E402
 from keywords import KEYWORDS  # noqa: E402
-from sources import FINDING_SOURCES, NUMBERS, SLOT_GUARDS, TEMPLATE_SOURCES  # noqa: E402
+from sources import FINDING_SOURCES, NUMBERS, SLOT_GUARDS, TEMPLATE_SOURCES, UI_SOURCES  # noqa: E402
 from validate_catalog import untranslated_words  # noqa: E402
 
 MT_MODEL = "facebook/nllb-200-distilled-600M"
@@ -247,7 +247,22 @@ def stage_translate(cat: dict, threshold: float, only: set[str] | None) -> None:
             t["kinyarwanda"] = translate_item(tr, emb, f"template:{tid}", spec["candidates"], spec["slots"],
                                               spec["prefix"], threshold, log)
     cat["templates"] = [by_id[tid] for tid in TEMPLATE_SOURCES]
-    cat["numbers"] = {k: {"rw": v, "audio": None, "source": "counting form, hand-written from public references",
+    # Libellés de l'app hôte (mode A) : même chaîne NLLB + rétro-traduction, sans point final ajouté aux boutons.
+    ui_by_id = {u["id"]: u for u in cat.get("ui", [])}
+    for uid, spec in UI_SOURCES.items():
+        u = ui_by_id.setdefault(uid, {"id": uid})
+        u["slots"] = spec["slots"]
+        if todo(f"ui:{uid}", (u.get("kinyarwanda") or {}).get("rw")):
+            print(f"- ui {uid}", flush=True)
+            k = translate_item(tr, emb, f"ui:{uid}", spec["candidates"], spec["slots"], False, threshold, log)
+            if not k["source"]["en"].endswith((".", "!", "?")):
+                k["rw"] = k["rw"].rstrip(" .")
+            u["kinyarwanda"] = k
+    cat["ui"] = [ui_by_id[uid] for uid in UI_SOURCES]
+    old_numbers = cat.get("numbers") or {}
+    # Garde les clips existants (refaits seulement par l'étape audio) : un --only ne doit pas effacer l'audio.
+    cat["numbers"] = {k: {"rw": v, "audio": (old_numbers.get(k) or {}).get("audio") if (old_numbers.get(k) or {}).get("rw") == v else None,
+                          "source": "counting form, hand-written from public references",
                           "status": STATUS} for k, v in NUMBERS.items()}
     p = cat["provenance"]["kinyarwanda"]
     p.update({"disclaimer": DISCLAIMER, "mtModel": MT_MODEL, "similarityModel": SIM_REPO + " (onnx/model_quantized.onnx)",
@@ -257,8 +272,9 @@ def stage_translate(cat: dict, threshold: float, only: set[str] | None) -> None:
                                 + " before translation, required exactly once after, then restored; {finding} is never translated"})
     LOG.write_text(json.dumps({"model": MT_MODEL, "threshold": threshold, "items": log}, ensure_ascii=False, indent=2)
                    + "\n", encoding="utf-8")
-    scores = [s["kinyarwanda"]["similarity"] for s in cat["findings"] + cat["templates"]]
-    low = [s["id"] for s in cat["findings"] + cat["templates"] if s["kinyarwanda"]["backTranslationCheck"] != "passed"]
+    sentences = cat["findings"] + cat["templates"] + cat["ui"]
+    scores = [s["kinyarwanda"]["similarity"] for s in sentences]
+    low = [s["id"] for s in sentences if s["kinyarwanda"]["backTranslationCheck"] != "passed"]
     retried = [e["id"] for e in log if len(e["attempts"]) > 1]
     print(f"translate: {len(scores)} sentences, min {min(scores):.3f}, mean {sum(scores)/len(scores):.3f}; "
           f"retried {len(retried)} {retried}; below threshold {low}")

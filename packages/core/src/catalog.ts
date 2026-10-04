@@ -94,6 +94,18 @@ export interface Catalog {
   templates: RecapTemplate[];
   /** Optionnel : clips audio des nombres pour lire le récap (clé = nombre en chiffres). */
   numbers?: Record<string, { rw: string; audio: string | null }>;
+  /** Optionnel : libellés figés de l'app hôte (mode A), traduits hors ligne comme les phrases du récap. */
+  ui?: UiLabel[];
+}
+
+export type UiLabelId = "listen" | "send_sms" | "analyse" | "recap_month" | "delete_whatsapp" | "deleted";
+export const UI_LABEL_IDS: readonly UiLabelId[] = ["listen", "send_sms", "analyse", "recap_month", "delete_whatsapp", "deleted"];
+
+export interface UiLabel {
+  id: UiLabelId;
+  /** Seul emplacement permis : {n} (un nombre en chiffres). */
+  slots: "n"[];
+  kinyarwanda: KinyarwandaSentence;
 }
 
 export class CatalogError extends Error {}
@@ -134,8 +146,24 @@ export function validateCatalog(raw: unknown): Catalog {
       }
     }
   }
+  for (const u of c.ui ?? []) {
+    if (!UI_LABEL_IDS.includes(u.id)) errors.push(`unknown ui label id ${String(u.id)}`);
+    const rw = u.kinyarwanda?.rw ?? "";
+    if (!rw) errors.push(`ui ${u.id}: empty kinyarwanda`);
+    const found = rw.match(/\{(n|k|x|p|finding)\}/g) ?? [];
+    if (found.length !== (u.slots ?? []).length || (u.slots ?? []).some((s) => !rw.includes(`{${s}}`))) {
+      errors.push(`ui ${u.id}: slots in kinyarwanda must match ${JSON.stringify(u.slots)}`);
+    }
+  }
   if (errors.length) throw new CatalogError(`invalid catalog:\n- ${errors.join("\n- ")}`);
   return c as Catalog;
+}
+
+/** Libellé figé de l'app hôte (kinyarwanda, emplacement {n} rempli en chiffres), ou null s'il est absent. */
+export function uiLabel(catalog: Catalog, id: UiLabelId, n?: number): string | null {
+  const u = catalog.ui?.find((x) => x.id === id);
+  if (!u) return null;
+  return fillSlots(u.kinyarwanda.rw, n === undefined ? {} : { n });
 }
 
 /** Remplit les emplacements {n},{k},{x},{p},{finding} d'une phrase figée. Aucun autre texte n'est produit. */

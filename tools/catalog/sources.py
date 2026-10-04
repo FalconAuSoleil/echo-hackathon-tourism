@@ -123,6 +123,43 @@ TEMPLATE_SOURCES = {
     ]},
 }
 
+# Libellés figés de l'app hôte (mode A : l'hôte se sert elle-même du téléphone). Mêmes règles que les phrases du
+# récap : traduits une fois hors ligne, rétro-traduits, notés, jamais traduits au runtime. Les libellés sans
+# point final restent sans point (boutons). Affichés avec une icône à côté du kinyarwanda.
+UI_SOURCES = {
+    "listen": {"slots": [], "candidates": [
+        ("Écouter", "Listen"),
+        ("Écouter le message", "Listen to the message"),
+    ]},
+    "send_sms": {"slots": [], "candidates": [
+        ("Envoyer le SMS", "Send the SMS"),
+        ("Envoyer le message", "Send the message"),
+    ]},
+    "analyse": {"slots": [], "candidates": [
+        ("Analyser les messages", "Analyse the messages"),
+        ("Lire les messages", "Read the messages"),
+        ("Comprendre les messages", "Understand the messages"),
+    ]},
+    "recap_month": {"slots": [], "candidates": [
+        ("Résumé du mois", "Summary of the month"),
+        ("Le résumé de ce mois", "The summary of this month"),
+        ("Ce mois-ci", "This month"),
+    ]},
+    # « Effacez / Delete » revient « Fermez / Lock » (NLLB : « Funga ») : sens faux malgré un score ≥ 0,75 ;
+    # la tournure « Il faut effacer » revient « Vous devez supprimer » (essais du 2026-10-04).
+    "delete_whatsapp": {"slots": ["n"], "candidates": [
+        ("Il faut effacer {n} messages vocaux dans WhatsApp.", "You must delete {n} voice messages in WhatsApp."),
+        ("Supprimez {n} messages vocaux de WhatsApp.", "Remove {n} voice messages from WhatsApp."),
+        ("Effacez {n} messages dans WhatsApp.", "Delete {n} messages in WhatsApp."),
+    ]},
+    "deleted": {"slots": [], "candidates": [
+        ("Les messages sont effacés", "The messages are deleted"),
+        ("C'est effacé", "It is deleted"),
+        ("J'ai effacé", "I deleted them"),
+        ("Fini", "Done"),
+    ]},
+}
+
 # Valeurs de protection des emplacements pendant la traduction : nombres à deux chiffres distincts, que NLLB
 # recopie tels quels (les petits nombres comme 2 ou 3 sont parfois écrits en toutes lettres). Après traduction,
 # chaque valeur doit apparaître exactement une fois, puis elle est remplacée par son emplacement.

@@ -206,6 +206,54 @@ try {
   check(!!hostSms && hostSms.startsWith("sms:%2B250788000111?body="), `SMS link uses the host number (${hostSms?.slice(0, 40)}…)`);
   await page.screenshot({ path: join(SHOTS, "09-host-app.png"), fullPage: true });
 
+  // Rappel : la carte promet que le son est effacé ; l'original du fichier importé reste dans WhatsApp.
+  check((await page.getByTestId("whatsapp-count").textContent()) === "1", "reminder: 1 voice note still to delete in WhatsApp (the imported file)");
+  await page.getByTestId("whatsapp-reminder").screenshot({ path: join(SHOTS, "14-whatsapp-reminder.png") });
+
+  // ---------- 3b. Mode A + petit téléphone : un seul modèle à la fois ----------
+  console.log("3b. Mode A labels in Kinyarwanda; low memory: transcribe all, then analyse, one model at a time");
+  await page.goto(BASE + "/#/settings");
+  await page.getByTestId("mode-a").check();
+  await page.waitForTimeout(300);
+  await page.goto(BASE + "/?memory=low#/host");
+  await page.getByTestId("inbox").waitFor();
+  const memMode = await page.evaluate("globalThis.__echoAnalysis.memory");
+  check(memMode === "one_model_at_a_time", `?memory=low → one model at a time (${String(memMode)})`);
+  const rwLabels = await page.$$eval("[data-testid^=rw-label-]", (els) => els.map((e) => `${e.getAttribute("data-testid")}=${e.querySelector('[lang="rw"]')?.textContent}`));
+  report.modeALabels = rwLabels;
+  for (const id of ["delete_whatsapp", "deleted", "analyse", "recap_month", "listen", "send_sms"]) {
+    check(rwLabels.some((l) => l.startsWith(`rw-label-${id}=`)), `mode A: frozen Kinyarwanda label "${id}" shown with its icon`);
+  }
+  await page.screenshot({ path: join(SHOTS, "15-host-mode-a-kinyarwanda.png"), fullPage: true });
+  await page.getByTestId("whatsapp-done").click();
+  await page.getByTestId("whatsapp-reminder").waitFor({ state: "detached", timeout: 5_000 });
+  check(true, "reminder disappears once the host confirms the WhatsApp copies are deleted");
+  await page.getByTestId("host-file").setInputFiles([join(WEB, "public/samples/en-prices-buy.wav"), join(WEB, "public/samples/es-visit-too-long.wav")]);
+  await page.getByTestId("host-text").fill("The guide was very friendly and the coffee was delicious.");
+  await page.getByTestId("host-add-text").click();
+  await page.waitForFunction(() => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("3 waiting"), null, { timeout: 10_000 });
+  const lowT0 = Date.now();
+  await page.getByTestId("host-process").click();
+  await page.waitForFunction(() => document.querySelector("[data-testid=inbox] h3")?.textContent?.includes("0 waiting") && !document.querySelector("[data-testid=transcribed-waiting]"), null, {
+    timeout: 10 * 60_000,
+    polling: 1000,
+  });
+  report.lowMemoryQueueMs = Date.now() - lowT0;
+  const swaps = (await page.evaluate("globalThis.__echoAnalysis.swaps")) as number;
+  const peak = (await page.evaluate("globalThis.__echoAnalysis.peakModels")) as number;
+  report.lowMemory = { swaps, peakModels: peak };
+  // Whisper pour les 2 voix, puis le modèle de similarité pour les 3 analyses : jamais les deux ensemble.
+  check(peak === 1 && swaps >= 1 && swaps <= 2, `one model at a time: never both models in one worker (peak ${peak}), worker replaced ${swaps} time(s) for 2 voice + 1 text`);
+  const lowCount = await page.evaluate(`(async () => {
+    const db = await new Promise((res) => { const r = indexedDB.open("echo"); r.onsuccess = () => res(r.result); });
+    return new Promise((res) => { const r = db.transaction("messages").objectStore("messages").count(); r.onsuccess = () => res(r.result); });
+  })()`);
+  check(lowCount === 5, `low-memory batch stored 3 more messages (${String(lowCount)} in total)`);
+  check((await page.getByTestId("whatsapp-count").textContent()) === "2", "reminder counts the 2 imported voice notes, not the written message");
+  await page.goto(BASE + "/?memory=auto#/settings");
+  await page.locator('input[name="mode"]').nth(1).check();
+  await page.waitForTimeout(300);
+
   await page.goto(BASE + "/#/coop");
   await page.getByTestId("coop").waitFor();
   await page.screenshot({ path: join(SHOTS, "10-coop-synthetic.png"), fullPage: true });

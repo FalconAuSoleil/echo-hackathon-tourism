@@ -180,6 +180,9 @@ validateCatalog(raw): Catalog; fillSlots(template, values): string   // template
 analyzeMessage(input: MessageInput, deps: { catalog; matcher; config; knownFingerprints?; knownMessages? }): Promise<MessageAnalysis>
 analyzeAudioMessage({ id, receivedAt, audio16k }, { ...deps, transcriber, withEnglishTranslation? }): Promise<MessageAnalysis>
   // stats → inaudible without transcription, or transcribe; the audio buffer is zero-filled afterwards
+  // = analyzeMessage(await transcribeAudioMessage(input, { transcriber, config, withEnglishTranslation? }), deps)
+transcribeAudioMessage(...): Promise<MessageInput>   // step 1 alone (Whisper only), used by the app's two-step queue
+uiLabel(catalog, id, n?): string | null              // frozen host-app labels (catalog `ui`, mode A)
 MessageAnalysis = { id; receivedAt; month; source; lang; status; reason?; scrubbedText; chunks: ChunkResult[];
   findings: {id, score}[]; coopFindings: FindingId[] /*not from guide chunks*/; notSureCount; offListCount;
   fingerprint; messageEmbedding?; englishTranslation? /*scrubbed*/; transcriptConfidence? }
@@ -247,12 +250,18 @@ aggregateCooperative(farms: { farmId; consent; messages: { month; status; coopFi
 ```
 WhatsApp "Share" ─▶ Web Share Target (POST multipart, handled in the service worker)
                     └▶ IndexedDB `queue` (audio Blob or text) ─▶ UI "N messages waiting"
-Worker (on demand, offline):
+Worker (on demand, offline), queue processed in two steps so that only one model is needed at a time:
+  step 1, Whisper only, every audio item:
   audio ─▶ decode to 16 kHz mono (OfflineAudioContext; WhatsApp sends .opus/.ogg — Chrome decodes Opus)
-        ─▶ core.analyzeAudioMessage: audioStats (duration, RMS, dynamic range) ─▶ Transcriber.transcribe(withEnglishTranslation)
-        ─▶ DELETE the audio Blob from `queue` immediately
+        ─▶ core.transcribeAudioMessage: audioStats (duration, RMS, dynamic range) ─▶ Transcriber.transcribe(withEnglishTranslation)
+        ─▶ DELETE the audio Blob from `queue` immediately (transcript kept in memory only)
+  step 2, similarity model only, transcripts + text items:
   text  ─▶ (no transcription; language = simple detector or user choice)
-  ─▶ core.analyzeMessage ─▶ store only what SPEC 6 allows ─▶ recompute off-list clusters ─▶ recap
+  ─▶ core.analyzeMessage ─▶ store only what SPEC 6 allows ─▶ shared/imported voice note: whatsappToDelete += 1
+  ─▶ recompute off-list clusters ─▶ recap
+Memory mode (worker-client.ts): "both_models" (one worker holds Whisper + MiniLM) or "one_model_at_a_time"
+  (navigator.deviceMemory ≤ 2, or Settings → Memory): one worker per model, terminated before the other model is
+  loaded, which frees all of its WebAssembly memory.
 Recap ─▶ screen (rw + fr/en glosses in the demo) ─▶ "Listen" (pre-generated audio clips)
       ─▶ "Send by SMS" = splitSms + location.href = smsUri(hostPhone, part) per part (human presses Send)
 ```
@@ -270,7 +279,7 @@ Fallback: file picker "Import a voice message" and paste box for text.
 | `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint`, `embedding?` (message embedding, near-duplicates; removed by `pruneExpiredEmbeddings` once older than `duplicateWindowDays` = 7, at app start and before each queue run), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
 | `reviewChunks` | `id` | `ReviewChunk` from `toReviewChunks`: `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?` (scrubbed; only when every chunk of the message is not_sure/off_list, see `wholeMessageUnderReview`), `mentionsGuide`, `reason?`, `embedding` (Float32Array, for clustering), `clusterId?` (set by the app) | The "To be read by a person" list. |
 | `recaps` | `month` | `lines: RecapLine[]`, `builtAt`, `smsOpenedAt?` | |
-| `settings` | `key` | `hostPhone` (the host's own number), `pinHash?`, `coopConsent`, `asrModel`, `thresholds?` | |
+| `settings` | `key` | `hostPhone` (the host's own number), `pinHash?`, `coopConsent`, `whatsappToDelete?` (count only: analysed shared/imported voice notes whose WhatsApp original is still to delete), `asrModel`, `thresholds?` | |
 
 `fingerprint` (non-reversible hash) and the embeddings are derived technical data needed for duplicates and
 off-list clustering; documented in the README privacy section. Demo data (3 simulated months) is stored with

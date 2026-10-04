@@ -121,6 +121,25 @@ for roasting, so the source now says "seeing the coffee prepared and tasting it"
 For a language machine translation covers badly, a speaker can simply rewrite these ~30 sentences and record
 them, no model needed (set `status: "speaker_validated"`).
 
+### Host-app labels (mode A)
+
+In mode A the host runs the host app herself, so its key buttons also show frozen Kinyarwanda (catalog `ui`, with an
+icon in the app; English stays for helpers and the demo). Same pipeline (`UI_SOURCES` in `tools/catalog/sources.py`,
+`--only ui:<id>`), same status `machine_translated_unvalidated`, no audio clip yet.
+
+| id | rw | source (en) | back-translation (en) | score |
+|---|---|---|---|---|
+| listen | Jya utega amatwi | Listen | Listen carefully | 0.83 |
+| send_sms | Yohereza ubutumwa | Send the message | Send a message | 0.95 |
+| analyse | Gusuzuma ubutumwa | Analyse the messages | Examining the Message | 0.82 |
+| recap_month | Ingingo z'ingenzi z'uku kwezi | The summary of this month | Highlights of the Month | 0.78 |
+| delete_whatsapp | Ugomba gukuraho ubutumwa bw'ijwi {n} muri WhatsApp. | You must delete {n} voice messages in WhatsApp. | You must delete 17 voice messages from WhatsApp. | 0.97 |
+| deleted | Ubutumwa burakurwaho | The messages are deleted | The message is removed | 0.86 |
+
+`delete_whatsapp` first came out as "Funga ubutumwa…" ("Lock / Close … messages") with a passing score of 0.77: the
+source was reworded ("You must delete…") and re-run. A passing score is not a validation (speaker check:
+`docs/MANUAL_TESTS.md` § 3).
+
 ## Reference score of the translation model on FLORES-200
 
 | Direction | chrF++ | Source |

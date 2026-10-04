@@ -146,3 +146,12 @@ th { color: var(--muted); font-weight: 600; font-size: 0.8rem; }
   .visitor-card { border-width: 1px; page-break-inside: avoid; }
   .visitor-card .langs { grid-template-columns: 1fr 1fr; }
 }
+
+/* Mode A : libellés kinyarwanda figés avec icône (app hôte) */
+.host-label { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 600; }
+.host-label .icon { flex: none; }
+.host-label .gloss-inline { font-weight: 400; opacity: 0.8; font-size: 0.8em; }
+button .host-label, .btn .host-label { font-size: 1.05rem; }
+.icon { vertical-align: middle; }
+.whatsapp-reminder { border-left: 4px solid var(--neg); background: #fff4f2; padding: 0.7rem 0.8rem; border-radius: 8px; margin-bottom: 0.75rem; }
+.whatsapp-reminder strong.count { font-size: 1.4rem; }

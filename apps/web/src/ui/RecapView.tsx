@@ -3,6 +3,8 @@ import { gsm7Length, smsUri } from "@echo/core";
 import type { MonthReport } from "../lib/recap-service.ts";
 import { playClips, stopPlayback } from "../lib/audio.ts";
 import { formatMonth } from "./common.tsx";
+import { HostLabel } from "./HostLabel.tsx";
+import type { Catalog } from "@echo/core";
 
 export function RecapView({
   report,
@@ -11,6 +13,7 @@ export function RecapView({
   onPhoneChange,
   onSmsOpened,
   title,
+  hostLabels,
 }: {
   report: MonthReport;
   /** Afficher les gloses FR/EN (phrases sources figées) à côté du kinyarwanda. */
@@ -19,6 +22,8 @@ export function RecapView({
   onPhoneChange?: (p: string) => void;
   onSmsOpened?: () => void;
   title?: string;
+  /** Mode A (app hôte) : libellés kinyarwanda figés du catalogue avec icônes à la place de l'anglais. */
+  hostLabels?: { catalog: Catalog; gloss: boolean };
 }) {
   const [playing, setPlaying] = useState(false);
   const [err, setErr] = useState("");
@@ -45,7 +50,13 @@ export function RecapView({
   };
   return (
     <section class="card" data-testid="recap">
-      <h2>{title ?? `Monthly recap, ${formatMonth(recap.month)}`}</h2>
+      <h2>
+        {hostLabels ? (
+          <HostLabel catalog={hostLabels.catalog} id="recap_month" rw en={`Monthly recap, ${formatMonth(recap.month)}`} gloss={hostLabels.gloss} />
+        ) : (
+          (title ?? `Monthly recap, ${formatMonth(recap.month)}`)
+        )}
+      </h2>
       <p class="muted" style={{ fontSize: "0.85rem" }}>
         Built only from frozen Kinyarwanda sentences of the catalog, with numbers in the slots. Nothing is translated or generated on
         the phone. Kinyarwanda: machine translation (NLLB-200), checked by back-translation, <strong>not yet validated by a speaker</strong>.
@@ -73,7 +84,7 @@ export function RecapView({
       </div>
       <div class="row" style={{ marginTop: "0.6rem" }}>
         <button onClick={listen} data-testid="listen">
-          {playing ? "Stop" : "Listen (Kinyarwanda)"}
+          {playing ? "Stop" : hostLabels ? <HostLabel catalog={hostLabels.catalog} id="listen" rw en="Listen (Kinyarwanda)" gloss={hostLabels.gloss} /> : "Listen (Kinyarwanda)"}
         </button>
         <small class="muted">Pre-recorded clips (MMS-TTS synthetic voice) played one after the other.</small>
       </div>
@@ -107,7 +118,8 @@ export function RecapView({
                 onSmsOpened?.();
               }}
             >
-              Send SMS {sms.length > 1 ? `${i + 1}/${sms.length}` : ""}
+              {hostLabels ? <HostLabel catalog={hostLabels.catalog} id="send_sms" rw en="Send SMS" gloss={hostLabels.gloss} /> : "Send SMS"}{" "}
+              {sms.length > 1 ? `${i + 1}/${sms.length}` : ""}
             </a>
             <small class="muted">{gsm7Length(part)} / 160 GSM characters</small>
           </div>

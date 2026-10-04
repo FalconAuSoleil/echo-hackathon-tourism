@@ -3,6 +3,7 @@ import { db, host, refresh, updateSettings } from "../lib/host-store.ts";
 import { wipeAll } from "../lib/db.ts";
 import { hashPin, isValidPin } from "../lib/pin.ts";
 import { mb } from "../ui/common.tsx";
+import { analysis, memoryPreference, setMemoryPreference, type MemoryPreference } from "../lib/worker-client.ts";
 
 export function SettingsPage() {
   const st = host.use();
@@ -10,6 +11,7 @@ export function SettingsPage() {
   const [pin, setPin] = useState("");
   const [pin2, setPin2] = useState("");
   const [msg, setMsg] = useState("");
+  const [memPref, setMemPref] = useState<MemoryPreference>(memoryPreference());
   const [storage, setStorage] = useState<{ usage?: number; quota?: number; persisted?: boolean }>({});
   useEffect(() => {
     void refresh();
@@ -50,7 +52,7 @@ export function SettingsPage() {
             Who uses this phone?
           </legend>
           <label class="row">
-            <input type="radio" name="mode" checked={s.mode === "A"} onChange={() => void updateSettings({ mode: "A" })} />
+            <input type="radio" name="mode" checked={s.mode === "A"} onChange={() => void updateSettings({ mode: "A" })} data-testid="mode-a" />
             Mode A: the host's own Android phone
           </label>
           <label class="row">
@@ -99,6 +101,32 @@ export function SettingsPage() {
           included. Off by default; can be turned off at any time. In this prototype nothing is actually sent anywhere: the{" "}
           <a href="#/coop">cooperative view</a> runs on this phone with synthetic farms.
         </p>
+      </section>
+
+      <section class="card">
+        <h2>Memory</h2>
+        <p class="muted" style={{ fontSize: "0.88rem" }}>
+          On a phone with 2 GB of memory, Whisper and the similarity model do not fit together: Echo then loads one model at a time
+          (all voice messages are transcribed first, then analysed). Automatic uses what the browser reports
+          {typeof (navigator as { deviceMemory?: number }).deviceMemory === "number" ? ` (${(navigator as { deviceMemory?: number }).deviceMemory} GB here)` : " (not reported here: both models stay loaded)"}.
+          Now: <strong>{analysis.memory === "one_model_at_a_time" ? "one model at a time" : "both models loaded"}</strong>.
+        </p>
+        <label class="field">
+          <span>Memory use (applies after reopening Echo)</span>
+          <select
+            value={memPref}
+            onChange={(e) => {
+              const v = (e.target as HTMLSelectElement).value as MemoryPreference;
+              setMemoryPreference(v);
+              setMemPref(v);
+            }}
+            data-testid="memory-pref"
+          >
+            <option value="auto">Automatic</option>
+            <option value="low">One model at a time (slower, for 2 GB phones)</option>
+            <option value="normal">Keep both models loaded (faster)</option>
+          </select>
+        </label>
       </section>
 
       <section class="card">

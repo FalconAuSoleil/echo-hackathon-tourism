@@ -1,19 +1,12 @@
 import { useEffect, useState } from "preact/hooks";
 import type { ComponentChildren } from "preact";
 import { analysis, type ProgressState } from "../lib/worker-client.ts";
+import { watchNetwork } from "../lib/network.ts";
 
 export function useOnline(): boolean {
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
-  useEffect(() => {
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener("online", on);
-    window.addEventListener("offline", off);
-    return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", off);
-    };
-  }, []);
+  // Navigateur : navigator.onLine ; APK : plugin natif @capacitor/network (navigator.onLine y reste vrai en mode avion).
+  useEffect(() => watchNetwork(setOnline), []);
   return online;
 }
 

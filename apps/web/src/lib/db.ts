@@ -33,6 +33,12 @@ export interface Settings {
   mode: "A" | "B";
   pin?: { salt: string; hash: string; iterations: number };
   coopConsent: boolean;
+  /**
+   * Messages vocaux partagés ou importés (depuis WhatsApp) déjà analysés, dont l'original est encore dans
+   * WhatsApp : la carte promet que le son est effacé, l'app le rappelle jusqu'à ce que l'hôte confirme.
+   * Un simple compteur (aucun identifiant de message ni d'expéditeur).
+   */
+  whatsappToDelete?: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = { hostPhone: "", farmPhone: "", farmName: "", mode: "B", coopConsent: false };
@@ -90,6 +96,21 @@ export async function saveSettings(db: EchoDatabase, patch: Partial<Settings>): 
     else await tx.store.put({ key, value });
   }
   await tx.done;
+}
+
+/** Ajoute `k` au compteur des messages vocaux à effacer dans WhatsApp (dans une seule transaction). */
+export async function addWhatsappToDelete(db: EchoDatabase, k: number): Promise<number> {
+  const tx = db.transaction("settings", "readwrite");
+  const row = await tx.store.get("whatsappToDelete");
+  const next = (typeof row?.value === "number" ? row.value : 0) + k;
+  await tx.store.put({ key: "whatsappToDelete", value: next });
+  await tx.done;
+  return next;
+}
+
+/** Message de la file dont l'original reste dans WhatsApp : audio reçu par partage ou import de fichier. */
+export function originalStaysInWhatsapp(item: Pick<QueueItem, "kind" | "via">): boolean {
+  return item.kind === "audio" && (item.via === "share" || item.via === "file");
 }
 
 /**

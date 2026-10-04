@@ -6,10 +6,10 @@
 import { env } from "@huggingface/transformers";
 import {
   DEFAULT_CONFIG,
-  analyzeAudioMessage,
   analyzeMessage,
   cosine,
   createMatcher,
+  transcribeAudioMessage,
   validateCatalog,
   type Catalog,
   type LinearClassifier,
@@ -17,7 +17,7 @@ import {
   type Transcriber,
 } from "@echo/core";
 import { DEFAULT_EMBEDDING_MODEL, createEmbedder, createWhisperTranscriber } from "@echo/models";
-import type { AssetsManifest, InitInfo, ModelSource, Stage, WorkerEvent, WorkerRequest } from "./protocol.ts";
+import type { AssetsManifest, InitInfo, ModelRole, ModelSource, Stage, WorkerEvent, WorkerRequest } from "./protocol.ts";
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -105,15 +105,6 @@ async function loadPrecomputed(manifest: AssetsManifest, embeddingModel: string)
   }
 }
 
-interface Engine {
-  catalog: Catalog;
-  matcher: Matcher;
-  transcriber: Transcriber;
-  info: InitInfo;
-}
-
-let enginePromise: Promise<Engine> | null = null;
-
 /**
  * Dans l'APK, les modèles sont déjà sur le téléphone (assets servis par la coquille Capacitor sur la même
  * origine) : on les lit sur place, sans copie dans Cache Storage, qui doublerait leur place (~215 Mo).
@@ -134,70 +125,112 @@ async function prepareModelFiles(manifest: AssetsManifest, source: ModelSource):
   return "browser-cache";
 }
 
-async function init(modelSource: ModelSource): Promise<Engine> {
-  const t0 = performance.now();
-  const manifest = (await (await fetch("/assets-manifest.json")).json()) as AssetsManifest;
-  const catalog = validateCatalog(await (await fetch("/catalog/catalog.json")).json());
-  // Les seuils livrés (DEFAULT_CONFIG, calibrés par l'évaluation) n'ont de sens qu'avec le modèle d'embedding
-  // de la calibration : refuser des fichiers préparés pour un autre modèle plutôt que de classer au hasard.
-  if (manifest.embeddingModel.id !== DEFAULT_EMBEDDING_MODEL) {
-    throw new Error(`assets prepared for ${manifest.embeddingModel.id} but thresholds calibrated for ${DEFAULT_EMBEDDING_MODEL}: rebuild the app (pnpm build)`);
-  }
-  const modelStorage = await prepareModelFiles(manifest, modelSource);
+// Chaque modèle est chargé à la demande. Ce worker ne libère jamais un modèle lui-même : sur un téléphone à peu
+// de mémoire, le client (worker-client.ts) termine ce worker avant de charger l'autre modèle dans un nouveau
+// worker. Terminer le worker rend toute sa mémoire WebAssembly au système, ce qu'une libération de session ne
+// garantit pas (la mémoire d'une instance WebAssembly ne rétrécit jamais).
 
-  progress("load-asr", 0, 1);
-  const transcriber = await createWhisperTranscriber(manifest.asrModel.id, { device: "wasm" });
-  progress("load-asr", 1, 1);
-  progress("load-embedder", 0, 1);
-  // Taille de lot par défaut de l'adaptateur, comme l'évaluation (résultats reproductibles).
-  const embed = await createEmbedder(manifest.embeddingModel.id, { device: "wasm" });
-  progress("load-embedder", 1, 1);
+interface Base {
+  manifest: AssetsManifest;
+  catalog: Catalog;
+  modelStorage: InitInfo["modelStorage"];
+}
 
-  progress("prepare-catalog", 0, 1);
-  const pre = await loadPrecomputed(manifest, manifest.embeddingModel.id);
-  let source: InitInfo["examples"]["source"] = "computed_on_device";
-  let check: number | undefined;
-  let precomputed: Map<string, Float32Array> | undefined;
-  if (pre) {
-    // Vérifie sur l'appareil que les vecteurs pré-calculés au build sont bien ceux de ce modèle.
-    const probe = [...pre.map.keys()].filter((_, i, a) => i % Math.max(1, Math.floor(a.length / 4)) === 0).slice(0, 4);
-    const fresh = await embed(probe);
-    check = Math.min(...probe.map((t, i) => cosine(fresh[i]!, pre.map.get(t)!)));
-    if (check >= 0.99) {
-      precomputed = pre.map;
-      source = "precomputed";
-    }
-  }
-  const matcher = await createMatcher(catalog, embed, DEFAULT_CONFIG, {
-    ...(precomputed ? { precomputed } : {}),
-    ...(precomputed && pre?.classifier ? { classifier: pre.classifier } : {}),
-  });
-  progress("prepare-catalog", 1, 1);
-  progress("ready", 1, 1);
-  return {
-    catalog,
-    matcher,
-    transcriber,
-    info: {
-      asrModel: manifest.asrModel.id,
-      embeddingModel: manifest.embeddingModel.id,
-      examples: { count: matcher.examples.length, source, ...(check !== undefined ? { check: Math.round(check * 10000) / 10000 } : {}) },
-      backend: { threads, crossOriginIsolated: self.crossOriginIsolated },
-      modelStorage,
-      loadMs: Math.round(performance.now() - t0),
-    },
-  };
+interface Nlp {
+  matcher: Matcher;
+  examples: NonNullable<InitInfo["examples"]>;
 }
 
 // Fixée par la requête "init" du fil principal (seul à voir le pont Capacitor) ; toujours envoyée en premier.
 let modelSource: ModelSource = "download";
+let basePromise: Promise<Base> | null = null;
+let asrPromise: Promise<Transcriber> | null = null;
+let nlpPromise: Promise<Nlp> | null = null;
+const t0 = performance.now();
 
-function engine(): Promise<Engine> {
-  if (!enginePromise) {
-    enginePromise = init(modelSource);
-    enginePromise.catch(() => (enginePromise = null));
-  }
-  return enginePromise;
+function retryable<T>(p: Promise<T>, reset: () => void): Promise<T> {
+  p.catch(reset);
+  return p;
+}
+
+function base(): Promise<Base> {
+  basePromise ??= retryable(
+    (async () => {
+      const manifest = (await (await fetch("/assets-manifest.json")).json()) as AssetsManifest;
+      const catalog = validateCatalog(await (await fetch("/catalog/catalog.json")).json());
+      // Les seuils livrés (DEFAULT_CONFIG, calibrés par l'évaluation) n'ont de sens qu'avec le modèle d'embedding
+      // de la calibration : refuser des fichiers préparés pour un autre modèle plutôt que de classer au hasard.
+      if (manifest.embeddingModel.id !== DEFAULT_EMBEDDING_MODEL) {
+        throw new Error(`assets prepared for ${manifest.embeddingModel.id} but thresholds calibrated for ${DEFAULT_EMBEDDING_MODEL}: rebuild the app (pnpm build)`);
+      }
+      const modelStorage = await prepareModelFiles(manifest, modelSource);
+      return { manifest, catalog, modelStorage };
+    })(),
+    () => (basePromise = null),
+  );
+  return basePromise;
+}
+
+function asr(): Promise<Transcriber> {
+  asrPromise ??= retryable(
+    (async () => {
+      const { manifest } = await base();
+      progress("load-asr", 0, 1);
+      const transcriber = await createWhisperTranscriber(manifest.asrModel.id, { device: "wasm" });
+      progress("load-asr", 1, 1);
+      return transcriber;
+    })(),
+    () => (asrPromise = null),
+  );
+  return asrPromise;
+}
+
+function nlp(): Promise<Nlp> {
+  nlpPromise ??= retryable(
+    (async () => {
+      const { manifest, catalog } = await base();
+      progress("load-embedder", 0, 1);
+      // Taille de lot par défaut de l'adaptateur, comme l'évaluation (résultats reproductibles).
+      const embed = await createEmbedder(manifest.embeddingModel.id, { device: "wasm" });
+      progress("load-embedder", 1, 1);
+      progress("prepare-catalog", 0, 1);
+      const pre = await loadPrecomputed(manifest, manifest.embeddingModel.id);
+      let source: NonNullable<InitInfo["examples"]>["source"] = "computed_on_device";
+      let check: number | undefined;
+      let precomputed: Map<string, Float32Array> | undefined;
+      if (pre) {
+        // Vérifie sur l'appareil que les vecteurs pré-calculés au build sont bien ceux de ce modèle.
+        const probe = [...pre.map.keys()].filter((_, i, a) => i % Math.max(1, Math.floor(a.length / 4)) === 0).slice(0, 4);
+        const fresh = await embed(probe);
+        check = Math.min(...probe.map((t, i) => cosine(fresh[i]!, pre.map.get(t)!)));
+        if (check >= 0.99) {
+          precomputed = pre.map;
+          source = "precomputed";
+        }
+      }
+      const matcher = await createMatcher(catalog, embed, DEFAULT_CONFIG, {
+        ...(precomputed ? { precomputed } : {}),
+        ...(precomputed && pre?.classifier ? { classifier: pre.classifier } : {}),
+      });
+      progress("prepare-catalog", 1, 1);
+      return { matcher, examples: { count: matcher.examples.length, source, ...(check !== undefined ? { check: Math.round(check * 10000) / 10000 } : {}) } };
+    })(),
+    () => (nlpPromise = null),
+  );
+  return nlpPromise;
+}
+
+async function info(): Promise<InitInfo> {
+  const b = await base();
+  const n = nlpPromise ? await nlpPromise : null;
+  return {
+    asrModel: b.manifest.asrModel.id,
+    embeddingModel: b.manifest.embeddingModel.id,
+    ...(n ? { examples: n.examples } : {}),
+    backend: { threads, crossOriginIsolated: self.crossOriginIsolated },
+    modelStorage: b.modelStorage,
+    loadMs: Math.round(performance.now() - t0),
+  };
 }
 
 self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
@@ -205,47 +238,39 @@ self.onmessage = async (ev: MessageEvent<WorkerRequest>) => {
   try {
     if (req.kind === "init") {
       modelSource = req.modelSource;
-      const e = await engine();
-      post({ kind: "result", reqId: req.reqId, info: e.info });
+      await base();
+      for (const role of req.load as ModelRole[]) await (role === "asr" ? asr() : nlp());
+      progress("ready", 1, 1);
+      post({ kind: "result", reqId: req.reqId, info: await info() });
       return;
     }
-    const e = await engine();
+    const t1 = performance.now();
+    if (req.kind === "transcribeAudio") {
+      const transcriber = await asr();
+      // Tampon audio remis à zéro par transcribeAudioMessage dès la fin de la transcription ; traduction
+      // anglaise produite maintenant (pour la liste « À faire lire »), tant que l'audio existe.
+      const input = await transcribeAudioMessage(
+        { id: req.id, receivedAt: req.receivedAt, audio16k: req.audio },
+        { transcriber, config: DEFAULT_CONFIG, withEnglishTranslation: true },
+      );
+      const ms = Math.round(performance.now() - t1);
+      post({ kind: "result", reqId: req.reqId, input, timings: { transcribeMs: input.transcript ? ms : 0, analyzeMs: 0, totalMs: ms } });
+      return;
+    }
+    const b = await base();
+    const { matcher } = await nlp();
     if (req.kind === "embed") {
       // Diagnostic (test e2e) : vecteurs du modèle de similarité tel qu'il tourne dans ce navigateur.
-      post({ kind: "result", reqId: req.reqId, vectors: await e.matcher.embed(req.texts) });
+      post({ kind: "result", reqId: req.reqId, vectors: await matcher.embed(req.texts) });
       return;
     }
-    const deps = { catalog: e.catalog, matcher: e.matcher, config: DEFAULT_CONFIG, knownMessages: req.knownMessages };
-    const t0 = performance.now();
-    if (req.kind === "analyzeAudio") {
-      let transcribeMs = 0;
-      // Transcriber enveloppé : dès la fin de la transcription, l'interface est prévenue et supprime le
-      // fichier audio de sa file ; le tampon est remis à zéro par analyzeAudioMessage.
-      const transcriber: Transcriber = {
-        async transcribe(audio, options) {
-          const ts = performance.now();
-          try {
-            return await e.transcriber.transcribe(audio, options);
-          } finally {
-            transcribeMs = performance.now() - ts;
-            post({ kind: "transcribed", reqId: req.reqId, id: req.id });
-          }
-        },
-      };
-      const analysis = await analyzeAudioMessage(
-        { id: req.id, receivedAt: req.receivedAt, audio16k: req.audio },
-        { ...deps, transcriber, withEnglishTranslation: true },
-      );
-      if (!transcribeMs) post({ kind: "transcribed", reqId: req.reqId, id: req.id }); // inaudible : pas transcrit, audio effacé quand même
-      const total = performance.now() - t0;
-      post({ kind: "result", reqId: req.reqId, analysis, timings: { transcribeMs: Math.round(transcribeMs), analyzeMs: Math.round(total - transcribeMs), totalMs: Math.round(total) } });
-      return;
-    }
-    if (req.kind === "analyzeText") {
-      const analysis = await analyzeMessage({ id: req.id, receivedAt: req.receivedAt, source: "text", text: req.text }, deps);
-      const total = Math.round(performance.now() - t0);
-      post({ kind: "result", reqId: req.reqId, analysis, timings: { analyzeMs: total, totalMs: total } });
-    }
+    const deps = { catalog: b.catalog, matcher, config: DEFAULT_CONFIG, knownMessages: req.knownMessages };
+    const analysis =
+      req.kind === "analyzeInput"
+        ? await analyzeMessage(req.input, deps)
+        : await analyzeMessage({ id: req.id, receivedAt: req.receivedAt, source: "text", text: req.text }, deps);
+    const total = Math.round(performance.now() - t1);
+    post({ kind: "result", reqId: req.reqId, analysis, timings: { analyzeMs: total, totalMs: total } });
   } catch (err) {
     post({ kind: "error", reqId: req.reqId, message: err instanceof Error ? err.message : String(err) });
   }

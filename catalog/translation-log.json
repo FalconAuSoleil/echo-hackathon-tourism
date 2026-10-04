@@ -1737,6 +1737,332 @@
           "passed": true
         }
       ]
+    },
+    {
+      "id": "ui:listen",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Écouter",
+            "en": "Listen"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Tega amatwi",
+              "rw": "Tega amatwi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Écoutez attentivement",
+                "en": "Listen to them."
+              },
+              "similarityFr": 0.8604,
+              "similarityEn": 0.7308,
+              "score": 0.7308
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Jya utega amatwi",
+              "rw": "Jya utega amatwi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Écoutez attentivement",
+                "en": "Listen carefully"
+              },
+              "similarityFr": 0.8604,
+              "similarityEn": 0.833,
+              "score": 0.833
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "ui:send_sms",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Envoyer le SMS",
+            "en": "Send the SMS"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Kohereza ubutumwa bugufi",
+              "rw": "Kohereza ubutumwa bugufi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Envoyer des courts messages",
+                "en": "Sending a short message"
+              },
+              "similarityFr": 0.6527,
+              "similarityEn": 0.681,
+              "score": 0.6527
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Yohereza ubutumwa bugufi",
+              "rw": "Yohereza ubutumwa bugufi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Envoyez des courts messages",
+                "en": "Send a short message"
+              },
+              "similarityFr": 0.803,
+              "similarityEn": 0.6037,
+              "score": 0.6037
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Envoyer le message",
+            "en": "Send the message"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Yohereza ubutumwa",
+              "rw": "Yohereza ubutumwa",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Envoyez un message",
+                "en": "Send a message"
+              },
+              "similarityFr": 0.9679,
+              "similarityEn": 0.9513,
+              "score": 0.9513
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Yohereza ubutumwa",
+              "rw": "Yohereza ubutumwa",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Envoyez un message",
+                "en": "Send a message"
+              },
+              "similarityFr": 0.9679,
+              "similarityEn": 0.9513,
+              "score": 0.9513
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "ui:analyse",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Analyser les messages",
+            "en": "Analyse the messages"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Suzuma ubwo butumwa",
+              "rw": "Suzuma ubwo butumwa",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Réfléchissez à ce message.",
+                "en": "Examine the message"
+              },
+              "similarityFr": 0.5388,
+              "similarityEn": 0.8193,
+              "score": 0.5388
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Gusuzuma ubutumwa",
+              "rw": "Gusuzuma ubutumwa",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "L'examen du message",
+                "en": "Examining the Message"
+              },
+              "similarityFr": 0.9041,
+              "similarityEn": 0.8221,
+              "score": 0.8221
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "ui:recap_month",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Résumé du mois",
+            "en": "Summary of the month"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Isubiramo ry'ukwezi",
+              "rw": "Isubiramo ry'ukwezi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le cycle de la lune",
+                "en": "The return of the moon"
+              },
+              "similarityFr": 0.4034,
+              "similarityEn": 0.29,
+              "score": 0.29
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Isubiramo ry'ukwezi",
+              "rw": "Isubiramo ry'ukwezi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le cycle de la lune",
+                "en": "The return of the moon"
+              },
+              "similarityFr": 0.4034,
+              "similarityEn": 0.29,
+              "score": 0.29
+            }
+          ],
+          "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "Le résumé de ce mois",
+            "en": "The summary of this month"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ingingo y'ibanze y'uku kwezi",
+              "rw": "Ingingo y'ibanze y'uku kwezi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le thème principal de ce mois",
+                "en": "This month's theme"
+              },
+              "similarityFr": 0.7907,
+              "similarityEn": 0.6319,
+              "score": 0.6319
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ingingo z'ingenzi z'uku kwezi",
+              "rw": "Ingingo z'ingenzi z'uku kwezi",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Les points forts du mois",
+                "en": "Highlights of the Month"
+              },
+              "similarityFr": 0.7825,
+              "similarityEn": 0.8754,
+              "score": 0.7825
+            }
+          ],
+          "chosen": "fr",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "ui:delete_whatsapp",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Il faut effacer {n} messages vocaux dans WhatsApp.",
+            "en": "You must delete {n} voice messages in WhatsApp."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ugomba gukuraho ubutumwa bw'ijwi 17 muri WhatsApp.",
+              "rw": "Ugomba gukuraho ubutumwa bw'ijwi {n} muri WhatsApp.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Vous devez supprimer 17 messages vocaux de WhatsApp.",
+                "en": "You must delete 17 voice messages from WhatsApp."
+              },
+              "similarityFr": 0.9662,
+              "similarityEn": 0.9888,
+              "score": 0.9662
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ugomba gusiba ubutumwa bw'amajwi 17 muri WhatsApp.",
+              "rw": "Ugomba gusiba ubutumwa bw'amajwi {n} muri WhatsApp.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Vous devez supprimer 17 messages vocaux sur WhatsApp.",
+                "en": "You must delete 17 voicemail messages from WhatsApp."
+              },
+              "similarityFr": 0.9703,
+              "similarityEn": 0.9566,
+              "score": 0.9566
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "ui:deleted",
+      "attempts": [
+        {
+          "attempt": 1,
+          "source": {
+            "fr": "Les messages sont effacés",
+            "en": "The messages are deleted"
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "Ubutumwa burakurwaho",
+              "rw": "Ubutumwa burakurwaho",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Le message est supprimé",
+                "en": "The message is removed"
+              },
+              "similarityFr": 0.9204,
+              "similarityEn": 0.8598,
+              "score": 0.8598
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "Ubutumwa buzacibwa",
+              "rw": "Ubutumwa buzacibwa",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "Un message qui sera rejeté",
+                "en": "A Message That Will Be Rejected"
+              },
+              "similarityFr": 0.7305,
+              "similarityEn": 0.4275,
+              "score": 0.4275
+            }
+          ],
+          "chosen": "en",
+          "passed": true
+        }
+      ]
     }
   ]
 }
