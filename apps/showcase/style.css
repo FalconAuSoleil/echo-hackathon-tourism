@@ -190,12 +190,6 @@ blockquote {
 .enough-close em { color: var(--cream); }
 
 /* Téléphone basique (simulation) */
-.noor-fine { text-align: center; margin-top: 0; max-width: 280px; }
-
-  display: inline-flex; align-items: center; gap: 12px; padding: 12px 20px 12px 14px; transition: opacity .5s;
-  border-radius: 99px; border: 0; background: var(--leaf); color: var(--night); font-weight: 600; font-size: 15px;
-}
-
 .nokia {
   width: 230px; padding: 26px 20px 30px; border-radius: 46px 46px 60px 60px; transition: filter .8s;
   background: linear-gradient(160deg, #3b4652, #1d242b 60%, #13181d); box-shadow: 0 50px 90px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.12);
