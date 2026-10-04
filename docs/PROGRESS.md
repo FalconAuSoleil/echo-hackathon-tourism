@@ -1018,3 +1018,9 @@ configuration (48 % / 6 % on the held-out half).
   and the month are synthetic and labelled as such on the page.
 - Photos: Wikimedia Commons, CC BY / CC BY-SA, credited in the footer (`public/photos/CREDITS.json`). The roasting
   photo is from Ethiopia; the others are from Rwanda.
+- Second pass: "Inside the phone" reduced to 4 plain-language steps (no model names, thresholds or codes); new "What it
+  takes" section (one entry-level Android, a bit of signal, then airplane mode); "A month later" and the recap merged
+  into one scene (7 messages → grouped counts → Noor's basic phone), the recap built by `buildMonthlyRecap` and split
+  by `splitSms`. The link to the PWA is replaced by a "Your turn" simulator: 9 synthetic voice samples and 2 written
+  messages with a name / phone number, run through the real `scrubPii` and `segment` in the browser; the findings of
+  each idea are the expected results, prepared in advance and labelled so; the end-of-month recap uses the real code.

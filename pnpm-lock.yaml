@@ -35,6 +35,10 @@ importers:
         version: 8.5.2
 
   apps/showcase:
+    dependencies:
+      '@echo/core':
+        specifier: workspace:*
+        version: link:../../packages/core
     devDependencies:
       vite:
         specifier: ^8.0.0

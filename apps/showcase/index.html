@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Echo · Visitors leave, their words stay</title>
-  <meta name="description" content="Follow one visitor's voice note from a coffee farm in the Rwandan highlands to the host's monthly recap in Kinyarwanda. Everything runs offline, on a phone." />
+  <meta name="description" content="Follow one visitor's voice note from a coffee farm in the Rwandan highlands to the host's monthly recap in Kinyarwanda, then try it yourself." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,12 +19,12 @@
     <div class="veil veil-bottom"></div>
     <nav class="topbar">
       <span class="brand">echo</span>
-      <span class="tag">Small AI for Development · Tourism track</span>
+      <a class="nav-try" href="#try">Try it yourself</a>
     </nav>
     <div class="hero-text">
       <p class="eyebrow reveal">Rwandan highlands · a coffee farm</p>
       <h1 class="reveal">Visitors leave.<br /><em>Their words stay.</em></h1>
-      <p class="lead reveal">Echo turns visitors' voice notes, in their own language, into a monthly recap in Kinyarwanda for the host. Offline, on a phone the household already owns.</p>
+      <p class="lead reveal">Echo turns visitors' voice notes, in their own language, into a monthly recap in Kinyarwanda for the host. On a phone the household already owns.</p>
     </div>
     <a class="scroll-cue" href="#noor">Follow one message <span>↓</span></a>
   </header>
@@ -87,7 +87,7 @@
       <p class="eyebrow reveal">On the road back</p>
       <h2 class="reveal">No signal. She records seven seconds anyway.</h2>
       <p class="reveal">WhatsApp sends it on its own, an hour later, when the bus reaches the main road.</p>
-      <p class="fine reveal">Press play: this is the actual test sample Echo analyses (synthetic voice, Piper TTS).</p>
+      <p class="fine reveal">Press play: a synthetic voice, the same sample Echo is tested with.</p>
     </div>
     <div class="phone reveal" id="wa-phone">
       <div class="phone-status"><span>11:52</span><span class="nosignal" id="signal">No service</span></div>
@@ -103,106 +103,101 @@
     </div>
   </section>
 
-  <!-- 5. Hors ligne -->
-  <section class="offline" id="offline">
-    <div class="airplane reveal" id="airplane">
-      <span class="ap-icon">✈</span>
-      <span class="ap-label">Airplane mode</span>
-      <span class="toggle"><i></i></span>
+  <!-- 5. Ce qu'il faut -->
+  <section class="enough" id="enough">
+    <p class="eyebrow reveal">What it takes</p>
+    <h2 class="reveal">A phone the family already has.<br /><em>A little signal, now and then.</em></h2>
+    <div class="needs">
+      <div class="need reveal">
+        <div class="need-visual"><span class="mini-phone"></span></div>
+        <b>One entry-level Android</b>
+        <span>Her daughter's smartphone is enough. Echo is installed on it once.</span>
+      </div>
+      <div class="need reveal">
+        <div class="need-visual"><span class="bars"><i class="lit"></i><i></i><i></i><i></i></span></div>
+        <b>A bit of signal</b>
+        <span>Only so WhatsApp can bring the voice notes in. A few minutes of 3G is plenty.</span>
+      </div>
+      <div class="need reveal">
+        <div class="need-visual"><span class="airplane" id="airplane"><span class="ap-icon">✈</span><span class="toggle"><i></i></span></span></div>
+        <b>Then, airplane mode is fine</b>
+        <span>Listening, understanding, counting: all of it happens on the phone. No computer, no Wi-Fi, no account.</span>
+      </div>
     </div>
-    <h2 class="reveal">From here on, <em>nothing</em> needs the internet.</h2>
-    <p class="reveal">On the household smartphone, one tap shares the voice note to Echo. Two small models already live in the phone's storage.</p>
-    <div class="models reveal">
-      <div><b>Whisper base</b><span>listens · 80 MB</span></div>
-      <div><b>MiniLM</b><span>understands meaning · 135 MB</span></div>
-      <div><b>No server</b><span>no account · no login</span></div>
-    </div>
+    <p class="enough-close reveal">No developer, no subscription, no server. <em>Noor's household can run it on its own.</em></p>
   </section>
 
-  <!-- 6. L'analyse, étape par étape -->
-  <section class="pipeline" id="pipeline" style="--steps: 6">
+  <!-- 6. Dans le téléphone -->
+  <section class="pipeline" id="pipeline" style="--steps: 4">
     <div class="pipeline-sticky">
       <div class="pipeline-head">
         <p class="eyebrow">Inside the phone</p>
-        <h2>Seven seconds of German, in six steps.</h2>
+        <h2>What Echo does with Lena's seven seconds.</h2>
       </div>
       <div class="pipeline-grid">
         <ol class="steps" id="steps">
-          <li data-i="0"><b>Listen</b><span>Whisper transcribes and detects the language.</span></li>
-          <li data-i="1"><b>Forget the voice</b><span>The audio is deleted, the buffer zero-filled.</span></li>
-          <li data-i="2"><b>Remove who said it</b><span>Names, phone numbers, e-mails, @handles: scrubbed before anything is stored.</span></li>
-          <li data-i="3"><b>Cut into ideas</b><span>Sentences, then clauses: "but", "mais", "aber", "pero"…</span></li>
-          <li data-i="4"><b>Match the meaning</b><span>Each idea is compared with 21 known findings, in any of 4 languages. Counted only if confident and the negation agrees.</span></li>
-          <li data-i="5"><b>Keep only the count</b><span>The words of a counted remark are not kept. Just +1.</span></li>
+          <li><b>It listens</b><span>The voice becomes text, whatever the visitor's language.</span></li>
+          <li><b>It forgets who spoke</b><span>The recording is deleted. Names and phone numbers are removed.</span></li>
+          <li><b>It finds the ideas</b><span>One message can hold a compliment and a complaint. Echo reads them apart.</span></li>
+          <li><b>It keeps only a tally</b><span>Not her words. Just one more visitor who liked this, one more who struggled with that.</span></li>
         </ol>
         <div class="stage" id="stage" data-step="0">
           <div class="stage-top">
-            <span class="lang-pill"><i></i> Deutsch · detected</span>
+            <span class="lang-pill"><i></i> German</span>
             <span class="offline-pill">✈ offline</span>
           </div>
-          <div class="stage-wave"><canvas class="wave" id="wave-stage" width="900" height="120"></canvas><span class="zero">audio deleted · 0x00 0x00 0x00 0x00</span></div>
+          <div class="stage-wave"><canvas class="wave" id="wave-stage" width="900" height="120"></canvas><span class="zero">voice deleted</span></div>
           <div class="transcript" id="transcript">
             <span class="clause c1">Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht.</span>
             <span class="clause c2">Aber der Weg vom Dorf bis hierher war viel zu lang.</span>
             <span class="scan"></span>
           </div>
-          <div class="scrub-note">names 0 · phone numbers 0 · e-mails 0 · handles 0</div>
           <div class="findings">
-            <div class="finding pos"><span class="code">P3</span><b>Roasting or tasting enjoyed</b><span class="conf"><i></i>above 0.82</span><span class="plus">+1</span></div>
-            <div class="finding neg"><span class="code">N1</span><b>Path or access too long</b><span class="conf"><i></i>above 0.82</span><span class="plus">+1</span></div>
+            <div class="finding pos"><span class="dot"></span><b>Loved the coffee roasting</b><span class="plus">+1</span></div>
+            <div class="finding neg"><span class="dot"></span><b>The path to the farm is too long</b><span class="plus">+1</span></div>
           </div>
-          <p class="stage-aside">“The walk was <u>not</u> too long at all” would <b>not</b> count as N1. A keyword list would.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 7. Le mois -->
+  <!-- 7. Le mois, regroupé, sur le téléphone de Noor -->
   <section class="month" id="month">
     <div class="photo dim" style="--img: url(photos/dusk.jpg)"></div>
     <div class="month-sticky">
       <div class="month-head">
         <p class="eyebrow">A month later</p>
-        <h2>Seven messages. Four languages. <em>Three people want the same thing, and Echo doesn't know it yet.</em></h2>
+        <h2>Seven visitors, four languages. <em>Five lines on Noor's phone.</em></h2>
+        <ol class="month-steps" id="month-steps">
+          <li>Messages arrive</li><li>Each one is understood</li><li>Echo groups them</li><li>Noor's phone buzzes</li>
+        </ol>
       </div>
-      <div class="msgs" id="msgs"></div>
-      <p class="cluster-note"><b>Same wish, three languages, three visitors:</b> picking the coffee cherries. Echo has no validated sentence for it, so it never names it. It tells Noor: a new topic is coming back, ask someone to read these.</p>
-      <div class="legend">
-        <span class="lg pos">counted, liked</span>
-        <span class="lg neg">counted, problem</span>
-        <span class="lg unsure">not sure: never counted, ask a person</span>
-        <span class="lg off">unknown topic</span>
-      </div>
-      <p class="fine month-fine">Messages 1 to 5 are Echo's synthetic test samples; 6 and 7 are written for this page. Labels are the expected results. In this story, the path was already the top problem last month.</p>
-    </div>
-  </section>
-
-  <!-- 8. Le récap -->
-  <section class="recap" id="recap">
-    <div class="recap-copy">
-      <p class="eyebrow reveal">First of the month</p>
-      <h2 class="reveal">Noor's basic phone buzzes.</h2>
-      <p class="reveal">Three SMS, in Kinyarwanda, sent from the household smartphone with no internet. She can also listen to it.</p>
-      <button class="listen reveal" id="listen"><span>▶</span> Jya utega amatwi <small>Listen</small></button>
-      <label class="gloss-toggle reveal"><input type="checkbox" id="gloss" checked /> English gloss (demo only, the host never sees it)</label>
-      <ol class="recap-lines" id="recap-lines"></ol>
-      <p class="fine reveal">Every sentence comes from a frozen catalog with numbers in slots. Nothing is generated, so nothing can be invented. Kinyarwanda is machine-translated and not yet validated by a speaker; voice: MMS-TTS.</p>
-    </div>
-    <div class="nokia reveal" id="nokia">
-      <div class="nokia-ear"></div>
-      <div class="nokia-screen">
-        <div class="lcd-top"><span>▂▄▆</span><span>SMS 1/3</span><span>▮▮▮</span></div>
-        <div class="lcd-from">Echo · Noor's farm</div>
-        <div class="lcd-text" id="lcd-text"></div>
-      </div>
-      <div class="nokia-keys">
-        <span></span><span class="ok"></span><span></span>
-        <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>*</i><i>0</i><i>#</i>
+      <div class="month-grid">
+        <div class="inbox">
+          <div class="msgs" id="msgs"></div>
+          <div class="groups" id="groups"></div>
+        </div>
+        <div class="noor-col">
+          <div class="nokia" id="nokia">
+            <div class="nokia-ear"></div>
+            <div class="nokia-screen">
+              <div class="lcd-top"><span>▂▄▆</span><span class="lcd-count">Noor</span><span>▮▮▮</span></div>
+              <div class="lcd-from">Echo · Noor's farm</div>
+              <div class="lcd-text"></div>
+            </div>
+            <div class="nokia-keys">
+              <span></span><span class="ok"></span><span></span>
+              <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>*</i><i>0</i><i>#</i>
+            </div>
+          </div>
+          <button class="listen" id="listen"><span>▶</span> Jya utega amatwi <small>Listen</small></button>
+          <p class="fine noor-fine">Plain SMS in Kinyarwanda. Fixed sentences only: nothing invented.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 9. Noor décide -->
+  <!-- 8. Noor décide -->
   <section class="fullbleed decide">
     <div class="photo kenburns" style="--img: url(photos/volcano-hills.jpg)"></div>
     <div class="veil veil-bottom"></div>
@@ -212,23 +207,63 @@
     </div>
   </section>
 
+  <!-- 9. Simulation -->
+  <section class="try" id="try">
+    <div class="try-head">
+      <p class="eyebrow">Your turn</p>
+      <h2>Be the visitor. <em>Send Noor a message.</em></h2>
+      <p>Pick a few messages, send them, and follow each one until it reaches Noor's phone.</p>
+    </div>
+    <div class="try-grid">
+      <div class="panel">
+        <div class="panel-title"><span>1</span> Visitors' messages</div>
+        <ul class="sim-list" id="sim-list"></ul>
+        <button class="btn-small" id="send-all">Send them all</button>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><span>2</span> The farm's smartphone <em class="pill-off">✈ offline</em></div>
+        <div class="proc" id="proc">
+          <p class="proc-empty">Waiting for a message…</p>
+        </div>
+        <div class="tally" id="tally"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><span>3</span> Noor's phone</div>
+        <div class="nokia small" id="sim-nokia">
+          <div class="nokia-ear"></div>
+          <div class="nokia-screen">
+            <div class="lcd-top"><span>▂▄▆</span><span class="lcd-count">Noor</span><span>▮▮▮</span></div>
+            <div class="lcd-from">Echo · Noor's farm</div>
+            <div class="lcd-text">No new message.</div>
+          </div>
+          <div class="nokia-keys">
+            <span></span><span class="ok"></span><span></span>
+            <i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>*</i><i>0</i><i>#</i>
+          </div>
+        </div>
+        <button class="btn-small primary" id="end-month" disabled>End of the month: send the recap</button>
+        <ol class="sim-recap" id="sim-recap"></ol>
+        <div class="sim-actions">
+          <button class="btn-small" id="sim-listen" hidden>▶ Listen in Kinyarwanda</button>
+          <button class="btn-small ghost" id="reset">Start a new month</button>
+        </div>
+      </div>
+    </div>
+    <p class="fine try-fine">Pre-recorded synthetic voices. What Echo understands in each message is prepared in advance (the expected result); removing names and numbers, cutting into ideas and writing the recap run Echo's real code, right here in your browser.</p>
+  </section>
+
   <!-- 10. Chiffres -->
   <section class="numbers">
     <div class="stats">
-      <div class="reveal"><b>0</b><span>servers doing analysis</span></div>
-      <div class="reveal"><b>0</b><span>accounts, logins, cloud bills</span></div>
+      <div class="reveal"><b>0</b><span>servers, accounts or cloud bills</span></div>
       <div class="reveal"><b>4 → 1</b><span>visitor languages to the host's language</span></div>
-      <div class="reveal"><b>6.5 %</b><span>of Echo's counted remarks are wrong.<br />A keyword list: 30 %.</span></div>
+      <div class="reveal"><b>1 in 15</b><span>remarks Echo counts is wrong.<br />A keyword list: 1 in 3.</span></div>
     </div>
-    <p class="numbers-note reveal">Measured on a held-out synthetic corpus with the shipped code. When it is not sure, Echo does not guess: it asks a person.</p>
-    <div class="cta reveal">
-      <a class="btn" id="try-app" href="http://localhost:4173/">Try the real app</a>
-      <a class="btn ghost" href="#">Back to the hills ↑</a>
-    </div>
+    <p class="numbers-note reveal">Measured on synthetic messages Echo had never seen. When it is not sure, Echo does not guess: it asks a person.</p>
   </section>
 
   <footer>
-    <p><b>Prototype honesty.</b> Lena, the visitors, their voices (Piper TTS) and the month shown here are synthetic. Noor is the brief's reference user. The Kinyarwanda is machine-translated and not validated by a speaker. Nothing has been tested with a real host yet.</p>
+    <p><b>Prototype honesty.</b> Lena, the visitors, their voices and the months shown here are synthetic. Noor is the brief's reference user. The Kinyarwanda is machine-translated and not validated by a speaker. Nothing has been tested with a real host yet.</p>
     <p class="credits" id="credits">Photos: </p>
   </footer>
 
