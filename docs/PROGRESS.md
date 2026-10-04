@@ -865,3 +865,19 @@ native speakers.
 by the e2e.
 
 **Remains**: real visitors' names and words through Whisper on a real phone (`docs/MANUAL_TESTS.md` §1 step 6a).
+
+## 2026-10-04 — fix-eval-3: level-3 tables vs the shipped PII scrubber
+
+- **Audit gap**: `level3.json` (03:01) predated the `pii.ts` change of 1858141, which changed 5 of the 322
+  whisper-base level-3 transcripts (de-061, "Frank Wert" → "[nom] Wert").
+- **Checked**: scrubbed all 966 cached level-3 transcripts (tiny/base/small, every condition) with three versions of
+  `scrubPii` (before 1858141, 1858141, working tree). While this fix was running, the parallel core fix (cf32f91)
+  changed `pii.ts` again (allow-list of capitalised non-names, quantifier rule for "jeden Frank wert") and re-ran
+  level 3 itself in that commit. A fresh `pnpm eval -- --level 3 --level report` on cf32f91 (cached transcripts,
+  reclassification only) gives `level3.json` and `RESULTS.md` byte-identical to the committed ones, so the level-3
+  tables are now those of the shipped code.
+- README §5.4 (whisper-base table, per-language table), §5.6 and `docs/VIDEO_SCRIPT.md` checked against RESULTS.md:
+  all figures match (10 dB: 35.2 % captured, 2.7 % error among accepted; de 12.5 % [2–47], 8 accepted); no edit needed.
+- **Verified**: `pnpm test` 168 passed, `pnpm typecheck`.
+- **Remains**: any later change to `packages/core/src/pii.ts`, the classifier or the thresholds requires re-running
+  `pnpm eval -- --level 2 --level 3 --level pii --level report` (about 3 min with cached transcripts).
