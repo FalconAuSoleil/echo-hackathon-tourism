@@ -1,7 +1,7 @@
 // Stockage sur l'appareil uniquement (IndexedDB), exactement ce que SPEC 6 autorise (docs/ARCHITECTURE.md §7).
 // Utilisé par l'interface ET par le service worker (Web Share Target → file d'attente).
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import type { KnownMessage, RecapLine, ReviewChunk, StoredMessage } from "@echo/core";
+import { DEFAULT_CONFIG, expireMessageEmbedding, type KnownMessage, type RecapLine, type ReviewChunk, type StoredMessage } from "@echo/core";
 
 export interface QueueItem {
   id: string;
@@ -106,6 +106,25 @@ export async function saveAnalysis(db: EchoDatabase, message: StoredMessage, rev
 export async function knownMessages(db: EchoDatabase): Promise<KnownMessage[]> {
   const all = await db.getAll("messages");
   return all.map((m) => ({ fingerprint: m.fingerprint, receivedAt: m.receivedAt, ...(m.embedding ? { embedding: m.embedding } : {}) }));
+}
+
+/**
+ * Retire l'embedding des fiches plus vieilles que la fenêtre des doublons (SPEC 6 : il ne sert qu'à repérer
+ * un quasi-doublon dans cette fenêtre). Appelé à l'ouverture de l'app et avant chaque traitement de la file.
+ * Renvoie le nombre de fiches modifiées.
+ */
+export async function pruneExpiredEmbeddings(db: EchoDatabase, now = new Date(), duplicateWindowDays = DEFAULT_CONFIG.duplicateWindowDays): Promise<number> {
+  const tx = db.transaction("messages", "readwrite");
+  let n = 0;
+  for (const m of await tx.store.getAll()) {
+    const pruned = expireMessageEmbedding(m, now, duplicateWindowDays);
+    if (pruned) {
+      await tx.store.put(pruned);
+      n++;
+    }
+  }
+  await tx.done;
+  return n;
 }
 
 /** Efface toutes les données Echo de l'appareil (réglages compris si `includeSettings`). */

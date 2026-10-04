@@ -529,3 +529,32 @@ pipeline and measures nothing (as before). `docs/screenshots/` was rewritten by 
 not committed by me.
 
 **Remains**: nothing for these two gaps. Re-run the full e2e once the web agent's work lands.
+
+## 2026-10-04 — Storage audit fixes: English MT and message embeddings (fix-core-1 agent)
+
+**Built**
+- `packages/core/src/storage.ts`: `toReviewChunks` keeps the scrubbed Whisper English translation (`englishMT`) **only
+  when every chunk of the message is not_sure/off_list** (`wholeMessageUnderReview`): otherwise the translation would
+  carry the counted clauses too, which SPEC 6 does not allow to be stored. Segmenting the English translation and
+  aligning it with the source clauses was not attempted (no reliable alignment): for a message with a counted chunk the
+  translation is shown once in "Just analysed" (`MessageResult`, `data-testid="english-mt"`, badge "machine
+  translation, to be checked") and never stored.
+- `expireMessageEmbedding` / `messageEmbeddingExpired` (core) + `pruneExpiredEmbeddings` (`apps/web/src/lib/db.ts`):
+  the 384-d message embedding is removed from the stored record once `receivedAt` is older than `duplicateWindowDays`
+  (7). Called when the host app opens the database and before each queue run (`host-store.ts`). Exact duplicates by
+  fingerprint keep working (the fingerprint stays).
+- Tests: 2 new core tests (MT stored only when the whole message is under review, scrubbed; embedding expiry), 1 new
+  IndexedDB test (prune old, keep fresh, idempotent). e2e: German sample stored with counted findings, no stored
+  `englishMT` for any message with a counted chunk, MT shown once in "Just analysed", fresh messages keep their embedding.
+- README §3.4 and §7 table, ARCHITECTURE §7 updated (the README hunks were committed by another agent in 4443717).
+
+**Verified**: `pnpm test` (133 passed), `pnpm typecheck`, `pnpm build`; e2e run at 04:05 (with all agents' working-tree
+changes): all host-storage checks above pass (`deStored`: P3 + N1, no review rows). That run had 6 failures, all in
+the "mode A frozen Kinyarwanda label" checks being added by another agent at the same time (catalog `ui:*` labels in
+progress), not related to this change.
+
+**Deviations / touched other areas (minimal)**: `apps/web/src/lib/db.ts`, `db.test.ts`, `host-store.ts`,
+`ui/MessageResult.tsx`, `scripts/e2e.ts` (web-app area), as the fix required.
+
+**Remains**: off-list/not-sure chunk embeddings (`ReviewChunk.embedding`) are still kept, since the unknown-topic
+clustering spans months; not in this audit item.

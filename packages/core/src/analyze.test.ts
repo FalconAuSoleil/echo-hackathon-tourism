@@ -3,7 +3,7 @@ import { analyzeMessage, isPhantomTranscript, mentionsGuide, type AnalyzeDeps } 
 import { analyzeAudioMessage } from "./audio.ts";
 import { makeConfig } from "./config.ts";
 import { createMatcher } from "./matcher.ts";
-import { toReviewChunks, toStoredMessage } from "./storage.ts";
+import { expireMessageEmbedding, toReviewChunks, toStoredMessage } from "./storage.ts";
 import { SIMILARITY_TEST_CONFIG, fakeEmbedder, fakeTranscriber, testCatalog } from "./test-fixtures.ts";
 import type { MessageInput, Transcript } from "./types.ts";
 
@@ -189,6 +189,39 @@ describe("storage : seulement ce que SPEC 6 autorise", () => {
     // « My name is [nom]. » et « Picking cherries... » : hors liste ; la négation : pas sûr.
     expect(review.map((r) => r.status).sort()).toEqual(["not_sure", "off_list", "off_list"]);
     expect(JSON.stringify(review)).not.toContain("Anna");
-    expect(review[0]!.englishMT).toBe("My name is [nom].");
+    // Le message contient un morceau compté (« The meal was delicious. ») : sa traduction anglaise entière n'est pas stockée.
+    expect(review.every((r) => r.englishMT === undefined)).toBe(true);
+  });
+
+  it("traduction anglaise stockée seulement si tout le message est à relire, et nettoyée", async () => {
+    const mixed = await analyzeMessage(
+      { ...audio({ text: "Die Mahlzeit war lecker. Der Weg war nicht zu lang.", language: "de", englishTranslation: "The meal was delicious. The path was not too long." }) },
+      await deps(),
+    );
+    expect(mixed.chunks.some((c) => c.status === "matched")).toBe(true);
+    expect(mixed.englishTranslation).toContain("The meal was delicious");
+    const mixedReview = toReviewChunks(mixed);
+    expect(mixedReview.length).toBeGreaterThan(0);
+    expect(JSON.stringify(mixedReview)).not.toContain("meal");
+
+    const allReview = await analyzeMessage(
+      { ...audio({ text: "Der Weg war nicht zu lang.", language: "de", englishTranslation: "The path was not too long, call Anna on +44 7700 900123." }) },
+      await deps(),
+    );
+    expect(allReview.chunks.every((c) => c.status === "not_sure" || c.status === "off_list")).toBe(true);
+    const r = toReviewChunks(allReview);
+    expect(r[0]!.englishMT).toMatch(/^The path was not too long/);
+    expect(r[0]!.englishMT).not.toMatch(/Anna|7700/);
+  });
+
+  it("l'embedding du message est retiré de la fiche après la fenêtre des doublons", async () => {
+    const stored = toStoredMessage(await analyzeMessage(text("The meal was delicious.", "en"), await deps()));
+    expect(stored.embedding).toBeInstanceOf(Float32Array);
+    expect(expireMessageEmbedding(stored, new Date("2026-10-09T10:00:00Z"), 7)).toBeNull();
+    const expired = expireMessageEmbedding(stored, new Date("2026-10-10T10:00:01Z"), 7);
+    expect(expired).not.toBeNull();
+    expect("embedding" in expired!).toBe(false);
+    expect(expired).toMatchObject({ id: stored.id, fingerprint: stored.fingerprint, findings: stored.findings });
+    expect(expireMessageEmbedding(expired!, new Date("2027-01-01T00:00:00Z"), 7)).toBeNull();
   });
 });

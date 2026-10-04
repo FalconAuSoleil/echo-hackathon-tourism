@@ -2,7 +2,7 @@
 import { toReviewChunks, toStoredMessage, type MessageAnalysis, type ReviewChunk, type StoredMessage } from "@echo/core";
 import { createStore } from "../ui/common.tsx";
 import { decodeTo16kMono } from "./audio.ts";
-import { enqueue, getSettings, knownMessages, newId, openEchoDB, saveAnalysis, saveSettings, type EchoDatabase, type QueueItem, type Settings } from "./db.ts";
+import { enqueue, getSettings, knownMessages, newId, openEchoDB, pruneExpiredEmbeddings, saveAnalysis, saveSettings, type EchoDatabase, type QueueItem, type Settings } from "./db.ts";
 import { analysis } from "./worker-client.ts";
 import type { Timings } from "../worker/protocol.ts";
 
@@ -32,7 +32,12 @@ export const host = createStore<HostState>({
 });
 
 let dbPromise: Promise<EchoDatabase> | null = null;
-export const db = (): Promise<EchoDatabase> => (dbPromise ??= openEchoDB());
+// À l'ouverture : les embeddings sortis de la fenêtre des doublons sont retirés des fiches.
+export const db = (): Promise<EchoDatabase> =>
+  (dbPromise ??= openEchoDB().then(async (d) => {
+    await pruneExpiredEmbeddings(d);
+    return d;
+  }));
 
 export async function refresh(): Promise<void> {
   const d = await db();
@@ -76,6 +81,7 @@ export async function removeQueued(id: string): Promise<void> {
 export async function processQueue(): Promise<void> {
   if (host.get().processing) return;
   const d = await db();
+  await pruneExpiredEmbeddings(d);
   const items = (await d.getAll("queue")).sort((a, b) => a.receivedAt.localeCompare(b.receivedAt));
   for (const item of items) {
     host.set((s) => ({ ...s, processing: item.id }));

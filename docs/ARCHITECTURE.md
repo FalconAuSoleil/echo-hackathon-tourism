@@ -262,8 +262,8 @@ Fallback: file picker "Import a voice message" and paste box for text.
 | Store | Key | Fields | Notes |
 |---|---|---|---|
 | `queue` | `id` | `receivedAt`, `kind: "audio"|"text"`, `blob?`, `text?`, `mime?` | Temporary inbox. Audio deleted right after transcription; text deleted after analysis. |
-| `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint`, `embedding?` (message embedding, near-duplicates), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
-| `reviewChunks` | `id` | `ReviewChunk` from `toReviewChunks`: `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?` (scrubbed), `mentionsGuide`, `reason?`, `embedding` (Float32Array, for clustering), `clusterId?` (set by the app) | The "To be read by a person" list. |
+| `messages` | `id` | `StoredMessage` from `toStoredMessage`: `receivedAt`, `month`, `lang`, `source`, `status`, `findings: {id, confidence}[]`, `coopFindings`, `notSureCount`, `offListCount`, `fingerprint`, `embedding?` (message embedding, near-duplicates; removed by `pruneExpiredEmbeddings` once older than `duplicateWindowDays` = 7, at app start and before each queue run), `synthetic?` | No text, no audio, no sender. Index on `month`, `fingerprint`. |
+| `reviewChunks` | `id` | `ReviewChunk` from `toReviewChunks`: `messageId`, `month`, `status: "not_sure"|"off_list"`, `text` (scrubbed), `englishMT?` (scrubbed; only when every chunk of the message is not_sure/off_list, see `wholeMessageUnderReview`), `mentionsGuide`, `reason?`, `embedding` (Float32Array, for clustering), `clusterId?` (set by the app) | The "To be read by a person" list. |
 | `recaps` | `month` | `lines: RecapLine[]`, `builtAt`, `smsOpenedAt?` | |
 | `settings` | `key` | `hostPhone` (the host's own number), `pinHash?`, `coopConsent`, `asrModel`, `thresholds?` | |
 

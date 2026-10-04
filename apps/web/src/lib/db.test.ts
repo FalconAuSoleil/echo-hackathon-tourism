@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { describe, expect, it } from "vitest";
 import { toReviewChunks, toStoredMessage, type MessageAnalysis } from "@echo/core";
-import { enqueue, getSettings, knownMessages, openEchoDB, saveAnalysis, saveSettings, wipeAll } from "./db.ts";
+import { enqueue, getSettings, knownMessages, openEchoDB, pruneExpiredEmbeddings, saveAnalysis, saveSettings, wipeAll } from "./db.ts";
 
 const analysis: MessageAnalysis = {
   id: "m1",
@@ -23,6 +23,21 @@ const analysis: MessageAnalysis = {
 };
 
 describe("IndexedDB storage", () => {
+  it("message embeddings are removed once older than the duplicate window (7 days)", async () => {
+    const db = await openEchoDB("test-prune");
+    const emb = new Float32Array([0.6, 0.8]);
+    await saveAnalysis(db, { ...toStoredMessage(analysis), id: "old", receivedAt: "2026-09-20T10:00:00.000Z", embedding: emb }, []);
+    await saveAnalysis(db, { ...toStoredMessage(analysis), id: "new", receivedAt: "2026-10-03T10:00:00.000Z", embedding: emb }, []);
+    expect(await pruneExpiredEmbeddings(db, new Date("2026-10-04T12:00:00.000Z"))).toBe(1);
+    const old = (await db.get("messages", "old"))!;
+    expect("embedding" in old).toBe(false);
+    expect(old).toMatchObject({ fingerprint: "abc", findings: [{ id: "P3", confidence: 0.9 }] });
+    expect((await db.get("messages", "new"))!.embedding).toEqual(emb);
+    // Idempotent ; le doublon exact par empreinte reste détectable (fenêtre gérée par le cœur).
+    expect(await pruneExpiredEmbeddings(db, new Date("2026-10-04T12:00:00.000Z"))).toBe(0);
+    expect((await knownMessages(db)).find((k) => k.receivedAt?.startsWith("2026-09-20"))).toEqual({ fingerprint: "abc", receivedAt: "2026-09-20T10:00:00.000Z" });
+  });
+
   it("stores only the SPEC 6 shapes: no full text in messages", async () => {
     const db = await openEchoDB("test-1");
     await saveAnalysis(db, toStoredMessage(analysis), toReviewChunks(analysis));

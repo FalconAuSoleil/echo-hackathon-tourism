@@ -134,6 +134,13 @@ export function MessageResult({
           <span data-testid="transcript">{a.scrubbedText}</span>
         </p>
       )}
+      {a.englishTranslation && a.englishTranslation.trim() !== a.scrubbedText.trim() && (
+        <p data-testid="english-mt">
+          <span class="badge mt">machine translation, to be checked</span>{" "}
+          <span class="muted">English, whole message (Whisper), shown once, stored only if no chunk was counted: </span>
+          {a.englishTranslation}
+        </p>
+      )}
       {a.status === "inaudible" && <p class="muted">Nothing is guessed: the message is not counted. The audio has been deleted.</p>}
       {inList.length > 0 && (
         <>

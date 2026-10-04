@@ -189,6 +189,19 @@ try {
   check(stored.messages.length === 2 && stored.queue.length === 0, "2 message records stored, queue empty");
   check(!/John|Smith|7700|900123/.test(storedJson), "no name or phone number in IndexedDB");
   check(!storedJson.includes("tasting was wonderful"), "full text not stored (only not-sure / off-list chunks)");
+  // Traduction anglaise Whisper : jamais stockée pour un message dont un morceau a été compté (elle contiendrait ce morceau).
+  type Row = { id: string; messageId?: string; lang?: string; findings?: unknown[]; englishMT?: string };
+  const msgs = stored.messages as Row[];
+  const reviewRows = stored.review as Row[];
+  const de = msgs.find((m) => m.lang === "de");
+  const mtOfCounted = reviewRows.filter((r) => r.englishMT && (msgs.find((m) => m.id === r.messageId)?.findings?.length ?? 0) > 0);
+  report.deStored = { findings: de?.findings, reviewRows: reviewRows.filter((r) => r.messageId === de?.id).map(({ id, englishMT }) => ({ id, englishMT })) };
+  check(!!de && (de.findings?.length ?? 0) > 0, `German sample stored with counted findings (${JSON.stringify(de?.findings)})`);
+  check(mtOfCounted.length === 0, "no stored englishMT for a message with a counted chunk (German sample: matched clauses not kept as text)");
+  const mtShown = await page.getByTestId("english-mt").count();
+  check(mtShown > 0, `English machine translation shown once in "Just analysed", labelled "to be checked" (${mtShown})`);
+  const withEmbedding = (stored.messages as { embedding?: unknown }[]).filter((m) => m.embedding).length;
+  check(withEmbedding === 2, "fresh messages keep their embedding (duplicate window: 7 days)");
   const hostSms = await page.locator("[data-testid=sms-part] a").first().getAttribute("href");
   check(!!hostSms && hostSms.startsWith("sms:%2B250788000111?body="), `SMS link uses the host number (${hostSms?.slice(0, 40)}…)`);
   await page.screenshot({ path: join(SHOTS, "09-host-app.png"), fullPage: true });
