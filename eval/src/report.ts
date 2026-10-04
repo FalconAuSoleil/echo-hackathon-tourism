@@ -16,6 +16,25 @@ const table = (head: string[], rows: (string | number)[][]) =>
 
 const LANGS = ["en", "fr", "de", "es"];
 
+/** Matrice de confusion (lignes = passages annotés, colonnes = décision d'Echo), colonnes et lignes vides masquées. */
+function confusionTable(conf: { rows: string[]; cols: string[]; counts: number[][] }): string {
+  const usedCols = conf.cols.filter((_, j) => conf.counts.some((r) => (r[j] ?? 0) > 0));
+  return table(["annotated \\ Echo", ...usedCols], conf.rows.map((r, i) => [r, ...usedCols.map((cname) => {
+    const v = conf.counts[i]![conf.cols.indexOf(cname)];
+    return v ? (cname === r ? `**${v}**` : String(v)) : "·";
+  })]).filter((row) => row.slice(1).some((x) => x !== "·")));
+}
+
+/** Tableau par langue du niveau 3 (résumés plats de level3.json : models.*.*.echo.byLang / keywords.byLang). */
+export function level3LangTable(r: J): string {
+  return table(["Lang", "Clips", "WER", "Echo P", "Echo R", "Echo F1", "Echo error among accepted", "Echo captured", "Echo not sure", "Kw P", "Kw R", "Kw F1", "Kw error among accepted", "Kw captured"],
+    LANGS.map((l) => {
+      const a = r.echo.byLang[l];
+      const b = r.keywords.byLang[l];
+      return [l, a.messages, pct(r.werByLang[l]?.wer), num(a.precision), num(a.recall), num(a.f1), `${pct(a.acceptedErrorRate)} ${ci(a.acceptedErrorCi95)} (${a.accepted} acc.)`, pct(a.captureRate), pct(a.notSureRate), num(b.precision), num(b.recall), num(b.f1), `${pct(b.acceptedErrorRate)} (${b.accepted} acc.)`, pct(b.captureRate)];
+    }));
+}
+
 // --- Courbe SVG (statique, fond clair explicite pour rester lisible dans un rendu sombre) ---
 function curveSvg(cal: J[], test: J[], chosen: number, kw: { coverage: number; err: number } | undefined, label: string): string {
   const W = 720, H = 420, L = 64, R = 24, T = 48, B = 56;
@@ -212,14 +231,9 @@ export function runReport(log: (s: string) => void = console.log) {
       })));
     w();
     // Confusion matrix (Echo, test): rows = annotated, cols = predicted
-    const conf = e.all.confusion;
-    const usedCols = conf.cols.filter((_: string, j: number) => conf.counts.some((r: number[]) => (r[j] ?? 0) > 0));
     w("Confusion matrix (Echo, test half, annotated passages → what Echo did on the overlapping chunks; empty columns hidden):");
     w();
-    w(table(["annotated \\ Echo", ...usedCols], conf.rows.map((r: string, i: number) => [r, ...usedCols.map((cname: string) => {
-      const v = conf.counts[i][conf.cols.indexOf(cname)];
-      return v ? (cname === r ? `**${v}**` : String(v)) : "·";
-    })]).filter((row: string[]) => row.slice(1).some((x) => x !== "·"))));
+    w(confusionTable(e.all.confusion));
     w();
 
     // Unknown topics
@@ -286,6 +300,35 @@ export function runReport(log: (s: string) => void = console.log) {
       w();
       w(table(["Condition", ...LANGS], Object.entries<J>(l3.models[anyModel]).map(([cond, r]) => [cond, ...LANGS.map((l) => pct(r.werByLang[l].wer))])));
       w();
+    }
+    // Détail par langue, par constat et matrice de confusion (SPEC 9 « Les mesures, langue par langue »)
+    if (l3.models["whisper-base"]) {
+      for (const cond of ["snr10", "clean_pad"].filter((c) => l3.models["whisper-base"][c])) {
+        const r = l3.models["whisper-base"][cond];
+        const label = cond === "snr10" ? "whisper-base, 10 dB SNR outdoor noise" : "whisper-base, clean speech with 0.4 s silence around it";
+        w(`### Level 3 in detail: ${label} (SYNTHETIC voices, all ${l3.clips} clips)`);
+        w();
+        w("Per language. P / R / F1: message level. Error among accepted: chunk answers counted that do not match the annotation, with");
+        w("its 95 % interval and the number of accepted answers (\"acc.\"); with so few accepted answers per language the intervals");
+        w("are very wide. Captured: annotated remarks counted with the right finding. Not sure: share of chunks. Kw: keyword baseline on the");
+        w("same Whisper transcripts.");
+        w();
+        w(level3LangTable(r));
+        w();
+        w("Per finding (message level):");
+        w();
+        w(table(["Finding", "Support", "Echo P", "Echo R", "Echo F1", "Kw P", "Kw R", "Kw F1"],
+          Object.keys(r.echo.all.perFinding).map((f) => {
+            const a = r.echo.all.perFinding[f];
+            const b = r.keywords.all.perFinding[f];
+            return [f, a.tp + a.fn, num(a.precision), num(a.recall), num(a.f1), num(b?.precision), num(b?.recall), num(b?.f1)];
+          })));
+        w();
+        w("Confusion matrix (Echo; annotated passages → what Echo did on the overlapping chunks; empty rows and columns hidden):");
+        w();
+        w(confusionTable(r.echo.all.confusion));
+        w();
+      }
     }
     // Choix du Whisper
     const base10 = (m: string) => l3.models[m]?.snr10?.echo?.all;

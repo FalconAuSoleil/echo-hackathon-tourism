@@ -12,7 +12,7 @@ text-to-speech voices (Piper), not by people. Label every number derived from it
 | `check_disjoint.py` | checks that no feedback sentence is near-identical to a `catalog/catalog.json` example | yes |
 | `audio_manifest.jsonl` | level 3: the 80 feedbacks turned into speech — voice, speaker, speed, voice license, noise clips and their licenses, SNR files | yes |
 | `generated/audio/{clean,snr20,snr10,snr5}/<id>.wav` | level-3 audio, 16 kHz mono | **no** (git-ignored, ~55 MB) — `bash tools/tts/make_eval_audio.sh` |
-| `demo-samples/*.wav` + `manifest.json` | the 10 demo messages of SPEC 8 (synthetic voices), with transcripts and expected outcomes | yes (1.6 MB) |
+| `demo-samples/*.wav` + `manifest.json` | the 10 demo messages of SPEC 8 (synthetic voices), with transcripts and expected outcomes | yes (1.5 MB) |
 
 ## 1. Level 2 — `feedback.jsonl`
 
@@ -155,23 +155,32 @@ The official level-3 numbers come from `pnpm eval`. Known effect: very short fee
 
 ## 3. Demo samples — `demo-samples/` (SPEC 8)
 
-10 committed WAV files (16 kHz mono, 1.6 MB in total), **synthetic voices**, to be labelled as such in the demo.
+10 committed WAV files (16 kHz mono, 1.5 MB in total), **synthetic voices**, to be labelled as such in the demo.
 `manifest.json` gives for each: transcript, language, voice + license, duration and the expected outcome.
 
 | id | lang | content | expected |
 |---|---|---|---|
-| de-roasting-path | de | roasting appreciated + path too long | P3 + N1 |
+| de-roasting-path | de | roasting appreciated + "der Weg vom Dorf bis hierher war viel zu lang" | P3 + N1 |
 | en-prices-buy | en | unclear prices + wants to buy coffee | N2 + P9 |
 | fr-welcome-meal | fr | warm welcome + meal | P1 + P4 |
 | es-visit-too-long | es | visit too long | N3 |
 | en-negation | en | "the walk up was not too long at all" | never N1 (not sure acceptable) |
-| fr-ambiguous | fr | "c'était particulier… je ne sais pas quoi en penser" | not sure |
+| fr-ambiguous | fr | "je dirais que c'était peut-être un peu long par moments" (hedged) | not sure (every chunk) |
 | en-picking, de-picking, fr-picking | en, de, fr | wish to pick coffee cherries | off-list ×3 → "unknown topic recurring at 3 visitors" |
 | inaudible-noise | – | 1.6 s of faint generated brown noise (numpy, no third-party audio) | inaudible, not counted |
 
-Recreate: `.venv/bin/python tools/tts/synthesize_demo.py`. Voices/speakers were chosen for intelligibility, and
-Piper's sampling is random, so the script makes 4 takes per sample and keeps the one with the lowest
-whisper-base WER (recorded as `voice.take` in the manifest). Unlike the level-3 audio, the demo samples are
-therefore *selected* clean takes: they show the pipeline, they are not evidence of accuracy.
-Whisper-base on the committed takes: WER 0 to 0.22 per sample, all languages detected correctly; the
+Recreate: `.venv/bin/python tools/tts/synthesize_demo.py` (`--only id1,id2` re-takes some samples and keeps the
+others). Voices/speakers were chosen for intelligibility, and Piper's sampling is random, so the script makes several
+takes per sample (`--takes`, default 4), runs each through the shipped pipeline (`tools/tts/check_demo.mts`:
+whisper-base + `@echo/core` with the calibrated thresholds, on Node) and keeps the lowest-WER take among those whose
+outcome matches `expected` (recorded as `voice.take` in the manifest). Unlike the level-3 audio, the demo samples are
+therefore *selected* takes: they show the pipeline, they are not evidence of accuracy. Check the committed files with
+`cd eval && npx tsx ../tools/tts/check_demo.mts` (all 10 match on 2026-10-04; the browser e2e test asserts the
+German P3 + N1 and the ambiguous "not sure" again with onnxruntime-web).
+
+History: the first `fr-ambiguous` sentence ("c'était particulier… je ne sais pas trop quoi en penser") ended off-list
+once transcribed, and the first German path clause ("hinauf zur Farm") was misheard and fell to "not sure"; both
+were rewritten and re-taken on 2026-10-04 (6 takes each). The new ambiguous sentence is close to the threshold: 1 of
+its 6 takes was counted as N3 "visit too long".
+Whisper-base on the committed takes: WER 0 to 0.25 per sample, all languages detected correctly; the
 inaudible sample is transcribed as "you" with confidence 0.12 and lasts 1.6 s (< 3 s rule).

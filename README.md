@@ -281,8 +281,22 @@ RESULTS.md); the test half is not perfectly untouched.
 | 5 dB SNR | 23.9 % | 97 % | 14 | 30.8 % | 8.3 % | 0.51 | 49.7 % | 65.9 % | 32.4 % |
 
 Loss vs text: about −8 points of capture at 10 dB, with the error among accepted answers staying under 10 % in every
-condition. 12 of the 80 clips are under 3 s ("Thanks!", "Meh.") and are inaudible by design. WER by language at
-10 dB (whisper-base): en 11.3 %, fr 22.1 %, de 21.9 %, es 15.4 %. Tiny and small rows are in RESULTS.md.
+condition. 12 of the 80 clips are under 3 s ("Thanks!", "Meh.") and are inaudible by design. Tiny and small rows are
+in RESULTS.md.
+
+Per language at 10 dB SNR (whisper-base, 20 clips per language, SYNTHETIC voices). P / R / F1 at message level; error
+among accepted with its 95 % interval and the number of accepted answers; not sure = share of chunks:
+
+| Lang | WER | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Keywords F1 | Keywords error among accepted | Keywords captured |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| en | 11.3 % | 1.00 | 0.41 | 0.58 | 0.0 % [0–30] (9 accepted) | 39.1 % | 37.5 % | 0.75 | 32.1 % (28 accepted) | 78.3 % |
+| fr | 22.1 % | 1.00 | 0.43 | 0.61 | 0.0 % [0–28] (10 accepted) | 34.8 % | 52.6 % | 0.74 | 33.3 % (33 accepted) | 73.9 % |
+| de | 21.9 % | 0.88 | 0.35 | 0.50 | 12.5 % [2–47] (8 accepted) | 35.0 % | 48.6 % | 0.51 | 42.9 % (21 accepted) | 45.0 % |
+| es | 15.4 % | 1.00 | 0.36 | 0.53 | 0.0 % [0–28] (10 accepted) | 32.0 % | 55.9 % | 0.75 | 26.7 % (30 accepted) | 76.0 % |
+
+With 8 to 10 accepted answers per language the intervals are very wide: the only wrong accepted answer at 10 dB is
+German. The same table for clean speech, the per-finding table and the confusion matrices are in
+[`eval/results/RESULTS.md`](eval/results/RESULTS.md) ("Level 3 in detail").
 
 **Which Whisper.** Rule: the smallest model with FLEURS WER ≤ 30 % in every visitor language **and**, at 10 dB, error
 among accepted ≤ 10 % with capture at most 10 points below the best model. Tiny fails (FLEURS fr 67 %, de 52 %; 10 dB
@@ -510,15 +524,19 @@ Found during the build:
   the frozen sentence says "{p} messages were not understood".
 - **Unknown-topic rule tuned on its only example** (picking); it deviates from SPEC 4.5 by also clustering
   below-threshold "not sure" chunks; with many messages it produces false alerts.
-- **The SPEC 8 "ambiguous" demo sample ends "off-list", not "not sure"**: still never counted and listed for a
-  person, but in the off-list part.
+- **The "ambiguous" demo sample is a chosen phrasing.** The first one ("c'était particulier… je ne sais pas trop quoi
+  en penser") ended off-list once transcribed; it was replaced by a hedged remark ("je dirais que c'était peut-être un
+  peu long par moments") that the shipped thresholds put in "not sure", and the take was selected by running the
+  shipped pipeline (`tools/tts/check_demo.mts`). One of six takes of that sentence was counted as N3 "visit too long":
+  hedged remarks sit near the threshold.
 - **Distinct visitors = distinct messages** (phone numbers are never stored), so one visitor sending two different
   messages counts twice for the unknown-topic rule.
 - **Date of a message = import time** (WhatsApp does not pass the send date when sharing).
 - **The cooperative view is local and synthetic**: no channel sends a farm's counts to the cooperative yet.
 - **No Swahili UI**; only the evaluated Whisper base is shipped (no smaller-model option in settings).
-- **Whisper base mishears some clauses** (in the demo the German "path too long" clause falls to "not sure"), which is
-  safe but lowers capture.
+- **Whisper base mishears some clauses** (the first German demo take turned "hinauf zur Farm" into "in Naufzur fahren",
+  and the "path too long" clause fell to "not sure"; the sample was re-written and re-taken), which is safe but lowers
+  capture.
 - **Memory: a 2 GB phone is probably not enough.** On the Android 14 emulator with 2 GB of RAM, the WebView renderer
   (≈ 1.55 GB with both models loaded) **was killed by low memory during transcription**: no message could be analysed
   (the app now restarts the page with a message instead of dying). With 3 GB it worked (6 s sample in 18.4 s). Not
@@ -651,7 +669,7 @@ on a real phone, a real SMS, a real WhatsApp share.
 |---|---|---|
 | Evaluation feedback corpus (250 feedbacks, levels 2–3) | **Synthetic**: written by the team, no real visitor | `eval/data/README.md`, RESULTS.md, this README |
 | Level-3 test audio | **Synthetic voices** (Piper TTS) + real outdoor noise (ESC-50) | RESULTS.md, data sheet |
-| Demo sample messages (10) | **Synthetic voices**; 9 are the best of 4 takes by whisper-base WER (they demonstrate, they do not measure); 1 is generated noise | Demo UI badge "synthetic voices", `eval/data/demo-samples/manifest.json` |
+| Demo sample messages (10) | **Synthetic voices**; 9 are selected takes (best of 4 by whisper-base WER; the German and the ambiguous ones re-taken as best of 6 among the takes whose outcome through the shipped pipeline matches the expected one): they demonstrate, they do not measure; 1 is generated noise | Demo UI badge "synthetic voices", `eval/data/demo-samples/manifest.json` |
 | Catalog example phrasings (756) | **Synthetic**, written by the team | `catalog/catalog.json` (`examplesSynthetic: true`) |
 | Kinyarwanda sentences and audio clips | **Machine translation (NLLB-200) and synthetic voice (MMS-TTS), not validated by a speaker** | Recap view in the app, `catalog/README.md`, `status: machine_translated_unvalidated` |
 | 3-month history in the demo | **Synthetic**: hand-written finding lists, not produced by the models | Demo UI badges "synthetic" |

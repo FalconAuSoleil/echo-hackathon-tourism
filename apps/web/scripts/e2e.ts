@@ -118,12 +118,12 @@ try {
   check(/French/.test(byTitle("French: welcome")?.lang ?? ""), "French detected for the French sample");
   check(/Spanish/.test(byTitle("Spanish")?.lang ?? ""), "Spanish detected for the Spanish sample");
   check(!(byTitle("negation")?.counted ?? "").includes("N1"), "negation sample does not count N1 (path too long)");
+  const deRes = byTitle("German: roasting");
+  check(/P3 /.test(deRes?.counted ?? "") && /N1 /.test(deRes?.counted ?? ""), `German sample counts P3 (roasting) and N1 (path too long) (${deRes?.counted.replace("Counted for this message: ", "")})`);
   const amb = byTitle("ambiguous");
-  // SPEC 8 attend « pas sûr » ; selon les seuils calibrés par l'évaluation, le morceau peut aussi tomber « hors liste ».
-  // Le test exige qu'aucun constat ne soit compté et rapporte le statut (décision du cœur, pas de l'interface).
-  check(!!amb && !amb.counted.includes("P") && !amb.counted.includes("N"), "ambiguous sample counts no finding");
+  // SPEC 8 : le message ambigu doit finir en « pas sûr » (tous ses morceaux), sans aucun constat compté.
   report.ambiguousChunkStatuses = amb?.chunks.map((c) => c.status);
-  console.log(`  info ambiguous sample chunk statuses: ${amb?.chunks.map((c) => c.status).join(", ")}`);
+  check(!!amb && amb.chunks.length > 0 && amb.chunks.every((c) => c.status === "not_sure") && !/[PN]\d+ /.test(amb.counted), `ambiguous sample ends in "not sure" (${amb?.chunks.map((c) => c.status).join(", ")})`);
   const anyUnsure = await page.locator(".chunk.not_sure .ask").count();
   check(anyUnsure > 0, `"Not sure: ask a person" shown (${anyUnsure} chunks)`);
   for (const r of res) console.log(`     ${r.title.padEnd(32)} ${String(r.status).padEnd(10)} ${r.lang.split(" (")[0]!.padEnd(8)} ${r.counted.replace("Counted for this message: ", "")}`);

@@ -492,3 +492,40 @@ labels, catalog.json not regenerated yet); not touched by this change.
 
 **Remains**: record the video. If the catalog gains frozen UI labels (work in progress by another agent), the
 README's "~30 frozen sentences" counts (§3, §4, §8, §9, §13) need updating.
+
+## 2026-10-04 — Demo samples (ambiguous, German) and level-3 detail tables (fix-eval-1 agent)
+
+**Built**
+- `fr-ambiguous` re-written as a hedged single clause, "Bon, je dirais que c'était peut-être un peu long par moments."
+  (fr_FR-upmc, speaker 1, length_scale 1.3, 3.8 s). Tried first: the suggested "c'était un peu long, enfin je ne sais
+  pas" family: as text it is "not sure", but once spoken Whisper puts a full stop before "enfin" and "Je ne sais pas
+  trop." alone falls off-list. The old sentence ended off-list as one chunk.
+- `de-roasting-path` path clause re-written: "Aber der Weg vom Dorf bis hierher war viel zu lang." ("hinauf zur Farm" was
+  transcribed "in Naufzur fahren" / "zu fahren"; "Fußweg zur Farm" too; all 6 takes of it missed N1).
+- `tools/tts/check_demo.mts` (new): runs demo samples or candidate takes through whisper-base + `analyzeAudioMessage`
+  with `DEFAULT_CONFIG` (Node onnxruntime) and compares with each sample's `expected` (strict: ambiguous = every chunk
+  "not sure"); exit 1 on a miss. `synthesize_demo.py` now uses it to pick takes (matching outcome first, then lowest WER;
+  a non-matching fallback is written as such in `voice.take`) and has `--only id1,id2` (others kept byte-identical).
+  Re-took only these two samples, 6 takes each; `manifest.json` updated (transcripts, take provenance, durations).
+- `apps/web/scripts/e2e.ts` (web area, minimal change): the info line became two assertions: German sample counts P3 **and**
+  N1; ambiguous sample has every chunk "not sure" and nothing counted. Variable named `deRes` because the web agent's
+  uncommitted work in the same file declares `de` in the same scope.
+- `eval/src/report.ts`: new "Level 3 in detail" sections for whisper-base at snr10 and clean_pad: per-language table
+  (WER, P, R, F1, error among accepted with 95 % CI and count, captured, not sure, keyword P/R/F1/error/captured),
+  per-finding table, confusion matrix (shared `confusionTable` with level 2). `RESULTS.md` regenerated with
+  `pnpm eval -- --level report` (only additions; no number changed). README §5.4 has the 10 dB per-language table.
+- Docs: README §10 limitations (ambiguous / German items rewritten), §12 demo row, `eval/data/README.md` §3,
+  `tools/tts/README.md`, `docs/DATASHEET.md` (take provenance, 1.5 MB), `docs/VIDEO_SCRIPT.md` rows 2 and 5.
+
+**Verified**: `check_demo.mts` on the committed manifest: 10/10 match. Browser e2e (headless Chromium, onnxruntime-web,
+own preview port 4189 because another agent's e2e held 4179): German → "P3 … N1 …" counted, ambiguous → `not_sure`;
+`pnpm --filter @echo/eval typecheck`, eval vitest (7), web typecheck. Two e2e runs; the second one (after fixing my regex)
+still had 6 FAILs, all "mode A: frozen Kinyarwanda label … shown with its icon", checks added by the web agent's
+uncommitted work in progress, not related to the samples.
+
+**Notes / deviations**: the ambiguous sentence sits close to the threshold: 1 of its 6 takes was counted as N3
+"visit too long" (written in README §10 and eval/data/README). The take is selected for the demo, which shows the
+pipeline and measures nothing (as before). `docs/screenshots/` was rewritten by the e2e runs with the web agent's WIP UI;
+not committed by me.
+
+**Remains**: nothing for these two gaps. Re-run the full e2e once the web agent's work lands.

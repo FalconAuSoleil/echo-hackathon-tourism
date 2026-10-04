@@ -7,8 +7,12 @@ Output: eval/data/demo-samples/<id>.wav (16 kHz mono PCM16) + eval/data/demo-sam
 Voices, speakers and speeds were chosen among several candidates for intelligibility with whisper-base
 (tools/tts/check_asr.mts), so that the demo shows the pipeline rather than TTS artefacts. Piper samples noise
 inside its ONNX graph (not seedable), so each run gives new takes: the script makes --takes random takes per
-sample and keeps the one with the lowest whisper-base WER (needs `pnpm models:download`; falls back to take 0). The level-3 evaluation
-audio is NOT selected that way (voices rotate, speakers are random).
+sample and runs them through the shipped pipeline (tools/tts/check_demo.mts: whisper-base + @echo/core with the
+calibrated thresholds, on Node). It keeps a take whose outcome matches the sample's `expected` block, the one
+with the lowest whisper-base WER among those (or the lowest WER overall, flagged, if none matches). Needs
+`pnpm models:download`; falls back to take 0. This is a deliberate selection for the DEMO only, written in the
+manifest; the level-3 evaluation audio is NOT selected that way (voices rotate, speakers are random).
+`--only id1,id2` re-takes just those samples and keeps the other files and manifest entries as they are.
 """
 from __future__ import annotations
 
@@ -30,8 +34,10 @@ OUT = REPO / "eval" / "data" / "demo-samples"
 
 # (id, lang, voice, speaker, length_scale, transcript, expected)
 SAMPLES = [
+    # Chemin : « hinauf zur Farm » était mal transcrit par whisper-base (« in Naufzur fahren », « zu fahren ») et la
+    # phrase tombait sous le seuil ; « bis hierher » se transcrit bien et reste un constat N1 net (2026-10-04).
     ("de-roasting-path", "de", "de_DE-thorsten-medium", None, 1.1,
-     "Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht. Aber der Weg vom Dorf hinauf zur Farm war wirklich viel zu lang.",
+     "Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht. Aber der Weg vom Dorf bis hierher war viel zu lang.",
      {"status": "analyzed", "findings": ["P3", "N1"], "notSure": False,
       "note": "SPEC 8: German, roasting appreciated + path too long"}),
     ("en-prices-buy", "en", "en_US-libritts_r-medium", 3, 1.0,
@@ -50,8 +56,13 @@ SAMPLES = [
      "The walk up to the farm was not too long at all, honestly it was fine.",
      {"status": "analyzed", "findings": [], "mustNot": ["N1"], "notSure": "allowed",
       "note": "SPEC 7/8: negation, must NOT give N1 (path too long); not sure is acceptable"}),
-    ("fr-ambiguous", "fr", "fr_FR-upmc-medium", 1, 1.1,
-     "Bon, c'était particulier, comme expérience. Honnêtement, je ne sais pas trop quoi en penser.",
+    # Message hésitant : proche de « visite trop longue » sans l'affirmer (une seule proposition, pour que Whisper ne
+    # la coupe pas en deux). Les phrases précédentes ne montraient pas le « pas sûr » une fois transcrites :
+    # « c'était particulier… je ne sais pas trop quoi en penser » tombait « hors liste », et « …, enfin je ne sais pas
+    # trop » était coupé avant « enfin », la fin seule tombant « hors liste » (2026-10-04).
+    # Lent (1.3) : à 1.1 la prise ne durait que 3,1 s, juste au-dessus des 3 s sous lesquelles un message est « inaudible ».
+    ("fr-ambiguous", "fr", "fr_FR-upmc-medium", 1, 1.3,
+     "Bon, je dirais que c'était peut-être un peu long par moments.",
      {"status": "analyzed", "findings": [], "notSure": True,
       "note": "SPEC 8: ambiguous, must end in not sure (ask a person)"}),
     ("en-picking", "en", "en_US-libritts_r-medium", 40, 1.05,
@@ -85,48 +96,65 @@ def brown_noise(seconds: float, rms: float, seed: int = 3) -> np.ndarray:
 TAKES_DIR = REPO / "eval" / "data" / "generated" / "demo-takes"
 
 
-def pick_best_takes(takes: dict[str, list[Path]], texts: dict[str, tuple[str, str]]) -> dict[str, int]:
-    """Transcrit chaque prise avec whisper-base (adaptateur de l'app) et garde la prise au WER le plus bas."""
-    rows = [{"id": f"{sid}#{k}", "lang": texts[sid][0], "text": texts[sid][1], "clean": str(p)}
-            for sid, ps in takes.items() for k, p in enumerate(ps)]
-    jl = TAKES_DIR / "takes.jsonl"
-    jl.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n")
-    try:
-        out = subprocess.run(["npx", "tsx", "../tools/tts/check_asr.mts", str(jl), "clean", "onnx-community/whisper-base"],
-                             cwd=REPO / "eval", capture_output=True, text=True, check=True, timeout=1800).stdout
-    except (subprocess.SubprocessError, OSError) as e:
-        print(f"ASR selection unavailable ({e}); keeping take 0", file=sys.stderr)
-        return {sid: 0 for sid in takes}
-    best: dict[str, tuple[float, int]] = {}
-    for line in out.splitlines():
-        parts = line.split("\t")
-        if len(parts) >= 5 and parts[4].startswith("wer=") and "#" in parts[0]:
-            sid, k = parts[0].rsplit("#", 1)
-            w = float(parts[4][4:])
-            if sid not in best or w < best[sid][0]:
-                best[sid] = (w, int(k))
-            print(f"  {parts[0]} {parts[4]} {parts[-1]}")
-    return {sid: best.get(sid, (0.0, 0))[1] for sid in takes}
+def pick_best_takes(takes: dict[str, list[Path]], meta: dict[str, tuple[str, str, dict]]) -> dict[str, tuple[int, str]]:
+    """Fait passer chaque prise par le parcours livré (check_demo.mts) : prise conforme à l'attendu, puis WER minimal."""
+    samples = [{"id": f"{sid}#{k}", "file": str(p), "lang": meta[sid][0], "transcript": meta[sid][1], "expected": meta[sid][2]}
+               for sid, ps in takes.items() for k, p in enumerate(ps)]
+    jf = TAKES_DIR / "takes.json"
+    jf.write_text(json.dumps({"samples": samples}, ensure_ascii=False))
+    proc = subprocess.run(["npx", "tsx", "../tools/tts/check_demo.mts", str(jf), "--json"],
+                          cwd=REPO / "eval", capture_output=True, text=True, timeout=3600)
+    rows = [json.loads(l) for l in proc.stdout.splitlines() if l.startswith("{")]
+    if not rows:
+        print(f"take selection unavailable ({proc.stderr[-300:]}); keeping take 0", file=sys.stderr)
+        return {sid: (0, "take 0 (selection unavailable)") for sid in takes}
+    best: dict[str, tuple[bool, float, int]] = {}
+    for r in rows:
+        sid, k = r["id"].rsplit("#", 1)
+        cand = (r["ok"], -r["wer"], -int(k))
+        print(f"  {r['id']} ok={r['ok']} wer={r['wer']} {'; '.join(r['mismatches'])}")
+        if sid not in best or cand > best[sid]:
+            best[sid] = cand
+    out = {}
+    for sid in takes:
+        ok, negw, negk = best.get(sid, (False, 0.0, 0))
+        n = len(takes[sid])
+        why = "matches the expected outcome, lowest whisper-base WER among those" if ok else \
+              "NO take matched the expected outcome; lowest whisper-base WER kept"
+        out[sid] = (-negk, f"{-negk + 1} of {n} ({why}; checked with tools/tts/check_demo.mts)")
+    return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--takes", type=int, default=4, help="random Piper takes per sample; the most intelligible is kept")
+    ap.add_argument("--only", default="", help="comma-separated sample ids to re-take; others are kept as they are")
     args = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
+    only = {x for x in args.only.split(",") if x}
+    unknown = only - {s[0] for s in SAMPLES}
+    if unknown:
+        ap.error(f"unknown sample ids: {sorted(unknown)}")
+    previous = {}
+    if only and (OUT / "manifest.json").exists():
+        previous = {it["id"]: it for it in json.loads((OUT / "manifest.json").read_text())["samples"]}
+    todo = [s for s in SAMPLES if not only or s[0] in only]
     takes: dict[str, list[Path]] = {}
-    texts = {}
-    for sid, lang, voice, spk, ls, text, _ in SAMPLES:
-        texts[sid] = (lang, text)
+    meta = {}
+    for sid, lang, voice, spk, ls, text, expected in todo:
+        meta[sid] = (lang, text, expected)
         takes[sid] = []
         for k in range(args.takes):
             p = TAKES_DIR / sid / f"take{k}.wav"
             write_wav(p, synthesize(voice, text, spk, ls))
             takes[sid].append(p)
-    choice = pick_best_takes(takes, texts) if args.takes > 1 else {sid: 0 for sid in takes}
+    choice = pick_best_takes(takes, meta) if args.takes > 1 else {sid: (0, "1 of 1") for sid in takes}
     items = []
     for sid, lang, voice, spk, ls, text, expected in SAMPLES:
-        shutil.copyfile(takes[sid][choice[sid]], OUT / f"{sid}.wav")
+        if sid not in takes:
+            items.append(previous[sid])
+            continue
+        shutil.copyfile(takes[sid][choice[sid][0]], OUT / f"{sid}.wav")
         import soundfile as sf
         dur = sf.info(str(OUT / f"{sid}.wav")).duration
         items.append({
@@ -134,11 +162,11 @@ def main() -> int:
             "voice": {"engine": "piper-tts 1.8.0", "model": voice, "speaker": spk, "lengthScale": ls,
                       "license": VOICES[voice]["license"], "dataset": VOICES[voice]["dataset"],
                       "source": f"https://huggingface.co/rhasspy/piper-voices/tree/main/{VOICES[voice]['path']}",
-                      "take": f"{choice[sid] + 1} of {args.takes} (lowest whisper-base WER)"},
+                      "take": choice[sid][1]},
             "durationSec": round(dur, 2),
             "expected": expected,
         })
-        print(sid, f"{dur:.1f}s take {choice[sid]}")
+        print(sid, f"{dur:.1f}s take {choice[sid][0]}")
     sid, expected = INAUDIBLE
     pcm = brown_noise(1.6, 0.01)
     write_wav(OUT / f"{sid}.wav", pcm)

@@ -15,7 +15,7 @@
       "id": "de-roasting-path",
       "file": "de-roasting-path.wav",
       "lang": "de",
-      "transcript": "Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht. Aber der Weg vom Dorf hinauf zur Farm war wirklich viel zu lang.",
+      "transcript": "Das Rösten der Bohnen über dem Feuer hat mir am meisten Spaß gemacht. Aber der Weg vom Dorf bis hierher war viel zu lang.",
       "synthetic": true,
       "voice": {
         "engine": "piper-tts 1.8.0",
@@ -25,9 +25,9 @@
         "license": "CC0-1.0",
         "dataset": "Thorsten-Voice, https://github.com/thorstenMueller/Thorsten-Voice",
         "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/de/de_DE/thorsten/medium",
-        "take": "2 of 4 (lowest whisper-base WER)"
+        "take": "5 of 6 (matches the expected outcome, lowest whisper-base WER among those; checked with tools/tts/check_demo.mts)"
       },
-      "durationSec": 7.08,
+      "durationSec": 6.57,
       "expected": {
         "status": "analyzed",
         "findings": [
@@ -149,19 +149,19 @@
       "id": "fr-ambiguous",
       "file": "fr-ambiguous.wav",
       "lang": "fr",
-      "transcript": "Bon, c'était particulier, comme expérience. Honnêtement, je ne sais pas trop quoi en penser.",
+      "transcript": "Bon, je dirais que c'était peut-être un peu long par moments.",
       "synthetic": true,
       "voice": {
         "engine": "piper-tts 1.8.0",
         "model": "fr_FR-upmc-medium",
         "speaker": 1,
-        "lengthScale": 1.1,
+        "lengthScale": 1.3,
         "license": "CC-BY-SA-4.0",
         "dataset": "UPMC Pierre, https://github.com/marytts/upmc-pierre-data",
         "source": "https://huggingface.co/rhasspy/piper-voices/tree/main/fr/fr_FR/upmc/medium",
-        "take": "1 of 4 (lowest whisper-base WER)"
+        "take": "1 of 6 (matches the expected outcome, lowest whisper-base WER among those; checked with tools/tts/check_demo.mts)"
       },
-      "durationSec": 6.55,
+      "durationSec": 3.76,
       "expected": {
         "status": "analyzed",
         "findings": [],

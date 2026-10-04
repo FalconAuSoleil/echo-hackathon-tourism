@@ -42,10 +42,10 @@ Chrome, let the models load once (01-demo-loading → 02-demo-ready), then turn 
 | # | Time | Action | Caption on screen |
 |---|---|---|---|
 | 1 | 1:20 | Show the "Offline" badge and the model box ("everything runs on this device", sizes) | "Offline. Models on the device." |
-| 2 | 1:28 | Click sample **de-roasting-path** (German, synthetic voice): play a second of audio, then the result: transcript, language, chunks, findings with confidence | "Synthetic voice. German: roasting liked." If the "path too long" clause falls to "not sure" (it does with whisper-base in our runs), say so: "this clause was misheard, so it is not counted: it goes to a person." |
+| 2 | 1:28 | Click sample **de-roasting-path** (German, synthetic voice): play a second of audio, then the result: transcript, language, chunks, findings with confidence | "Synthetic voice. German: roasting liked, path too long." (P3 + N1; the e2e test asserts both.) |
 | 3 | 1:45 | Click **fr-welcome-meal** and **en-prices-buy** | "French and English: welcome, meal, unclear prices, wants to buy coffee." |
 | 4 | 1:55 | Click **en-negation** | "'Not too long' is not a complaint. Keywords count it; Echo does not." |
-| 5 | 2:03 | Click **fr-ambiguous** | "Ambiguous: never guessed, listed for a person." (It ends in the off-list part; still not counted.) |
+| 5 | 2:03 | Click **fr-ambiguous** | "'Maybe a bit long at times': hedged, so not sure. Never guessed, listed for a person." (It ends in orange "not sure"; the e2e test asserts it.) |
 | 6 | 2:10 | Click **inaudible-noise** | "1.6 s of noise: inaudible, not counted." |
 | 7 | 2:15 | Click the three **picking** samples (en, de, fr) | "Three visitors, three languages, a topic the tool doesn't know: flagged for a person, never named." |
 | 8 | 2:28 | Open the keyword-vs-Echo comparison (04-compare-keywords-vs-echo) | "Same messages, keyword matching: more counts, more wrong ones." |
