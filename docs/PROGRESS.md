@@ -986,6 +986,6 @@ configuration (48 % / 6 % on the held-out half).
   among accepted answers, the negation subset and the "not sure" routing. Touched outside the owned paths (minimal):
   `eval/src/level3.ts`, `eval/src/report.ts`, `eval/src/run.ts`, `eval/src/lib/keyword-sets.ts` (+ test),
   `apps/web/scripts/prepare-assets.ts`, `eval/keywords*/README.md`, `docs/ARCHITECTURE.md`.
-- **Remains**: the error on audio is above the 8 % bound in two conditions (20 dB, text of the level-3 messages); a
+- **Remains**: the error on audio is above the 8 % bound at 20, 10 and 5 dB (10.4 %, 8.7 %, 8.3 %) and on the text of the level-3 messages (10.2 %) [corrected by the verify pass: first written as "two conditions"]; a
   rule that also looks at audio (e.g. a stricter threshold when the transcription confidence is lower) would need its
   own calibration, not on the test half. Real visitors and a real phone are still unmeasured.

@@ -350,7 +350,8 @@ Keywords = the blind lists (headline baseline); the last column gives the origin
 
 Loss vs text: about −12 points of capture at 10 dB. The error among accepted answers is between 6 % and 10 % on audio
 (and 10.2 %, 6 of 59, on the text of these 80 messages, 39 of which are from the calibration half): above the 8 %
-bound of the calibration rule in two conditions, and about a third of the keyword error everywhere.
+bound of the calibration rule at 20, 10 and 5 dB and on that text (only clean speech stays under it), and about a
+third of the keyword error everywhere.
 With the previous configuration (threshold 0.84) the 10 dB row was 35.2 % captured, 2.7 % wrong: the new setting
 counts more remarks on audio but also makes more mistakes there (4 wrong answers out of 46 at 10 dB, vs 1 of 37).
 12 of the 80 clips are under 3 s ("Thanks!", "Meh.") and are inaudible by design. Tiny and small rows are in
