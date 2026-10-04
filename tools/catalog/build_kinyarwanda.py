@@ -5,14 +5,16 @@
   content    exemples synthétiques, mots-clés, intitulés → catalog.json (aucun modèle)
   translate  NLLB-200 (facebook/nllb-200-distilled-600M) fr/en → kin_Latn, rétro-traduction kin → fra et eng,
              similarité avec le modèle de l'app (paraphrase-multilingual-MiniLM-L12-v2, même fichier ONNX q8),
-             emplacements protégés puis vérifiés, simplification et nouvel essai si le score est bas.
+             emplacements protégés puis vérifiés, mot source recopié tel quel refusé, simplification et nouvel
+             essai si le score est bas.
              Journal complet des essais : catalog/translation-log.json
   audio      MMS-TTS kin (facebook/mms-tts-kin, CC-BY-NC 4.0) : un clip par phrase de constat, par morceau fixe
-             de modèle (entre les emplacements) et par nombre 0..31 → mp3 mono 16 kHz dans catalog/audio/
+             de modèle (entre les emplacements) et par nombre 0..31 → mp3 mono 16 kHz dans catalog/audio/ ;
+             seuls les clips dont le texte a changé sont refaits (--fresh-audio : tous)
 
 Tout le kinyarwanda est marqué « machine translation, not validated by a speaker ».
 
-Usage : .venv/bin/python tools/catalog/build_kinyarwanda.py [--stages ...] [--threshold 0.75]
+Usage : .venv/bin/python tools/catalog/build_kinyarwanda.py [--stages ...] [--threshold 0.75] [--only template:fix,...] [--fresh-audio]
 """
 from __future__ import annotations
 
@@ -37,6 +39,7 @@ from examples_negative import NEGATIVE_EXAMPLES  # noqa: E402
 from examples_positive import POSITIVE_EXAMPLES  # noqa: E402
 from keywords import KEYWORDS  # noqa: E402
 from sources import FINDING_SOURCES, NUMBERS, SLOT_GUARDS, TEMPLATE_SOURCES  # noqa: E402
+from validate_catalog import untranslated_words  # noqa: E402
 
 MT_MODEL = "facebook/nllb-200-distilled-600M"
 TTS_MODEL = "facebook/mms-tts-kin"
@@ -172,6 +175,9 @@ def translate_item(tr: Translator, emb: Embedder, item_id: str, candidates: list
             back_en = tr([rw_raw], "rw", "en")[0]
             sim_fr, sim_en = emb.sim(p_fr, back_fr), emb.sim(p_en, back_en)
             rw, slot_check = restore(rw_raw, slots)
+            leaked = untranslated_words(rw_raw, src_fr, src_en)
+            if rw is not None and leaked:  # mot source recopié (« message », « comments ») : pas du kinyarwanda
+                rw, slot_check = None, f"untranslated source words {leaked}"
             score = min(sim_fr, sim_en)
             options.append({"translatedFrom": src_lang, "rwRaw": rw_raw, "rw": rw, "slotCheck": slot_check,
                             "backTranslation": {"fr": back_fr, "en": back_en},
@@ -302,19 +308,29 @@ class Speaker:
         return len(wav) / self.rate
 
 
-def stage_audio(cat: dict) -> None:
-    print("audio: loading MMS-TTS kin")
-    sp = Speaker()
+def stage_audio(cat: dict, fresh: bool = False) -> None:
+    """Un clip n'est régénéré que si son texte parlé a changé (manifest.json), sauf avec fresh=True."""
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
-    for old in AUDIO_DIR.glob("*.mp3"):
-        old.unlink()
+    mpath = AUDIO_DIR / "manifest.json"
+    previous = {} if fresh or not mpath.exists() else \
+        {c["file"]: c for c in json.loads(mpath.read_text(encoding="utf-8"))["clips"]}
+    speaker: list[Speaker] = []
     manifest = []
+    regenerated = []
 
     def clip(name: str, text: str) -> str:
         spoken = tts_text(text)
         rel = f"audio/{name}.mp3"
-        dur = sp.to_mp3(spoken, ROOT / "catalog" / rel)
-        manifest.append({"file": rel, "text": text, "spoken": spoken, "seconds": round(dur, 2)})
+        old = previous.get(rel)
+        if old and old["spoken"] == spoken and (ROOT / "catalog" / rel).is_file():
+            dur = old["seconds"]
+        else:
+            if not speaker:
+                print("audio: loading MMS-TTS kin", flush=True)
+                speaker.append(Speaker())
+            dur = round(speaker[0].to_mp3(spoken, ROOT / "catalog" / rel), 2)
+            regenerated.append(rel)
+        manifest.append({"file": rel, "text": text, "spoken": spoken, "seconds": dur})
         return rel
 
     for f in cat["findings"]:
@@ -333,11 +349,15 @@ def stage_audio(cat: dict) -> None:
     p = cat["provenance"]["kinyarwanda"]
     p.update({"ttsModel": TTS_MODEL, "ttsLicense": "CC-BY-NC 4.0",
               "audioFormat": "mp3, mono, 16 kHz, 24 kbit/s; VITS seed " + str(TTS_SEED)})
+    kept = {c["file"] for c in manifest}
+    for fp in AUDIO_DIR.glob("*.mp3"):  # clips orphelins (phrase supprimée ou découpée autrement)
+        if f"audio/{fp.name}" not in kept:
+            fp.unlink()
     total = sum(fp.stat().st_size for fp in AUDIO_DIR.glob("*.mp3"))
-    (AUDIO_DIR / "manifest.json").write_text(json.dumps({"model": TTS_MODEL, "license": "CC-BY-NC 4.0",
+    mpath.write_text(json.dumps({"model": TTS_MODEL, "license": "CC-BY-NC 4.0",
                                                          "disclaimer": DISCLAIMER, "clips": manifest},
                                                         ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"audio: {len(manifest)} clips, {total/1024:.0f} KiB")
+    print(f"audio: {len(manifest)} clips ({len(regenerated)} regenerated: {regenerated}), {total/1024:.0f} KiB")
 
 
 def main() -> None:
@@ -345,6 +365,7 @@ def main() -> None:
     ap.add_argument("--stages", default="content,translate,audio")
     ap.add_argument("--threshold", type=float, default=0.75)
     ap.add_argument("--only", default=None, help="redo only these ids, e.g. finding:P10,template:fix")
+    ap.add_argument("--fresh-audio", action="store_true", help="regenerate every clip, not only changed ones")
     args = ap.parse_args()
     stages = args.stages.split(",")
     cat = load_catalog()
@@ -355,7 +376,7 @@ def main() -> None:
         stage_translate(cat, args.threshold, set(args.only.split(",")) if args.only else None)
         save_catalog(cat)
     if "audio" in stages:
-        stage_audio(cat)
+        stage_audio(cat, args.fresh_audio)
         save_catalog(cat)
     print("done → catalog/catalog.json")
 

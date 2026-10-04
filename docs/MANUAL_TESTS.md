@@ -97,7 +97,7 @@ Cannot be done here: no Kinyarwanda speaker. Everything in `catalog/` is flagged
    Check first the known drifts listed under the table (P2, P3, P6, P7, P8, N5, unknown_topic, keep/fix "ku" vs "kuri").
 2. Read three full recap lines aloud with numbers, e.g. "Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bumvaga bakiriwe neza."
    Is the word order natural once `{finding}` follows the colon?
-3. Listen to every clip in `catalog/audio/` (68 mp3, `audio/manifest.json` gives the text of each): is the word
+3. Listen to every clip in `catalog/audio/` (67 mp3, `audio/manifest.json` gives the text of each): is the word
    intelligible, is the pronunciation acceptable? Listen to `num-0` … `num-31` (counting form, e.g. "cumi na gatatu").
 4. Listen to a concatenated line (template part + number + part + number + finding clip, played by the app's
    "Listen" button): are the gaps between clips acceptable?

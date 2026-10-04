@@ -10,7 +10,7 @@ generated at runtime: the Kinyarwanda was produced **once**, offline, by `tools/
 | File | Content |
 |---|---|
 | `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 9 synthetic example phrasings × 4 visitor languages (756 in total), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
-| `audio/*.mp3` | 68 pre-generated clips (MMS-TTS kin, mono 16 kHz 24 kbit/s, ~360 KiB in total): 21 finding sentences, 15 fixed parts of templates, 32 numbers. `audio/manifest.json` lists text, spoken text and duration of each clip. |
+| `audio/*.mp3` | 67 pre-generated clips (MMS-TTS kin, mono 16 kHz 24 kbit/s, ~360 KiB in total): 21 finding sentences, 14 fixed parts of templates, 32 numbers. `audio/manifest.json` lists text, spoken text and duration of each clip. |
 | `translation-log.json` | Every translation attempt: source (fr, en), raw NLLB output, back-translations, similarity scores, slot check, which attempt was kept. |
 | `flores-check.json` | (not produced yet) our own chrF++ measure of the same NLLB model on FLORES-200 devtest, written by `tools/catalog/flores_check.py`. |
 
@@ -42,11 +42,11 @@ The authored source of truth is `tools/catalog/examples_positive.py`, `examples_
    the very same `onnx/model_quantized.onnx` file, mean pooling + L2 norm, run with onnxruntime in Python).
    Score = `min(cos(source_fr, back_fr), cos(source_en, back_en))`. Using both directions catches false friends
    that one language hides (e.g. French "retours" → `kugaruka` → back to "retours", but in English "returning").
-4. **Simplify and retry**: if the score is below **0.75**, the next, simpler candidate is translated. 9 of the 29
-   sentences needed a retry (P8, N3, N4, N7, N8, keep, fix, nothing_urgent, no_feedback); all are logged in
+4. **Simplify and retry**: if the score is below **0.75**, the next, simpler candidate is translated. 10 of the 29
+   sentences needed a retry (P8, N3, N4, N7, N8, keep, fix, nothing_urgent, not_understood, no_feedback); all are logged in
    `translation-log.json`. After a first full pass two templates (`fix`, `nothing_urgent`) were still under the
    threshold: simpler candidates were added to `sources.py` and those sentences re-run (`--only`). Final scores:
-   min 0.75, mean 0.87; every sentence passes (`backTranslationCheck: "passed"`).
+   min 0.75, mean 0.88; every sentence passes (`backTranslationCheck: "passed"`).
 5. **Numbers stay digits.** Before translation `{n} {k} {x} {p}` are replaced by guard numbers (17, 13, 14, 15:
    two-digit numbers NLLB copies verbatim, unlike 2 or 3 which it sometimes writes as words). After translation
    each guard must appear exactly once, no other digit may appear, then the slot is restored. A candidate failing
@@ -54,8 +54,12 @@ The authored source of truth is `tools/catalog/examples_positive.py`, `examples_
    their prefix ("The biggest problem ({k} out of {n})") and the frozen line is `<prefix>: {finding}`, where
    `{finding}` is a finding sentence translated and checked on its own. `tools/catalog/validate_catalog.py` and
    `validateCatalog` in core re-check every slot.
+   A candidate is also rejected when NLLB copies a source word unchanged (5+ letters, same first 5 letters, e.g.
+   "message" or "comments were not understood"); `validate_catalog.py` re-checks every frozen sentence against its
+   sources (proper nouns such as WhatsApp allowed).
 6. **Audio** with MMS-TTS Kinyarwanda (`facebook/mms-tts-kin`, VITS, fixed seed 1234 for reproducible clips),
-   compressed to mp3 mono 16 kHz 24 kbit/s with ffmpeg.
+   compressed to mp3 mono 16 kHz 24 kbit/s with ffmpeg. Only clips whose spoken text changed are regenerated
+   (`audio/manifest.json` is the reference; `--fresh-audio` redoes all).
 
 ### The audio recap: concatenating pre-generated clips
 
@@ -75,7 +79,7 @@ has no clip (core reports it in `missingAudio`, the digits are still shown and s
 |---|---|---|---|---|---|
 | P1 | Abashyitsi bumvaga bakiriwe neza. | Visitors felt welcome. | The visitors felt welcomed. | 0.98 | 1 |
 | P2 | Abashyitsi bakundaga gusura umurima w'ikawa. | Visitors liked the visit of the coffee field. | Guests often visited the coffee plantation. | 0.81 | 1 |
-| P3 | Abashyitsi bakundaga guteka no gusogongera ikawa. | Visitors liked roasting and tasting the coffee. | Guests enjoyed cooking and tasting coffee. | 0.86 | 1 |
+| P3 | Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya. | Visitors liked seeing the coffee prepared and tasting it. | The guests were thrilled to see how the coffee was prepared and consumed. | 0.87 | 1 |
 | P4 | Abashyitsi bishimiye ibyo kurya. | Visitors liked the meal. | The guests enjoyed the meal. | 0.91 | 1 |
 | P5 | Ibisobanuro byawe ku birebana n'ikawa birasobanutse neza. | Your explanations about coffee are clear. | Your definition of coffee is clear. | 0.91 | 1 |
 | P6 | Abashyitsi bakundaga kubona ubuzima nyakuri bwo mu isambu. | Visitors liked seeing real farm life. | Visitors enjoyed real life on the farm. | 0.93 | 1 |
@@ -99,17 +103,21 @@ has no clip (core reports it in `missingAudio`, the digits are still shown and s
 | fix | Ikibazo gikomeye kurusha ibindi ({k} ku {n}): {finding} | The biggest problem ({k} out of {n}): {finding} | The most important issue (13 out of 17) | 0.76 | 5 |
 | fix_streak | Ikibazo gikomeye kurusha ibindi ({k} kuri {n}), mu gihe cy'amezi {x}: {finding} | The biggest problem ({k} out of {n}), for {x} months: {finding} | The biggest problem (13 out of 17) in 14 months | 0.95 | 1 |
 | nothing_urgent | Nta kibazo gikomeye muri uku kwezi. | No big problem this month. | There are no major problems this month. | 0.88 | 3 |
-| unknown_topic | Hari igitekerezo cyihariye cyagarutse ku basura {k}: usabe umuntu gusoma izo message. | An unknown topic comes back from {k} visitors: ask a person to read these messages. | A special suggestion came back to 13 visitors: Ask someone to read the messages. | 0.87 | 1 |
-| not_understood | Ubutumwa {p} ntibwasobanukiwe: baza umuntu. | {p} messages were not understood: ask a person. | Message 15 was misunderstood: ask someone. | 0.83 | 1 |
+| unknown_topic | Abashyitsi {k} baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo. | {k} visitors talk about a new topic: ask a person to read their words. | 13 guests discuss a new topic: Ask someone to read their words. | 0.92 | 1 |
+| not_understood | {p} Amagambo adasobanutse neza: jya usaba umuntu. | {p} unclear remarks: ask someone. | 15 Confused words: Ask someone. | 0.82 | 2 |
 | no_feedback | Nta butumwa bw'umushyitsi muri uku kwezi. | No message from visitors this month. | There are no guest messages this month. | 0.82 | 2 |
 
 **What the back-translations show (read before trusting the scores).** A score above the threshold does not
 mean the sentence is right; the embedding model is lenient and the back-translation uses the same NLLB model, so
 errors can cancel out. Visible drifts a speaker should check first: P2 and P6 use a habitual past ("used to like");
-P3 says "cooking" for roasting; P7 says "this place" rather than "the landscape"; P8 lost "price" ("the visit is
-worthwhile"); N5 lost "you"; `unknown_topic` says "a special suggestion" for "an unknown topic" and uses the
-loanword "message"; `keep`/`fix` use `ku` and `fix_streak` uses `kuri` for "out of"; `fix_streak` ("for {x}
+P3 says `kuyirya` ("consume it") for tasting; P7 says "this place" rather than "the landscape"; P8 lost "price" ("the visit is
+worthwhile"); N5 lost "you"; `not_understood` says "words" (`amagambo`) for "remarks" and keeps a capital after the
+number; `keep`/`fix` use `ku` and `fix_streak` uses `kuri` for "out of"; `fix_streak` ("for {x}
 months") replaces "{x}th month in a row". These are honest limits of machine translation without a speaker.
+Fixed on 2026-10-04 (sources reworded, sentences re-run with `--only`, clips regenerated): `not_understood` said
+"{p} messages were not understood" while `{p}` counts remarks (not-sure chunks, a message can hold several);
+`unknown_topic` kept the English word "message" ("izo message"); P3 back-translated as "cooking" (NLLB has no word
+for roasting, so the source now says "seeing the coffee prepared and tasting it").
 For a language machine translation covers badly, a speaker can simply rewrite these ~30 sentences and record
 them, no model needed (set `status: "speaker_validated"`).
 

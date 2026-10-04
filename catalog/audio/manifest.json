@@ -17,9 +17,9 @@
     },
     {
       "file": "audio/finding-P3.mp3",
-      "text": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
-      "spoken": "abashyitsi bakundaga guteka no gusogongera ikawa",
-      "seconds": 3.33
+      "text": "Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya.",
+      "spoken": "abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya",
+      "seconds": 3.98
     },
     {
       "file": "audio/finding-P4.mp3",
@@ -191,27 +191,21 @@
     },
     {
       "file": "audio/template-unknown_topic-0.mp3",
-      "text": "Hari igitekerezo cyihariye cyagarutse ku basura ",
-      "spoken": "hari igitekerezo cyihariye cyagarutse ku basura",
-      "seconds": 2.64
+      "text": "Abashyitsi ",
+      "spoken": "abashyitsi",
+      "seconds": 0.67
     },
     {
       "file": "audio/template-unknown_topic-1.mp3",
-      "text": ": usabe umuntu gusoma izo message.",
-      "spoken": "usabe umuntu gusoma izo message",
-      "seconds": 1.87
-    },
-    {
-      "file": "audio/template-not_understood-0.mp3",
-      "text": "Ubutumwa ",
-      "spoken": "ubutumwa",
-      "seconds": 0.94
+      "text": " baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
+      "spoken": "baganira ku ngingo nshya usabe umuntu gusoma amagambo yabo",
+      "seconds": 3.78
     },
     {
       "file": "audio/template-not_understood-1.mp3",
-      "text": " ntibwasobanukiwe: baza umuntu.",
-      "spoken": "ntibwasobanukiwe baza umuntu",
-      "seconds": 1.84
+      "text": " Amagambo adasobanutse neza: jya usaba umuntu.",
+      "spoken": "amagambo adasobanutse neza jya usaba umuntu",
+      "seconds": 2.98
     },
     {
       "file": "audio/template-no_feedback-0.mp3",

@@ -42,6 +42,23 @@ class SlotProtection(unittest.TestCase):
         self.assertIsNone(b.restore("Ubutumwa 170", ["n"])[0])
 
 
+class UntranslatedWords(unittest.TestCase):
+    def test_detects_a_source_word_left_in_english(self):
+        self.assertEqual(v.untranslated_words("usabe umuntu gusoma izo message.",
+                                              "demandez à une personne de lire ces messages.",
+                                              "ask a person to read these messages."), ["message"])
+        self.assertEqual(v.untranslated_words("{p} comments were not understood: jya ubaza umuntu.",
+                                              "{p} commentaires", "{p} comments were not understood"),
+                         ["comments", "understood"])
+
+    def test_accepts_kinyarwanda_and_proper_nouns(self):
+        self.assertEqual(v.untranslated_words("Abashyitsi {k} baganira ku ngingo nshya.",
+                                              "{k} visiteurs parlent d'un sujet nouveau.",
+                                              "{k} visitors talk about a new topic."), [])
+        self.assertEqual(v.untranslated_words("Siba ubutumwa kuri WhatsApp.", "Supprimez sur WhatsApp.",
+                                              "Delete on WhatsApp."), [])
+
+
 class AudioSegments(unittest.TestCase):
     def test_split_keeps_slot_order(self):
         parts = b.split_segments("A ({k} ku {n}): {finding}")

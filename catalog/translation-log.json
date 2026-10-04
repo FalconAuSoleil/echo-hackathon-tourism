@@ -92,38 +92,38 @@
         {
           "attempt": 1,
           "source": {
-            "fr": "Les visiteurs ont aimé griller et goûter le café.",
-            "en": "Visitors liked roasting and tasting the coffee."
+            "fr": "Les visiteurs ont aimé voir préparer le café et le goûter.",
+            "en": "Visitors liked seeing the coffee prepared and tasting it."
           },
           "options": [
             {
               "translatedFrom": "en",
-              "rwRaw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
-              "rw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
+              "rwRaw": "Abashyitsi bakundaga kureba ikawa bayitegura bakayisiga.",
+              "rw": "Abashyitsi bakundaga kureba ikawa bayitegura bakayisiga.",
               "slotCheck": "ok",
               "backTranslation": {
-                "fr": "Les invités appréciaient cuisiner et déguster du café.",
-                "en": "Guests enjoyed cooking and tasting coffee."
+                "fr": "Les invités aimaient voir le café préparé et versé.",
+                "en": "Guests enjoyed watching coffee beans be prepared and poured."
               },
-              "similarityFr": 0.9092,
-              "similarityEn": 0.8576,
-              "score": 0.8576
+              "similarityFr": 0.9285,
+              "similarityEn": 0.7201,
+              "score": 0.7201
             },
             {
               "translatedFrom": "fr",
-              "rwRaw": "Abashyitsi bakundaga guteka no kunywa ikawa.",
-              "rw": "Abashyitsi bakundaga guteka no kunywa ikawa.",
+              "rwRaw": "Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya.",
+              "rw": "Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya.",
               "slotCheck": "ok",
               "backTranslation": {
-                "fr": "Les invités appréciaient la cuisine et le café.",
-                "en": "Guests enjoyed cooking and drinking coffee."
+                "fr": "Les invités ont été ravis de voir le café préparé et consommé.",
+                "en": "The guests were thrilled to see how the coffee was prepared and consumed."
               },
-              "similarityFr": 0.8354,
-              "similarityEn": 0.8217,
-              "score": 0.8217
+              "similarityFr": 0.8919,
+              "similarityEn": 0.8656,
+              "score": 0.8656
             }
           ],
-          "chosen": "en",
+          "chosen": "fr",
           "passed": true
         }
       ]
@@ -1544,35 +1544,35 @@
         {
           "attempt": 1,
           "source": {
-            "fr": "Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ces messages.",
-            "en": "An unknown topic comes back from {k} visitors: ask a person to read these messages."
+            "fr": "{k} visiteurs parlent d'un sujet nouveau : demandez à une personne de lire leurs mots.",
+            "en": "{k} visitors talk about a new topic: ask a person to read their words."
           },
           "options": [
             {
               "translatedFrom": "en",
-              "rwRaw": "Hari igitekerezo kitari cyamenyekanye cyatanzwe n'abashyitsi 13: usabe umuntu gusoma ubwo butumwa.",
-              "rw": "Hari igitekerezo kitari cyamenyekanye cyatanzwe n'abashyitsi {k}: usabe umuntu gusoma ubwo butumwa.",
+              "rwRaw": "13 abashyitsi baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
+              "rw": "{k} abashyitsi baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
               "slotCheck": "ok",
               "backTranslation": {
-                "fr": "Une suggestion inconnue a été faite par 13 invités: demandez à quelqu'un de lire le message.",
-                "en": "An unknown suggestion was made by 13 guests: Ask someone to read the message."
+                "fr": "13 invités à discuter d'un nouveau sujet: demandez à quelqu'un de lire leurs propos.",
+                "en": "13 guests discuss a new topic: Ask someone to read their comments."
               },
-              "similarityFr": 0.8127,
-              "similarityEn": 0.8053,
-              "score": 0.8053
+              "similarityFr": 0.9124,
+              "similarityEn": 0.8985,
+              "score": 0.8985
             },
             {
               "translatedFrom": "fr",
-              "rwRaw": "Hari igitekerezo cyihariye cyagarutse ku basura 13: usabe umuntu gusoma izo message.",
-              "rw": "Hari igitekerezo cyihariye cyagarutse ku basura {k}: usabe umuntu gusoma izo message.",
+              "rwRaw": "Abashyitsi 13 baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
+              "rw": "Abashyitsi {k} baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
               "slotCheck": "ok",
               "backTranslation": {
-                "fr": "Une suggestion spéciale a été donnée aux 13 visiteurs: demandez à quelqu'un de lire ces messages.",
-                "en": "A special suggestion came back to 13 visitors: Ask someone to read the messages."
+                "fr": "13 invités discutent d'un nouveau thème: demandez à quelqu'un de lire leurs mots.",
+                "en": "13 guests discuss a new topic: Ask someone to read their words."
               },
-              "similarityFr": 0.8678,
-              "similarityEn": 0.88,
-              "score": 0.8678
+              "similarityFr": 0.9226,
+              "similarityEn": 0.9349,
+              "score": 0.9226
             }
           ],
           "chosen": "fr",
@@ -1586,38 +1586,75 @@
         {
           "attempt": 1,
           "source": {
-            "fr": "{p} messages n'ont pas été compris : demandez à une personne.",
-            "en": "{p} messages were not understood: ask a person."
+            "fr": "{p} remarques n'ont pas été comprises : demandez à une personne.",
+            "en": "{p} remarks were not understood: ask a person."
           },
           "options": [
             {
               "translatedFrom": "en",
-              "rwRaw": "Ubutumwa 15 ntibwasobanukiwe: baza umuntu.",
-              "rw": "Ubutumwa {p} ntibwasobanukiwe: baza umuntu.",
+              "rwRaw": "15 Amagambo ntiyasobanukiwe: baza umuntu.",
+              "rw": "{p} Amagambo ntiyasobanukiwe: baza umuntu.",
               "slotCheck": "ok",
               "backTranslation": {
-                "fr": "Le message 15 n'a pas été compris: demandez à quelqu'un.",
-                "en": "Message 15 was misunderstood: ask someone."
+                "fr": "15 Les mots sont incompréhensibles: demandez à quelqu'un.",
+                "en": "15 The words are unclear: ask the person."
               },
-              "similarityFr": 0.8599,
-              "similarityEn": 0.8297,
-              "score": 0.8297
+              "similarityFr": 0.7443,
+              "similarityEn": 0.816,
+              "score": 0.7443
             },
             {
               "translatedFrom": "fr",
-              "rwRaw": "Ubutumwa 15 ntibusobanukiwe: baza umuntu.",
-              "rw": "Ubutumwa {p} ntibusobanukiwe: baza umuntu.",
-              "slotCheck": "ok",
+              "rwRaw": "15 comments were not understood: jya ubaza umuntu.",
+              "rw": null,
+              "slotCheck": "untranslated source words ['understood']",
               "backTranslation": {
-                "fr": "15 messages incompréhensibles: demandez à quelqu'un.",
-                "en": "Message 15 is incomprehensible: ask someone."
+                "fr": "15 commentaires n'ont pas été compris: demandez à quelqu'un.",
+                "en": "15 comments were not understood: ask someone."
               },
-              "similarityFr": 0.8482,
-              "similarityEn": 0.7638,
-              "score": 0.7638
+              "similarityFr": 0.9416,
+              "similarityEn": 0.9103,
+              "score": 0.9103
             }
           ],
           "chosen": "en",
+          "passed": false
+        },
+        {
+          "attempt": 2,
+          "source": {
+            "fr": "{p} remarques pas claires : demandez à quelqu'un.",
+            "en": "{p} unclear remarks: ask someone."
+          },
+          "options": [
+            {
+              "translatedFrom": "en",
+              "rwRaw": "15 Amagambo adasobanutse neza: baza umuntu.",
+              "rw": "{p} Amagambo adasobanutse neza: baza umuntu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "15 Des mots qui ne sont pas clairs: demandez à quelqu'un.",
+                "en": "15 Misunderstandings: Ask the person."
+              },
+              "similarityFr": 0.8738,
+              "similarityEn": 0.8157,
+              "score": 0.8157
+            },
+            {
+              "translatedFrom": "fr",
+              "rwRaw": "15 Amagambo adasobanutse neza: jya usaba umuntu.",
+              "rw": "{p} Amagambo adasobanutse neza: jya usaba umuntu.",
+              "slotCheck": "ok",
+              "backTranslation": {
+                "fr": "15 Des mots qui ne sont pas clairs: demandez à quelqu'un.",
+                "en": "15 Confused words: Ask someone."
+              },
+              "similarityFr": 0.8738,
+              "similarityEn": 0.8195,
+              "score": 0.8195
+            }
+          ],
+          "chosen": "fr",
           "passed": true
         }
       ]

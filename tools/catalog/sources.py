@@ -11,7 +11,10 @@ FINDING_SOURCES = {
     "P2": [("La visite du champ de café a plu.", "Visitors liked the visit of the coffee field."),
            ("Les visiteurs aiment voir les caféiers.", "Visitors like to see the coffee trees."),
            ("Le champ de café plaît.", "The coffee field is liked.")],
-    "P3": [("Les visiteurs ont aimé griller et goûter le café.", "Visitors liked roasting and tasting the coffee."),
+    # NLLB n'a pas de mot pour « torréfier » (il écrit « guteka », cuisiner) : la phrase parle de préparation.
+    "P3": [("Les visiteurs ont aimé voir préparer le café et le goûter.",
+            "Visitors liked seeing the coffee prepared and tasting it."),
+           ("Les visiteurs ont aimé griller et goûter le café.", "Visitors liked roasting and tasting the coffee."),
            ("Les visiteurs aiment goûter le café.", "Visitors like to taste the coffee."),
            ("Le goût du café plaît.", "The coffee taste is liked.")],
     "P4": [("Les visiteurs ont aimé le repas.", "Visitors liked the meal."),
@@ -99,19 +102,19 @@ TEMPLATE_SOURCES = {
         ("Il n'y a pas de problème important.", "There is no important problem."),
     ]},
     "unknown_topic": {"slots": ["k"], "prefix": False, "candidates": [
-        ("Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ces messages.",
-         "An unknown topic comes back from {k} visitors: ask a person to read these messages."),
-        ("{k} visiteurs parlent d'un sujet nouveau : demandez à une personne de lire leurs messages.",
-         "{k} visitors talk about a new topic: ask a person to read their messages."),
+        # « messages » restait en anglais dans le kinyarwanda (« izo message ») : on parle des mots des visiteurs.
+        ("{k} visiteurs parlent d'un sujet nouveau : demandez à une personne de lire leurs mots.",
+         "{k} visitors talk about a new topic: ask a person to read their words."),
+        ("Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ce qu'ils disent.",
+         "An unknown topic comes back from {k} visitors: ask a person to read what they say."),
         ("Nouveau sujet chez {k} visiteurs : demandez à une personne.", "New topic from {k} visitors: ask a person."),
     ]},
     "not_understood": {"slots": ["p"], "prefix": False, "candidates": [
-        ("{p} messages n'ont pas été compris : demandez à une personne.",
-         "{p} messages were not understood: ask a person."),
+        # {p} compte des remarques (morceaux « pas sûr »), pas des messages : un message peut en contenir plusieurs.
+        ("{p} remarques n'ont pas été comprises : demandez à une personne.",
+         "{p} remarks were not understood: ask a person."),
+        ("{p} remarques pas claires : demandez à quelqu'un.", "{p} unclear remarks: ask someone."),
         ("{p} remarques pas comprises : demandez à une personne.", "{p} remarks not understood: ask a person."),
-        ("{p} messages non compris : demandez à une personne de les lire.",
-         "{p} messages not understood: ask a person to read them."),
-        ("{p} messages pas clairs : demandez à quelqu'un.", "{p} unclear messages: ask someone."),
     ]},
     "no_feedback": {"slots": [], "prefix": False, "candidates": [
         ("Pas de retour ce mois-ci.", "No feedback this month."),

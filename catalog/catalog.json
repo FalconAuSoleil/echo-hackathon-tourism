@@ -336,21 +336,21 @@
         ]
       },
       "kinyarwanda": {
-        "rw": "Abashyitsi bakundaga guteka no gusogongera ikawa.",
+        "rw": "Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya.",
         "source": {
-          "fr": "Les visiteurs ont aimé griller et goûter le café.",
-          "en": "Visitors liked roasting and tasting the coffee."
+          "fr": "Les visiteurs ont aimé voir préparer le café et le goûter.",
+          "en": "Visitors liked seeing the coffee prepared and tasting it."
         },
         "backTranslation": {
-          "fr": "Les invités appréciaient cuisiner et déguster du café.",
-          "en": "Guests enjoyed cooking and tasting coffee."
+          "fr": "Les invités ont été ravis de voir le café préparé et consommé.",
+          "en": "The guests were thrilled to see how the coffee was prepared and consumed."
         },
-        "similarity": 0.8576,
+        "similarity": 0.8656,
         "similarityDetail": {
-          "fr": 0.9092,
-          "en": 0.8576
+          "fr": 0.8919,
+          "en": 0.8656
         },
-        "translatedFrom": "en",
+        "translatedFrom": "fr",
         "attempts": 1,
         "chosenAttempt": 1,
         "backTranslationCheck": "passed",
@@ -2508,19 +2508,19 @@
         "k"
       ],
       "kinyarwanda": {
-        "rw": "Hari igitekerezo cyihariye cyagarutse ku basura {k}: usabe umuntu gusoma izo message.",
+        "rw": "Abashyitsi {k} baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.",
         "source": {
-          "fr": "Un sujet inconnu revient chez {k} visiteurs : demandez à une personne de lire ces messages.",
-          "en": "An unknown topic comes back from {k} visitors: ask a person to read these messages."
+          "fr": "{k} visiteurs parlent d'un sujet nouveau : demandez à une personne de lire leurs mots.",
+          "en": "{k} visitors talk about a new topic: ask a person to read their words."
         },
         "backTranslation": {
-          "fr": "Une suggestion spéciale a été donnée aux 13 visiteurs: demandez à quelqu'un de lire ces messages.",
-          "en": "A special suggestion came back to 13 visitors: Ask someone to read the messages."
+          "fr": "13 invités discutent d'un nouveau thème: demandez à quelqu'un de lire leurs mots.",
+          "en": "13 guests discuss a new topic: Ask someone to read their words."
         },
-        "similarity": 0.8678,
+        "similarity": 0.9226,
         "similarityDetail": {
-          "fr": 0.8678,
-          "en": 0.88
+          "fr": 0.9226,
+          "en": 0.9349
         },
         "translatedFrom": "fr",
         "attempts": 1,
@@ -2540,29 +2540,29 @@
         "p"
       ],
       "kinyarwanda": {
-        "rw": "Ubutumwa {p} ntibwasobanukiwe: baza umuntu.",
+        "rw": "{p} Amagambo adasobanutse neza: jya usaba umuntu.",
         "source": {
-          "fr": "{p} messages n'ont pas été compris : demandez à une personne.",
-          "en": "{p} messages were not understood: ask a person."
+          "fr": "{p} remarques pas claires : demandez à quelqu'un.",
+          "en": "{p} unclear remarks: ask someone."
         },
         "backTranslation": {
-          "fr": "Le message 15 n'a pas été compris: demandez à quelqu'un.",
-          "en": "Message 15 was misunderstood: ask someone."
+          "fr": "15 Des mots qui ne sont pas clairs: demandez à quelqu'un.",
+          "en": "15 Confused words: Ask someone."
         },
-        "similarity": 0.8297,
+        "similarity": 0.8195,
         "similarityDetail": {
-          "fr": 0.8599,
-          "en": 0.8297
+          "fr": 0.8738,
+          "en": 0.8195
         },
-        "translatedFrom": "en",
-        "attempts": 1,
-        "chosenAttempt": 1,
+        "translatedFrom": "fr",
+        "attempts": 2,
+        "chosenAttempt": 2,
         "backTranslationCheck": "passed",
         "audio": null,
         "status": "machine_translated_unvalidated"
       },
       "audioParts": [
-        "audio/template-not_understood-0.mp3",
+        null,
         "audio/template-not_understood-1.mp3"
       ]
     },

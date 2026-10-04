@@ -593,3 +593,38 @@ clustering spans months; not in this audit item.
 
 **Remains**: on a real phone, check Settings → Apps → Echo → Storage ≈ 150 MB app + ~36 MB data (add to
 `docs/MANUAL_TESTS.md` §4 when that file is no longer being edited by another agent).
+
+## 2026-10-04 — Catalog fix: not-understood counts remarks, no English loanword, P3 (fix-catalog-1 agent)
+
+**Fixed**
+- `not_understood` said "{p} messages were not understood" (rw `Ubutumwa {p} ntibwasobanukiwe`) while `{p}` counts
+  not-sure chunks (remarks): 1 message with 3 unclear clauses read as "3 messages". Sources now say remarks
+  (`tools/catalog/sources.py`); kept: `{p} Amagambo adasobanutse neza: jya usaba umuntu.` = "{p} unclear remarks: ask
+  someone." (attempt 2, score 0.82; back-translation "15 Confused words / Des mots qui ne sont pas clairs").
+- `unknown_topic` contained the English word "message" (`usabe umuntu gusoma izo message`). Now
+  `Abashyitsi {k} baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo.` = "{k} visitors talk about a new
+  topic: ask a person to read their words." (0.92).
+- P3 back-translated as "cooking" (NLLB writes `guteka` for roasting in every phrasing tried). Source reworded to
+  "Visitors liked seeing the coffee prepared and tasting it." → `Abashyitsi bishimiye kureba uko ikawa yateguwe no
+  kuyirya.` (0.87; back "see how the coffee was prepared and consumed").
+- New guard in the build and the validator: a candidate whose Kinyarwanda copies a source word unchanged (5+ letters,
+  same first 5 letters; proper nouns WhatsApp/Echo allowed) is rejected (`untranslated_words` in
+  `validate_catalog.py`, 2 new tests in `test_catalog.py`). NLLB did this with "comments were not understood"
+  scoring 0.985, so the score alone would have kept it.
+- Audio stage is now incremental: only clips whose spoken text changed are regenerated (manifest), orphans removed,
+  `--fresh-audio` redoes all. Regenerated: `finding-P3`, `template-unknown_topic-0/1`, `template-not_understood-1`;
+  `template-not_understood-0` removed (the sentence now starts with the slot) → 67 clips.
+- README: §6 recap example recomputed with the shipped code (still 3 SMS), §4 wording, §10 limitation removed,
+  clip count 67; `catalog/README.md` table, retry list and drift notes; `docs/MANUAL_TESTS.md` clip count.
+
+**Run / verified**: `.venv/bin/python tools/catalog/build_kinyarwanda.py --stages translate,audio --only
+finding:P3,template:unknown_topic,template:not_understood`; `validate_catalog.py` OK; `test_catalog.py` 17 OK;
+`pnpm test` 142 passed (incl. the 1000-random-month recap test); `pnpm typecheck`; `pnpm build`.
+
+**Notes / remains**
+- `amagambo` means "words/statements": closer to "remarks" than `ubutumwa` (messages), but a speaker should check.
+  Still machine-translated, unvalidated.
+- Another agent was adding host UI labels (`UI_SOURCES`, `cat.ui`) in the same catalog files at the same time;
+  I committed only my hunks (their work stays uncommitted for them). The `--only` run kept their `ui` entries.
+- `docs/screenshots/05-recap-kinyarwanda.png` still shows the old sentences: re-take it with the web e2e
+  (`pnpm --filter @echo/web e2e`) → web/docs agent.

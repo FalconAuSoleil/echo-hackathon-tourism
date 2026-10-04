@@ -7,7 +7,9 @@ Règles vérifiées en plus du schéma :
 - emplacements : ceux du modèle présents exactement une fois dans le kinyarwanda, aucun chiffre en dur,
   {finding} en fin de ligne pour les modèles qui l'utilisent, aucun emplacement dans les phrases de constat ;
 - audio : chaque fichier référencé existe, n'est pas vide ; audioParts = une entrée par partie fixe autour des emplacements ;
-  nombres 0..31 présents avec leur clip.
+  nombres 0..31 présents avec leur clip ;
+- aucun mot de la source anglaise ou française recopié tel quel dans le kinyarwanda (NLLB laisse parfois
+  « message » ou « comments » non traduits).
 Sortie non nulle en cas d'erreur. Usage : .venv/bin/python tools/catalog/validate_catalog.py
 """
 from __future__ import annotations
@@ -19,6 +21,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SLOT_RE = re.compile(r"\{(n|k|x|p|finding)\}")
+WORD_RE = re.compile(r"[a-zà-ÿ]+")
+PROPER_NOUNS = {"whatsapp", "echo"}  # noms propres, gardés tels quels dans toutes les langues
+
+
+def untranslated_words(rw: str, *sources: str) -> list[str]:
+    """Mots du kinyarwanda (5 lettres ou plus) qui reprennent un mot des sources (même début sur 5 lettres)."""
+    src = {w for s in sources for w in WORD_RE.findall(SLOT_RE.sub(" ", s.lower())) if len(w) >= 5}
+    words = WORD_RE.findall(SLOT_RE.sub(" ", rw.lower().replace("’", "'")))
+    return sorted({w for w in words if len(w) >= 5 and w not in PROPER_NOUNS and any(w[:5] == t[:5] for t in src)})
 
 
 def validate(cat: dict, schema: dict, base: Path) -> list[str]:
@@ -106,6 +117,9 @@ def check_sentence(where: str, k: dict, slots: list[str], base: Path) -> list[st
         errs.append(f"{where}: back-translations fr and en required")
     if not isinstance(k.get("similarity"), (int, float)):
         errs.append(f"{where}: similarity score missing")
+    leaked = untranslated_words(k["rw"], *((k.get("source") or {}).get(lang, "") for lang in ("fr", "en")))
+    if leaked:
+        errs.append(f"{where}: untranslated source words in rw {leaked}")
     if re.search(r"\d", SLOT_RE.sub("", k["rw"])):
         errs.append(f"{where}: digits outside slots in rw {k['rw']!r}")
     for s in slots:

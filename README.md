@@ -101,7 +101,7 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
       (0.84) **and** the negation agrees; at most 2 findings per chunk.
    6. Below the threshold, low transcription confidence, unclear negation → **"not sure"**.
    7. Unlike any finding (cosine below the floor 0.59) → **"off-list"**.
-4. **"Not sure": flag, never guess.** Never counted. The recap says "{p} … not understood: ask a person". A read-only
+4. **"Not sure": flag, never guess.** Never counted. The recap says "{p} unclear remarks: ask someone" ({p} counts remarks, i.e. not-sure chunks, not messages). A read-only
    list **"To be read by a person"** shows the scrubbed original text and, when no chunk of the message was counted,
    Whisper's English translation of the message labelled "machine translation, to be checked" (for a message with a
    counted chunk, the translation is shown once right after analysis and not stored). The guide, the daughter or someone from the cooperative can read them; the
@@ -128,10 +128,10 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    | Kinyarwanda (what the host gets) | English gloss (catalog source sentence, shown only in the demo / helper view) |
    |---|---|
    | Muri uku kwezi: Ubutumwa 7 bwatanzwe n'abashyitsi. | This month: 7 messages from visitors. |
-   | Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bakundaga guteka no gusogongera ikawa. | What visitors like (3 out of 7): Visitors liked roasting and tasting the coffee. |
+   | Ibyo abashyitsi bakunda (3 ku 7): Abashyitsi bishimiye kureba uko ikawa yateguwe no kuyirya. | What visitors like (3 out of 7): Visitors liked seeing the coffee prepared and tasting it. |
    | Ikibazo gikomeye kurusha ibindi (2 kuri 7), mu gihe cy'amezi 2: Inzira igana ku isambu irareshya cyane cyangwa ikaba igoye cyane. | The biggest problem (2 out of 7), for 2 months: The road to the farm is too long or difficult. |
-   | Hari igitekerezo cyihariye cyagarutse ku basura 3: usabe umuntu gusoma izo message. | An unknown topic comes back from 3 visitors: ask a person to read these messages. |
-   | Ubutumwa 2 ntibwasobanukiwe: baza umuntu. | 2 messages were not understood: ask a person. |
+   | Abashyitsi 3 baganira ku ngingo nshya: usabe umuntu gusoma amagambo yabo. | 3 visitors talk about a new topic: ask a person to read their words. |
+   | 2 Amagambo adasobanutse neza: jya usaba umuntu. | 2 unclear remarks: ask someone. |
 
 7. **Cooperative view (bonus).** Anonymous counts per finding across farms that consented ("5 farms out of 12: path
    too long"). Remarks about the guide never leave the host's view. **In this prototype the other farms are
@@ -338,7 +338,7 @@ The keyword lists were written by the same author as the synthetic corpus, which
 |---|---|
 | Shipped models (q8 ONNX) | whisper-base 79.7 MB + MiniLM 135.4 MB = **215.1 MB** (tiny would be 43.6 MB, small 251.8 MB) |
 | One-time download of the web app | ≈ 242 MB (models + 27 MB WebAssembly runtime) + app shell, catalog, clips, samples; side-loadable by copying `models/` |
-| Catalog + Kinyarwanda audio | 68 MP3 clips, ~360 KiB |
+| Catalog + Kinyarwanda audio | 67 MP3 clips, ~360 KiB |
 | Side-loadable debug APK (models bundled) | ~150 MB (157 MB file). **On the phone: the installed APK (150 MB) + ~36 MB of app data**: the models are read in place from the APK, not copied (the data is the service worker's copy of the app shell and the 27 MB WebAssembly runtime). Measured on the Android 14 emulator: app data 267 MB before this fix (models copied into Cache Storage), 36 MB after. Cost: reading the 118 MB MiniLM file from the APK takes ~1.4–1.6 s vs ~0.7 s from Cache Storage (emulator) |
 | Memory (laptop, Node process, whisper-base) | 885 MB after loading, **peak 1.2 GB** (native runtime libraries + file buffers) |
 | Memory in the APK's WebView (**Android 14 emulator**, not a phone) | renderer ≈ **1.55 GB** once both models are loaded. **2 GB of RAM: the renderer was killed by low memory during transcription** (the app now restarts the page with a message); **3 GB: works** |
@@ -503,7 +503,7 @@ From the spec (SPEC 11.10):
 - **Test data and voices are synthetic.** Levels 2–3 are an upper bound; real visitors code-switch, ramble, have
   wind on the microphone, and WhatsApp compresses audio (Opus) — none of that is measured.
 - **The Kinyarwanda is not validated by a speaker** (machine translation + back-translation with the same model,
-  where errors can cancel out; known drifts listed in `catalog/README.md`, e.g. "cooking" for roasting).
+  where errors can cancel out; known drifts listed in `catalog/README.md`, e.g. "words" (`amagambo`) for remarks).
 
 Found during the build:
 - **Nothing has run on a real Android phone, and no real SMS has been sent** (no phone, SIM or WhatsApp here). The
@@ -520,8 +520,6 @@ Found during the build:
 - **Echo captures about half of the remarks automatically** (48 % on synthetic text, 35 % on noisy synthetic audio);
   the rest needs a person to read the review list. Recall is low for some findings (N4 0.17, P6/P11 0.25).
 - **German has the highest error among accepted answers (15 %)** on synthetic text, above the 5 % target.
-- **The not-understood line counts remarks, not messages**: the slot `{p}` is the number of "not sure" chunks, while
-  the frozen sentence says "{p} messages were not understood".
 - **Unknown-topic rule tuned on its only example** (picking); it deviates from SPEC 4.5 by also clustering
   below-threshold "not sure" chunks; with many messages it produces false alerts.
 - **The "ambiguous" demo sample is a chosen phrasing.** The first one ("c'était particulier… je ne sais pas trop quoi
@@ -577,7 +575,7 @@ Found during the build:
 | `packages/models` | transformers.js adapters: Whisper with our language detection, token-log-prob confidence, repetition-loop guard, 30 s windows; embedder (mean pooling, L2). Same file in the browser and in the evaluation. |
 | `apps/web` | Vite + Preact PWA: Try-it demo, host app (modes A/B), settings + PIN, cooperative view, visitor card, service worker, share target, worker. |
 | `apps/android` | Capacitor shell packaging `apps/web/dist` (models bundled) as a side-loadable APK; Android share intent → the web app's queue. |
-| `catalog/` | `catalog.json` (21 findings, 756 synthetic examples, keywords, frozen Kinyarwanda, templates, numbers) + 68 MP3 clips. |
+| `catalog/` | `catalog.json` (21 findings, 756 synthetic examples, keywords, frozen Kinyarwanda, templates, numbers) + 67 MP3 clips. |
 | `eval/` | `pnpm eval`: levels 1–3, performance, report; synthetic corpus, keyword lists, results. |
 | `tools/` | Build-time Python only: Kinyarwanda catalog (NLLB-200, MMS-TTS), Piper test audio, ESC-50 noise, FLEURS fetch, model download. |
 
