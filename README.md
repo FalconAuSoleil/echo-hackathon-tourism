@@ -180,12 +180,12 @@ says small operators cannot do for themselves.
 | Reaches a host with a basic phone, in Kinyarwanda | No (needs a smartphone, free text) | Yes, orally | No | **Yes: SMS + audio, frozen sentences only** |
 | Works offline | Partially (offline packs) | Yes | Paper: yes | **Yes: all analysis on the phone** |
 | Says when it is unsure | No | n/a | n/a | **Yes: "not sure — ask a person"** |
-| Can hallucinate to the host | Free translation can be wrong | n/a | No | **No: closed list of ~30 frozen sentences** |
+| Can hallucinate to the host | Free translation can be wrong | n/a | No | **No: closed list of 29 recap sentences + 6 host-app labels + 32 number words, all frozen** |
 
 ## 4. Guardrails
 
 - **Closed list of output sentences.** The host only ever sees or hears frozen Kinyarwanda sentences from
-  `catalog/catalog.json` (21 finding sentences + 8 templates) with digits in numeric slots. Nothing is translated or
+  `catalog/catalog.json` (29 recap sentences: 21 findings + 8 templates; 6 host-app labels in mode A; 32 number words) with digits in numeric slots. Nothing is translated or
   generated at runtime. A core test builds 1,000 random months and asserts every recap line is exactly a catalog
   template; the recap throws rather than fall back to any other text if a sentence is missing.
 - **"Not sure" is never counted and always flagged** with "ask a person": below the calibrated probability, low
@@ -390,7 +390,7 @@ The complete data sheet, with every license checked on its primary page (URL and
 | FLEURS (test split) | CC BY 4.0 | 100 utt./language used (en, fr, de, es, sw) | Level 1 WER on real voices | Read speech, quiet rooms; no Kinyarwanda |
 | Mozilla Common Voice | CC0 | **not used** (Mozilla Data Collective needs an account) | – | – |
 | NLLB-200 distilled 600M + FLORES-200 reference | CC BY-NC 4.0 (model), CC BY-SA 4.0 (FLORES) | 2.46 GB, build time only | Kinyarwanda catalog + back-translation; published chrF++ eng→kin **44.0** | Not validated by a speaker; non-commercial |
-| MMS-TTS Kinyarwanda | CC BY-NC 4.0 | 145 MB, build time only | 68 recap clips | One synthetic voice, unchecked pronunciation; non-commercial |
+| MMS-TTS Kinyarwanda | CC BY-NC 4.0 | 145 MB, build time only | 67 clips (21 findings, 14 template parts, 32 numbers) | One synthetic voice, unchecked pronunciation; non-commercial |
 | Piper TTS voices (**synthetic voices**) | engine GPL-3.0 (build-time tool); voices CC0 / CC-BY / CC-BY-SA / Unlicense | 13 voices, 80 clips, 6.5 min per condition; 10 demo samples | Level 3 audio, demo samples | Studio read speech, no hesitations, no non-native accents |
 | ESC-50 outdoor noise | CC BY-NC 3.0 (ESC-10 CC BY 3.0); clips kept only if Freesound source is CC0/CC-BY | 48 clips × 5 s, 12 classes, mixed at 20/10/5 dB SNR | Level 3 noise | Not recorded on a Rwandan farm; no wind on the mic |
 | Visitor feedbacks (**synthetic**, ours) | released with the project | 250 feedbacks, 137 KB | Levels 2 and 3 | Written by people who know the catalog |
@@ -448,7 +448,7 @@ fr 28.7 %. On synthetic text, Echo's error among accepted answers is 4.2 % en, 0
 in French and German (52–54 % of chunks) as in English (26 %). So French and German visitors are more often routed to
 a person, and German errors are the ones to watch. Swahili (WER ≥ 77 %) and any language outside en/fr/de/es are
 treated as unsupported: the whole message is "not sure", never guessed. On the host side, the Kinyarwanda is the same
-~30 sentences for everyone, machine-translated and unvalidated (§8).
+29 recap sentences + 6 host-app labels + 32 number words for everyone, machine-translated and unvalidated (§8).
 
 **"Not sure" is always flagged, never guessed.** No "not sure" chunk is ever counted (core rule + test), and the
 recap always carries the "ask a person" line when there are any. The review list is read-only; the tool never asks the
@@ -469,8 +469,8 @@ what we imagined visitors say about a coffee farm.
 
 The jury asks how the tool behaves with a language that is less well covered. Two answers:
 
-1. **Host side: Kinyarwanda is only ~30 frozen sentences** (21 finding sentences + 8 recap templates, plus number
-   words 0–31), produced once with NLLB-200 and checked by back-translation (all ≥ 0.75 similarity, mean 0.87; drifts
+1. **Host side: Kinyarwanda is only 29 recap sentences + 6 host-app labels + 32 number words, all frozen** (21
+   finding sentences + 8 recap templates, the 6 mode A button labels, number words 0–31), produced once with NLLB-200 and checked by back-translation (all ≥ 0.75 similarity, mean 0.87; drifts
    listed in [`catalog/README.md`](catalog/README.md)). No model ever runs for the host. For a language that machine
    translation covers badly, **a speaker can simply write these sentences and record them**, with no model at all: edit
    `rw` in `catalog/catalog.json`, record the clips, set `status: "speaker_validated"`, run the validator (procedure in
@@ -489,7 +489,7 @@ The jury asks how the tool behaves with a language that is less well covered. Tw
   5–10 example phrasings per language (`tools/catalog/examples_*.py`), the keyword lists, and re-run
   `tools/catalog/build_kinyarwanda.py` (or let a speaker write the sentences), then `pnpm eval` re-calibrates the
   threshold and regenerates `calibration.ts`. No code change.
-- **Another host language** = another set of ~30 sentences and clips (§8). Another visitor language = examples in
+- **Another host language** = another set of 29 sentences, 6 labels, 32 number words and their clips (§8). Another visitor language = examples in
   that language + adding it to `supportedLangs`, if Whisper handles it (measure it with level 1 first).
 - **Deployment through cooperatives.** A cooperative officer installs the app once per household smartphone (Wi-Fi at
   the cooperative, or by copying the `models/` folder — models are served from the app's own origin and can be
@@ -501,7 +501,7 @@ The jury asks how the tool behaves with a language that is less well covered. Tw
   not side-loaded. Note that two build-time models (NLLB-200, MMS-TTS) are non-commercial: a commercial deployment
   needs speaker-written sentences and recorded clips.
 - **Pilot plan** (proposed, not started): 10–15 farms of one coffee cooperative for 3 months.
-  1. Month 0: a Kinyarwanda speaker validates the 29 sentences and re-records the clips; install on household phones;
+  1. Month 0: a Kinyarwanda speaker validates the 29 sentences, 6 labels and 32 number words and re-records the clips; install on household phones;
      run `docs/MANUAL_TESTS.md` on the actual phones (timing, SMS).
   2. Months 1–3: cards handed out at every visit; measure the **visitor response rate**, messages per farm, share
      "not sure" / inaudible, and have a person label a sample of real messages to re-measure error among accepted
@@ -595,7 +595,7 @@ Found during the build:
 
 | Path | What |
 |---|---|
-| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation). 127 tests with fakes. `calibration.ts` is generated by the evaluation. |
+| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation). 114 tests with fakes (142 in the whole workspace). `calibration.ts` is generated by the evaluation. |
 | `packages/models` | transformers.js adapters: Whisper with our language detection, token-log-prob confidence, repetition-loop guard, 30 s windows; embedder (mean pooling, L2). Same file in the browser and in the evaluation. |
 | `apps/web` | Vite + Preact PWA: Try-it demo, host app (modes A/B), settings + PIN, cooperative view, visitor card, service worker, share target, worker. |
 | `apps/android` | Capacitor shell packaging `apps/web/dist` (models bundled) as a side-loadable APK; Android share intent → the web app's queue. |
@@ -631,7 +631,7 @@ pnpm dev                           # web app with hot reload: http://localhost:5
 pnpm build                         # production build into apps/web/dist (~260 MB with models)
 pnpm preview                       # serve the build: http://localhost:4173 (COOP/COEP headers → WASM threads)
 
-pnpm test                          # vitest, all packages (core, models, web, eval: 127 tests)
+pnpm test                          # vitest, all packages (core, models, web, eval: 142 tests)
 pnpm typecheck                     # tsc on every package
 pnpm --filter @echo/web e2e        # after `pnpm build`: real models in headless Chromium, online then offline
                                    #   (first time: npx playwright install chromium; writes docs/screenshots/)
@@ -677,7 +677,7 @@ Step-by-step phone tests, including airplane mode, WhatsApp sharing and the real
 
 ### 11.4 What was verified on this machine (2026-10-04, WSL2, 8 CPUs, no GPU)
 
-`pnpm install`, `pnpm models:download`, `pnpm test` (127 passed), `pnpm typecheck`, `pnpm smoke:models`,
+`pnpm install`, `pnpm models:download`, `pnpm test` (142 passed), `pnpm typecheck`, `pnpm smoke:models`,
 `pnpm build`, `pnpm --filter @echo/web e2e` (**E2E PASSED**: 10 samples through the real models, recap, SMS link,
 host queue with audio deleted, no PII in IndexedDB, WhatsApp-deletion reminder and its counter, mode A Kinyarwanda
 labels, a low-memory queue run that never holds both models in one worker, then network cut + reload: app, models and analysis work offline)
@@ -713,8 +713,8 @@ offline mode (tested in Chromium), the audio deletion and the PII scrubbing; lev
 For us, localizing AI does not mean making a big model speak every language. It means deciding where the model
 stops, and handing the rest to the people who live there.
 
-- **The host's language is owned by a speaker, not by a model.** Kinyarwanda in Echo is about 30 frozen sentences
-  and 32 number words, with their audio clips. Today they are machine-translated and unvalidated, and we say so. But
+- **The host's language is owned by a speaker, not by a model.** Kinyarwanda in Echo is 29 recap sentences + 6 host-app labels
+  + 32 number words, with audio clips for the recap and numbers. Today they are machine-translated and unvalidated, and we say so. But
   the design means a Kinyarwanda speaker (a cooperative officer, the host's daughter) can rewrite and re-record all
   of them in an afternoon, with no model, no GPU and no retraining. The same holds for any language machine
   translation covers badly. Localization becomes a text file a community can correct, not a model it has to trust.

@@ -9,7 +9,7 @@ generated at runtime: the Kinyarwanda was produced **once**, offline, by `tools/
 
 | File | Content |
 |---|---|
-| `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 9 synthetic example phrasings × 4 visitor languages (756 in total), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
+| `catalog.json` | 21 findings (P1–P11, N1–N10): fr/en labels, polarity, 9 synthetic example phrasings × 4 visitor languages (756 in total), keyword lists for the no-AI baseline, the Kinyarwanda sentence of each finding; 8 recap templates; spoken numbers 0–31; ui: 6 mode A labels (listen, send_sms, analyse, recap_month, delete_whatsapp, deleted), no audio. Schema: `catalog.schema.json`; TS mirror and validator: `packages/core/src/catalog.ts`. |
 | `audio/*.mp3` | 67 pre-generated clips (MMS-TTS kin, mono 16 kHz 24 kbit/s, ~360 KiB in total): 21 finding sentences, 14 fixed parts of templates, 32 numbers. `audio/manifest.json` lists text, spoken text and duration of each clip. |
 | `translation-log.json` | Every translation attempt: source (fr, en), raw NLLB output, back-translations, similarity scores, slot check, which attempt was kept. |
 | `flores-check.json` | (not produced yet) our own chrF++ measure of the same NLLB model on FLORES-200 devtest, written by `tools/catalog/flores_check.py`. |

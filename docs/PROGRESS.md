@@ -689,3 +689,13 @@ finding:P3,template:unknown_topic,template:not_understood`; `validate_catalog.py
 
 **Remains**: real 2 GB phone (memory, timing), whether hosts actually delete WhatsApp originals, speaker check of the 6
 labels → `docs/MANUAL_TESTS.md` (§ 1 steps 6b/8b, § 3, § 4 steps 4 and 8).
+
+## 2026-10-04 — fix-docs-2: README counts aligned with the code
+
+- README §3 table, §4, §5 (Swahili paragraph), §8, §9 and §13: the host-side Kinyarwanda is now described as
+  "29 recap sentences (21 findings + 8 templates) + 6 host-app labels (mode A, `catalog.json` `ui`) + 32 number words"
+  instead of "~30 sentences" / "21 + 8". Pilot step 1 validates the 29 sentences, 6 labels and 32 number words.
+- README §6 MMS-TTS row: 67 clips (21 findings, 14 template parts, 32 numbers), matching `catalog/audio` (67 mp3 + manifest).
+- README §11 test counts: `pnpm test` = 142 (checked: 22 files, 142 passed); `packages/core` alone = 114.
+- `catalog/README.md` file table: lists the `ui` section (6 mode A labels, no audio).
+- Verified: `pnpm test` 142 passed, `pnpm typecheck` clean. Docs only, no code change; nothing remaining.
