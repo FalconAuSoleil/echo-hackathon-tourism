@@ -464,3 +464,31 @@ this killed the app; now the page restarts with a message. Screenshots in `apps/
 **Remains**: real phone (install, WhatsApp share, microphone, real SMS, timing, 2 GB RAM limit) → `docs/MANUAL_TESTS.md` § 4.
 Signed release build (needs a keystore: the user's call). Lowering memory (e.g. load MiniLM only after Whisper, or whisper-tiny on
 ≤ 2 GB phones) is a web/eval decision.
+
+## 2026-10-04 — Docs fixes (fix-docs-1 agent)
+
+**Done**
+- README §5.7, §10, §11.4, §12 (and the honesty notice at the top): the APK is now described as **tested on an
+  Android 14 emulator, not on a phone**, with the measured emulator results: renderer ≈ 1.55 GB with both models;
+  **2 GB RAM → renderer killed by low memory during transcription**; 3 GB → works, 6 s sample in 18.4 s, shared `.opus`
+  in 6.5 s; offline start 29 s / 10–11 s (2 GB), 19 s (3 GB); share intent and `sms:` checked. "Not tested on a real
+  phone" kept everywhere. The old "whether a 2–3 GB phone keeps the tab alive is untested" is gone.
+- `docs/VIDEO_SCRIPT.md`: timed 4 min 30 s script for the 5 segments of brief §08 (problem sentence of SPEC 13 with
+  the measured numbers, AI + guardrails, demo, user's day + stack, our take), the demo click sequence with captions,
+  the list of existing stills, and an honesty checklist. **The video itself is not recorded** (team's job).
+- README §13 "Our take: localizing AI development" (+ contents link, + link to the video script in the header table).
+- `docs/DATASHEET.md`: new row for the Kinyarwanda number words 0–31 (references with URLs: Omniglot,
+  languagesandnumbers.com, Harvard ELIAS; terms: word forms only, no text copied, Omniglot is all-rights-reserved;
+  32 entries + clips; no noun-class agreement; not speaker-validated; the `status` field says
+  `machine_translated_unvalidated` although they are hand-written). §3 point 3 mentions them. README §6 summary row too.
+- Language detection wording: 250 = 237 right + 12 "unknown" + **1 detected as another supported language**
+  (es-009 "Duró apenas media hora, nos supo a poco." → English; calibration half), found by re-running
+  `detectTextLanguage` on the corpus. Fixed in README §8 and in the generator `eval/src/report.ts` (minimal change in
+  the eval area), then `pnpm eval -- --level report` regenerated `eval/results/RESULTS.md` (only that line changed).
+
+**Verified**: `pnpm typecheck` passes. `pnpm test`: 133 passed, 1 failed in `packages/core/src/catalog.test.ts`
+("libellés figés de l'app hôte"), which belongs to another agent's uncommitted in-progress work (catalog `ui`
+labels, catalog.json not regenerated yet); not touched by this change.
+
+**Remains**: record the video. If the catalog gains frozen UI labels (work in progress by another agent), the
+README's "~30 frozen sentences" counts (§3, §4, §8, §9, §13) need updating.

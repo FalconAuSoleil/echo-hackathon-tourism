@@ -64,7 +64,7 @@ Swahili is a bonus language: Whisper's Swahili is weak and the app treats it as 
 Corpus: 250 synthetic feedbacks (eval/data/feedback.jsonl), split 125/125 into a calibration half and a held-out test half (seed 20261004, stratified by language x main category (picking, off-list, ambiguous, cancelling negation, inherent negation, multi-finding, single)).
 Catalog: 756 synthetic examples (catalog/catalog.json), disjoint from the corpus (eval/data/check_disjoint.py).
 Everything below is on the **held-out test half** unless marked otherwise. Written messages go through the shipped path with
-automatic language detection (correct for 237/250 feedbacks, 12 "unknown" → whole message not sure).
+automatic language detection (all 250 feedbacks: 237 right, 12 "unknown" → whole message not sure, 1 detected as another supported language and analysed in that language).
 
 ### How the threshold was chosen (calibration half only)
 

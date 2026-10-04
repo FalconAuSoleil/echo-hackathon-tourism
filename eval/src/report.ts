@@ -140,7 +140,9 @@ export function runReport(log: (s: string) => void = console.log) {
     w(`Corpus: ${l2.corpus.total} synthetic feedbacks (eval/data/feedback.jsonl), split ${c.split.calibration}/${c.split.test} into a calibration half and a held-out test half (seed ${c.split.seed}, stratified by ${c.split.stratifiedBy}).`);
     w(`Catalog: ${l2.catalogExamples} synthetic examples (catalog/catalog.json), disjoint from the corpus (eval/data/check_disjoint.py).`);
     w("Everything below is on the **held-out test half** unless marked otherwise. Written messages go through the shipped path with");
-    w(`automatic language detection (correct for ${l2.languageDetection.correct}/${l2.languageDetection.total} feedbacks, ${l2.languageDetection.unknown} "unknown" → whole message not sure).`);
+    const ld = l2.languageDetection;
+    const otherLang = ld.total - ld.correct - ld.unknown;
+    w(`automatic language detection (all ${ld.total} feedbacks: ${ld.correct} right, ${ld.unknown} "unknown" → whole message not sure, ${otherLang} detected as another supported language and analysed in that language).`);
     w();
     w("### How the threshold was chosen (calibration half only)");
     w();
