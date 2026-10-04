@@ -12,7 +12,7 @@ import { evaluateByLang, summary, type SystemOutput } from "./lib/metrics.ts";
 import { DATA_DIR, RAW_DIR, RESULTS_DIR, ROOT, abs } from "./lib/paths.ts";
 import { execFileSync } from "node:child_process";
 import { EMBEDDERS, fromAnalysis, getEmbedder, keywordOutput, loadCatalog } from "./lib/system.ts";
-import { loadKeywordSet, primaryKeywordSet } from "./lib/keyword-sets.ts";
+import { KEYWORD_SET_NAMES, loadKeywordSet, primaryKeywordSet } from "./lib/keyword-sets.ts";
 import { createMatcher } from "@echo/core";
 import { errorCounts, rates, sumCounts } from "./lib/wer.ts";
 
@@ -52,6 +52,8 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
   const keywordSet = primaryKeywordSet();
   const lists = loadKeywordSet(keywordSet);
   log(`[level3] keyword set: ${keywordSet}`);
+  // Les deux jeux sont aussi rapportés (résumé), comme au niveau 2 : le principal reste dans `keywords`.
+  const listsBySet = Object.fromEntries(KEYWORD_SET_NAMES.map((n) => [n, n === keywordSet ? lists : loadKeywordSet(n)]));
   const matcher = await createMatcher(catalog, await getEmbedder(embedderKey), config);
   const rows = readJsonl<AudioRow>(join(DATA_DIR, "audio_manifest.jsonl"));
   const fbById = new Map(loadFeedback().map((f) => [f.id, f]));
@@ -72,7 +74,13 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
   const { analyzeMessage } = await import("@echo/core");
   for (const f of feedbacks) textOut.set(f.id, fromAnalysis(await analyzeMessage({ id: f.id, receivedAt: "2026-09-15T10:00:00Z", source: "text", text: f.text }, { catalog, matcher, config })));
   const textKw = new Map(feedbacks.map((f) => [f.id, keywordOutput(f.id, f.text, f.lang, lists)]));
-  const level2Same = { echo: evaluateByLang(feedbacks, textOut), keywords: evaluateByLang(feedbacks, textKw) };
+  const level2Same = {
+    echo: evaluateByLang(feedbacks, textOut),
+    keywords: evaluateByLang(feedbacks, textKw),
+    keywordSets: Object.fromEntries(
+      KEYWORD_SET_NAMES.map((n) => [n, summary(evaluateByLang(feedbacks, new Map(feedbacks.map((f) => [f.id, keywordOutput(f.id, f.text, f.lang, listsBySet[n]!)]))).all)]),
+    ),
+  };
 
   const models: Record<string, unknown> = {};
   for (const size of opts.sizes) {
@@ -138,6 +146,17 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
         keywords: kw,
         echoTestSubset: summary(evaluateByLang(testSubset, outs).all),
         keywordsTestSubset: summary(evaluateByLang(testSubset, kwOuts).all),
+        keywordSets: Object.fromEntries(
+          KEYWORD_SET_NAMES.map((n) => {
+            const o = new Map(
+              rows.map((r) => {
+                const t = cache.get(`${cond}/${r.id}`);
+                return [r.id, keywordOutput(r.id, t?.text ?? "", t?.language ?? r.lang, listsBySet[n]!)];
+              }),
+            );
+            return [n, summary(evaluateByLang(feedbacks, o).all)];
+          }),
+        ),
         perMessage: analyses.map((a) => ({
           id: a.id,
           status: a.status,

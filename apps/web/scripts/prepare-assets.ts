@@ -4,10 +4,11 @@
 //   - ort/                runtime onnxruntime-web (WASM) servi par l'app elle-même, jamais par un CDN ;
 //   - catalog/            catalog.json + clips audio kinyarwanda ;
 //   - samples/            messages d'exemple de la démo (voix de synthèse, eval/data/demo-samples/) ;
-//   - keywords/           listes de mots-clés de la méthode de comparaison (eval/keywords/) ;
+//   - keywords/           listes de mots-clés de la méthode de comparaison (eval/keywords-blind/, la référence
+//                         principale du README : écrites sans voir le corpus d'évaluation) ;
 //   - precomputed/        embeddings des exemples du catalogue + classifieur linéaire, calculés ICI avec le même
 //                         modèle et le même code (@echo/models, @echo/core) pour que le téléphone n'ait pas à
-//                         plonger 756 exemples au premier lancement ; vérifiés sur l'appareil au démarrage ;
+//                         plonger les 1 260 exemples au premier lancement ; vérifiés sur l'appareil au démarrage ;
 //   - assets-manifest.json  liste des fichiers de modèles (tailles) et des choix (seuils, modèles).
 //
 // Usage : tsx scripts/prepare-assets.ts [--no-precompute]
@@ -93,8 +94,10 @@ place(join(ROOT, "catalog/catalog.json"), join(PUB, "catalog/catalog.json"));
 for (const f of readdirSync(join(ROOT, "catalog/audio"))) place(join(ROOT, "catalog/audio", f), join(PUB, "catalog/audio", f));
 const samplesDir = join(ROOT, "eval/data/demo-samples");
 for (const f of readdirSync(samplesDir)) place(join(samplesDir, f), join(PUB, "samples", f));
-const kwDir = join(ROOT, "eval/keywords");
-const kwFiles = readdirSync(kwDir).filter((f) => f.endsWith(".json"));
+const kwDir = join(ROOT, "eval/keywords-blind");
+const kwFiles = readdirSync(kwDir).filter((f) => /^[a-z]{2}\.json$/.test(f));
+// Dossier vidé d'abord : `place` garde un fichier existant de même taille (ancien jeu eval/keywords/).
+rmSync(join(PUB, "keywords"), { recursive: true, force: true });
 for (const f of kwFiles) place(join(kwDir, f), join(PUB, "keywords", f));
 
 // 4. Embeddings pré-calculés (cache dans .cache/ selon catalogue + modèle + réglages du classifieur).

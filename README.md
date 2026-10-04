@@ -65,22 +65,30 @@ Rwandan coffee areas (our Overpass query, 2026-10-03): small farms receiving vis
 
 > "Because of this tool, small rural tourism hosts like Noor will know every month what visitors loved and what to
 > fix first, which today they never learn once visitors leave; we know because the World Bank brief describes this
-> exact gap, and our tests show the tool captures **48 %** of visitor remarks versus **88 %** for keyword matching."
+> exact gap, and our tests show the tool captures **53 %** of visitor remarks versus **80 %** for keyword matching."
 
 We report X < Y as measured, and it needs its context to be read correctly:
 
 - **Definition.** A *remark* is a passage of a feedback annotated as expressing one catalog finding (P1–N10). It is
   *correctly captured* when the system counts exactly that finding on a chunk overlapping the passage. Measured on
-  the held-out half of our **synthetic** written corpus (152 remarks in 125 feedbacks), same remarks for both methods.
-- **Of the answers each method counts, the share that is wrong:** Echo **6 %** [95 % CI 3–13], keywords **28 %**
-  [22–34]. Keywords count "the walk was **not** too long" as a complaint and "delicious coffee" as a meal.
-- **Echo routes the rest to a person:** 41 % of remarks are flagged "not sure — ask a person" instead of being
-  guessed. Remarks counted right or flagged for a person: Echo 89 %, keywords 88 % (keywords have no such flag).
-- End to end on synthetic audio with outdoor noise (10 dB SNR): Echo captures 35 % with 3 % wrong; keywords 69 % with
-  33 % wrong.
+  the held-out half of our **synthetic** written corpus (152 remarks in 125 feedbacks), same remarks for every method.
+- **Which keyword baseline.** Y uses keyword lists written **blind**: without opening the evaluation corpus or any
+  result (`eval/keywords-blind/README.md`). Our first lists were written by the same agent that wrote the synthetic
+  corpus and can repeat its wording; they capture **88 %** (28 % wrong) and are kept in every table for transparency.
+- **Of the answers each method counts, the share that is wrong:** Echo **6.5 %** (6 of 92) [95 % CI 3–14], blind
+  keywords **30 %** (58 of 194) [24–37], original keywords 28 %. Keywords count "the walk was **not** too long" as a
+  complaint and "delicious coffee" as a meal: of 13 cancelling negations, Echo counts 2, the blind lists 11, the
+  original lists all 13.
+- **Echo routes the rest to a person:** 34 % of remarks are flagged "not sure — ask a person" instead of being
+  guessed. Remarks counted right or flagged for a person: Echo 88 %, blind keywords 80 % (keywords have no such flag).
+- End to end on synthetic audio with outdoor noise (10 dB SNR): Echo captures 43 % with 9 % wrong; blind keywords 65 %
+  with 30 % wrong (original lists 69 % / 33 %).
+- **Before the latest change** (catalog of 756 examples, threshold 0.84) Echo captured 48 % with 6 % wrong on the
+  same held-out half. With 1,260 examples and a new threshold rule (§5.3), both decided on the calibration half only,
+  it captures 53 % with 6.5 % wrong: 8 more remarks, a gain within the 95 % intervals ([§5.6](#56-echo-vs-keywords-summary)).
 
-In one line: **Echo counts fewer remarks by itself, but what it counts is right about 19 times out of 20, and it
-says when it does not know; keyword matching counts more, gets about one answer in four wrong, and never says so.**
+In one line: **Echo counts fewer remarks by itself, but 93 % of what it counts is right, and it says when it does
+not know; keyword matching counts more, gets more than one answer in four wrong, and never says so.**
 The host acts on the counts, so we chose a low wrong-answer rate over coverage (threshold rule in §5.3).
 
 ## 2. The full user journey
@@ -113,9 +121,9 @@ The host acts on the counts, so we chose a low wrong-answer rate over coverage (
    4. The text is **split into sentences, then clauses** ("but", "mais", "aber", "pero"…).
    5. A **multilingual sentence-embedding model** (MiniLM) embeds each chunk; a small classifier trained on the
       catalog's example sentences gives a probability per finding. Accepted only if ≥ the calibrated threshold
-      (0.84) **and** the negation agrees; at most 2 findings per chunk.
+      (0.82) **and** the negation agrees; at most 2 findings per chunk.
    6. Below the threshold, low transcription confidence, unclear negation → **"not sure"**.
-   7. Unlike any finding (cosine below the floor 0.59) → **"off-list"**.
+   7. Unlike any finding (cosine below the floor 0.62) → **"off-list"**.
 4. **"Not sure": flag, never guess.** Never counted. The recap says "{p} unclear remarks: ask someone" ({p} counts remarks, i.e. not-sure chunks, not messages). A read-only
    list **"To be read by a person"** shows the scrubbed original text and, for a voice note, Whisper's English
    translation of **that part of the recording**, labelled "machine translation, to be checked". Whisper notes the
@@ -176,13 +184,13 @@ What the models do, and nothing else:
 | Step | Model | Why a model is needed |
 |---|---|---|
 | Speech → text, language detection | Whisper base (q8 ONNX, 79.7 MB) | Visitors speak; four languages; a voice note is the lowest-effort way for a visitor to give feedback |
-| Remark → one of 21 findings, or "not sure", or "off-list" | paraphrase-multilingual-MiniLM-L12-v2 (q8, 135.4 MB) + a logistic-regression layer trained on 756 catalog examples | The same idea is said in countless ways in four languages ("we walked forever", "der Weg war endlos", "el camino se hizo eterno"); a keyword list misses paraphrases and cannot tell "not too long" from "too long" |
+| Remark → one of 21 findings, or "not sure", or "off-list" | paraphrase-multilingual-MiniLM-L12-v2 (q8, 135.4 MB) + a logistic-regression layer trained on 1,260 catalog examples | The same idea is said in countless ways in four languages ("we walked forever", "der Weg war endlos", "el camino se hizo eterno"); a keyword list misses paraphrases and cannot tell "not too long" from "too long" |
 | Grouping unknown remarks by meaning | Same embeddings, average-linkage clustering | A recurring new topic (e.g. coffee-cherry picking) is phrased differently by each visitor |
 
 **Why not a simpler tool?** An SMS survey or a form forces visitors into fixed boxes in a language they may not read,
 and gets few answers; a spreadsheet needs someone to read, translate and tally voice notes in four languages every
-month; a keyword search counts negations and look-alike words as findings (measured: 28 % of its counted answers are
-wrong, 0 % of cancelling negations handled, vs 6 % and 85 % for Echo). The analytical work is exactly what the brief
+month; a keyword search counts negations and look-alike words as findings (measured with lists written blind: 30 % of
+its counted answers are wrong, 15 % of cancelling negations handled, vs 6.5 % and 85 % for Echo). The analytical work is exactly what the brief
 says small operators cannot do for themselves.
 
 | | Google Translate | A local guide | A form / SMS survey | **Echo** |
@@ -207,7 +215,8 @@ says small operators cannot do for themselves.
   (litotes, double negation, attenuation).
 - **Negation agreement rule.** Each catalog example is tagged negated or not; a chunk is only accepted through
   examples with the same negation status. "The path was not too long" never gives N1; "there was no shade" still gives
-  N8. Measured: 85 % of cancelling negations handled on the held-out half (keywords 0 %).
+  N8. Measured: 85 % of cancelling negations handled on the held-out half (11 of 13; blind keywords 15 %, original
+  keywords 0 %).
 - **Inaudible messages** (under 3 s, silence, steady noise, Whisper phantom texts like "[Music]", very low
   confidence) are marked inaudible and never counted; audio that fails the duration/silence/noise checks is not even transcribed.
 - **Duplicates** (same normalised text, or message embedding cosine ≥ 0.98 within 7 days) are counted once.
@@ -247,32 +256,38 @@ Swahili is unusable with these sizes (WER ≥ 77 %): Echo treats it as an unsupp
 
 | | Precision | Recall | F1 | **Error among accepted answers** | Remarks captured | Not-sure rate (chunks) | Off-list rate (chunks) | Cancelling negations handled |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| **Echo** | **0.95** | 0.50 | 0.66 | **6.0 %** [3–13] | 48.0 % | 43.8 % | 19.2 % | **84.6 %** |
-| Keywords (no AI) | 0.71 | 0.89 | 0.79 | 27.8 % [22–34] | 87.5 % | 0 % (no such state) | 22.3 % | 0 % |
+| **Echo** | **0.93** | 0.54 | 0.69 | **6.5 %** [3–14] | 53.3 % | 37.5 % | 21.4 % | **84.6 %** |
+| Keywords, blind lists (no AI, headline baseline) | 0.69 | 0.81 | 0.75 | 29.9 % [24–37] | 79.6 % | 0 % (no such state) | 26.3 % | 15.4 % |
+| Keywords, original lists (written by the corpus author) | 0.71 | 0.89 | 0.79 | 27.8 % [22–34] | 87.5 % | 0 % (no such state) | 22.3 % | 0 % |
+| *Echo before 2026-10-04 (756 examples, threshold 0.84)* | *0.95* | *0.50* | *0.66* | *6.0 %* [3–13] | *48.0 %* | *43.8 %* | *19.2 %* | *84.6 %* |
 
 Precision / recall / F1 are message level (predicted set of findings vs annotated set); error among accepted answers
 is at chunk level (each (chunk, finding) the system counts that does not match the annotation) and is the most
-important safety measure. Ambiguous feedbacks given a finding: Echo 2/8, keywords 5/8. Off-list feedbacks given a
-finding: Echo 0/15, keywords 5/15.
+important safety measure. Ambiguous feedbacks given a finding: Echo 2/8, blind keywords 4/8, original keywords 5/8.
+Off-list feedbacks given a finding: Echo 0/15, blind keywords 7/15, original keywords 5/15.
 
 Per language (held-out half):
 
-| Lang | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Keywords F1 | Keywords error among accepted |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| en | 0.96 | 0.58 | 0.72 | 4.2 % | 56.4 % | 26.3 % | 0.82 | 23.5 % |
-| fr | 1.00 | 0.50 | 0.67 | 0.0 % | 50.0 % | 52.0 % | 0.72 | 35.3 % |
-| de | 0.90 | 0.43 | 0.58 | **15.0 %** | 40.5 % | 53.8 % | 0.76 | 31.6 % |
-| es | 0.95 | 0.51 | 0.67 | 4.8 % | 46.0 % | 42.3 % | 0.85 | 19.6 % |
+| Lang | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Blind keywords F1 | Blind keywords error among accepted | Blind keywords captured |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| en | 0.92 | 0.58 | 0.71 | 8.0 % | 56.4 % | 21.1 % | 0.79 | 27.8 % | 87.2 % |
+| fr | 1.00 | 0.53 | 0.69 | 0.0 % | 52.9 % | 44.0 % | 0.68 | 39.1 % | 73.5 % |
+| de | 0.91 | 0.50 | 0.65 | 8.7 % | 50.0 % | 47.7 % | 0.75 | 30.2 % | 78.6 % |
+| es | 0.91 | 0.57 | 0.70 | 8.0 % | 54.0 % | 36.5 % | 0.77 | 21.9 % | 78.4 % |
 
-Per finding, Echo's precision is 1.00 for 18 of the 21 findings (N3 0.71, N9 0.75, N7 0.80); its recall ranges from
-0.17 (N4 visit too short) and 0.25 (P6, P11) to 1.00 (P10, N2). Full per-finding table in RESULTS.md.
+German was the weak language before (15.0 % error, 40.5 % captured with the previous configuration); the errors are
+now spread over en, de and es (2 wrong answers each, about 25 accepted answers per language, so wide intervals).
 
-**Confusion matrix highlights** (Echo, held-out half, annotated passage → what Echo did): **only 2 of the 152
-remarks were counted as another finding** (one P2 field visit → P5 explanations; one N9 waiting → N8 thirst/no break);
-everything else not captured went to "not sure" (most) or off-list. Annotated off-list passages: 10 off-list, 5 not
-sure, 0 counted. Ambiguous passages: 5 not sure, 1 off-list, 2 counted as N3. Negated passages: 2 counted (N7, N9),
-11 not sure / off-list. The weakest findings by recall (P11 general thanks 3/13, P3 roasting 3/11) mostly fall to
-"not sure", not to a wrong finding.
+Per finding, Echo's precision is 1.00 for 17 of the 21 findings (N9 0.67, N3 0.71, P8 0.75, N7 0.80); its recall
+ranges from 0.33 (N4 visit too short), 0.36 (P3 roasting) and 0.38 (N1 path too long) to 1.00 (P10, N2). Full
+per-finding table in RESULTS.md.
+
+**Confusion matrix highlights** (Echo, held-out half, annotated passage → what Echo did): **only 3 of the 152
+remarks were counted as another finding** (one P1 welcome and one P4 meal → P8 value for money; one N9 waiting → N8
+water/shade/breaks); everything else not captured went to "not sure" (most) or off-list. Annotated off-list passages: 10 off-list,
+5 not sure, 0 counted. Ambiguous passages: 5 not sure, 1 off-list, 2 counted as N3. Negated passages: 2 counted (N7,
+N9), 11 not sure / off-list. The weakest findings by recall (P11 general thanks 5/13, P3 roasting 4/11) mostly fall
+to "not sure", not to a wrong finding.
 
 **Personal-data scrubbing (SYNTHETIC sentences, `eval/data/pii-names.jsonl`).** The shipped `scrubPii` on 52
 sentences with 58 first names in varied positions (sentence start, German, after "our guide was called" or
@@ -285,7 +300,7 @@ sentence also lowercased like a transcript without capitals:
 | Spoken phone numbers removed | 4/4 | 4/4 |
 | Other words removed by mistake | 0.3 % (1/364) | 0 % (0/364) |
 
-On the whole written corpus (250 feedbacks + 756 catalog examples), 0 of 9,584 words are removed by mistake (Lyon
+On the whole written corpus (250 feedbacks + 1,260 catalog examples), 0 of 13,789 words are removed by mistake (Lyon
 and Valencia were, before a list of capitalised non-names was added: cities, currencies, Wi-Fi, GPS, WhatsApp…).
 Over-scrubbing on **Whisper transcripts** is measured too, on the level-3 clean clips (synthetic voices), since
 Whisper capitalises words that are lowercase in writing: **2 of 965 words** removed by mistake with whisper-base
@@ -294,66 +309,83 @@ Whisper capitalises words that are lowercase in writing: **2 of 965 words** remo
 any [nom]?"). The sentences were written before the first measurement, but the name list was widened once
 afterwards (Rwandan names), so this recall is optimistic; details in RESULTS.md.
 
-### 5.3 The threshold: share of chunks handled vs error, and why 0.84
+### 5.3 The threshold: share of chunks handled vs error, and why 0.82
 
 ![coverage vs error curve](eval/results/coverage-error-curve.svg)
 
-Rule, decided on the **calibration half only**: off-list floor first (Youden index, 0.59), then the acceptance
-threshold that **maximises remarks captured subject to error among accepted answers ≤ 5 %, ≥ 20 accepted answers and
-cancelling-negation accuracy ≥ 85 %**; the same rule picked the variant (embedding model, scoring, regularisation).
-Chosen: MiniLM + linear classifier, accept when probability **≥ 0.84**. On the calibration half: capture 46.2 %, error
-4.5 %, coverage 32.1 % of chunks. On the held-out half: capture 48.0 %, error 6.0 % [3–13]. The original rule (cosine
+Rule, decided on the **calibration half only**: off-list floor first (Youden index, 0.62), then the acceptance
+threshold that **maximises remarks captured subject to error among accepted answers ≤ 8 %, ≥ 20 accepted answers and
+every cancelling negation of the calibration half handled (16 of 16)**; among the variants (embedding model, scoring,
+regularisation, negation margin) whose capture is within 2 points of the best, the one with the lowest error wins.
+Chosen: MiniLM + linear classifier, accept when probability **≥ 0.82**. On the calibration half: capture 53.8 %, error
+3.9 %, coverage 36.8 % of chunks. On the held-out half: capture 53.3 %, error 6.5 % [3–14]. The original rule (cosine
 to the nearest catalog example) never got under 5 % error at any threshold (≥ 20 % even at high thresholds), which is
 why the linear layer exists. We value a wrong count more than a missed one: the host would act on a wrong count,
 while a missed remark goes to a person. The values are written to `packages/core/src/calibration.ts`, which the app
-reads. Honesty note: some test-half numbers were seen by intermediate runs before three procedure changes (listed in
-RESULTS.md); the test half is not perfectly untouched.
+reads.
+
+Until 2026-10-04 the rule was ≤ 5 % error and ≥ 85 % of cancelling negations, with 756 catalog examples: threshold
+0.84, floor 0.59, held-out 48.0 % captured, 6.0 % wrong. The recall work that followed (diagnosis of the lost remarks,
+504 more synthetic catalog examples, non-negating idioms such as "without hesitation", wider language detection, the
+rule above) was measured on the calibration half only (`eval/results/experiments/log.md`); comma splitting, per-language
+thresholds and margin rules were tried and rejected there. A larger embedding model (multilingual mpnet) captured
+about 69 % on the calibration half but needs ~1.4 GB in the browser, too much for a 2 GB phone, so it is not shipped.
+Honesty note: the held-out half had been evaluated before these choices (and some test-half numbers were seen by
+intermediate runs before three earlier procedure changes, listed in RESULTS.md), so it is not perfectly untouched.
 
 ### 5.4 Level 3 — end to end on audio (SYNTHETIC voices + real outdoor noise)
 
 80 feedbacks (20 per language) spoken by 13 Piper TTS voices at varied speeds, mixed with ESC-50 outdoor noise at 20,
 10 and 5 dB SNR, through the whole app path (audio checks → Whisper → audio wiped → analysis).
 
-| Input (whisper-base) | WER | Language right | Inaudible (of 80) | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Keywords captured | Keywords error among accepted |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Text, same 80 messages (level 2) | – | – | – | 42.9 % | 8.7 % | 0.60 | 49.3 % | 89.0 % | 32.3 % |
-| Clean + 0.4 s silence | 13.7 % | 100 % | 12 | 40.7 % | 0.0 % | 0.60 | 47.1 % | 71.4 % | 32.5 % |
-| 20 dB SNR | 13.6 % | 100 % | 12 | 37.4 % | 7.3 % | 0.57 | 44.2 % | 70.3 % | 33.6 % |
-| **10 dB SNR** | 17.5 % | 100 % | 12 | **35.2 %** | **2.7 %** | 0.56 | 47.8 % | 69.2 % | 33.0 % |
-| 5 dB SNR | 23.9 % | 97 % | 14 | 30.8 % | 8.3 % | 0.51 | 49.7 % | 65.9 % | 32.4 % |
+Keywords = the blind lists (headline baseline); the last column gives the original lists for transparency.
 
-Loss vs text: about −8 points of capture at 10 dB, with the error among accepted answers staying under 10 % in every
-condition. 12 of the 80 clips are under 3 s ("Thanks!", "Meh.") and are inaudible by design. Tiny and small rows are
-in RESULTS.md.
+| Input (whisper-base) | WER | Language right | Inaudible (of 80) | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Keywords captured | Keywords error among accepted | Original lists: captured / error |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Text, same 80 messages (level 2) | – | – | – | 54.9 % | 10.2 % | 0.68 | 39.5 % | 81.3 % | 29.7 % | 89.0 % / 32.3 % |
+| Clean + 0.4 s silence | 13.7 % | 100 % | 12 | 44.0 % | 6.4 % | 0.60 | 35.7 % | 67.0 % | 30.4 % | 71.4 % / 32.5 % |
+| 20 dB SNR | 13.6 % | 100 % | 12 | 44.0 % | 10.4 % | 0.60 | 35.9 % | 64.8 % | 31.7 % | 70.3 % / 33.6 % |
+| **10 dB SNR** | 17.5 % | 100 % | 12 | **42.9 %** | **8.7 %** | 0.60 | 40.8 % | 64.8 % | 30.3 % | 69.2 % / 33.0 % |
+| 5 dB SNR | 23.9 % | 97 % | 14 | 31.9 % | 8.3 % | 0.50 | 42.5 % | 61.5 % | 32.3 % | 65.9 % / 32.4 % |
+
+Loss vs text: about −12 points of capture at 10 dB. The error among accepted answers is between 6 % and 10 % on audio
+(and 10.2 %, 6 of 59, on the text of these 80 messages, 39 of which are from the calibration half): above the 8 %
+bound of the calibration rule in two conditions, and about a third of the keyword error everywhere.
+With the previous configuration (threshold 0.84) the 10 dB row was 35.2 % captured, 2.7 % wrong: the new setting
+counts more remarks on audio but also makes more mistakes there (4 wrong answers out of 46 at 10 dB, vs 1 of 37).
+12 of the 80 clips are under 3 s ("Thanks!", "Meh.") and are inaudible by design. Tiny and small rows are in
+RESULTS.md.
 
 Per language at 10 dB SNR (whisper-base, 20 clips per language, SYNTHETIC voices). P / R / F1 at message level; error
-among accepted with its 95 % interval and the number of accepted answers; not sure = share of chunks:
+among accepted with its 95 % interval and the number of accepted answers; not sure = share of chunks; keywords = blind
+lists:
 
 | Lang | WER | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Keywords F1 | Keywords error among accepted | Keywords captured |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en | 11.3 % | 1.00 | 0.41 | 0.58 | 0.0 % [0–30] (9 accepted) | 39.1 % | 37.5 % | 0.75 | 32.1 % (28 accepted) | 78.3 % |
-| fr | 22.1 % | 1.00 | 0.43 | 0.61 | 0.0 % [0–28] (10 accepted) | 34.8 % | 52.6 % | 0.74 | 33.3 % (33 accepted) | 73.9 % |
-| de | 21.9 % | 0.88 | 0.35 | 0.50 | 12.5 % [2–47] (8 accepted) | 35.0 % | 48.6 % | 0.51 | 42.9 % (21 accepted) | 45.0 % |
-| es | 15.4 % | 1.00 | 0.36 | 0.53 | 0.0 % [0–28] (10 accepted) | 32.0 % | 55.9 % | 0.75 | 26.7 % (30 accepted) | 76.0 % |
+| en | 11.3 % | 1.00 | 0.55 | 0.71 | 0.0 % [0–24] (12 accepted) | 52.2 % | 27.1 % | 0.72 | 36.7 % (30 accepted) | 73.9 % |
+| fr | 22.1 % | 0.92 | 0.48 | 0.63 | 8.3 % [1–35] (12 accepted) | 43.5 % | 44.7 % | 0.69 | 34.6 % (26 accepted) | 60.9 % |
+| de | 21.9 % | 0.78 | 0.35 | 0.48 | **22.2 %** [6–55] (9 accepted) | 35.0 % | 48.6 % | 0.63 | 23.5 % (17 accepted) | 55.0 % |
+| es | 15.4 % | 0.91 | 0.40 | 0.56 | 7.7 % [1–33] (13 accepted) | 40.0 % | 47.1 % | 0.72 | 23.1 % (26 accepted) | 68.0 % |
 
-With 8 to 10 accepted answers per language the intervals are very wide: the only wrong accepted answer at 10 dB is
-German. The same table for clean speech, the per-finding table and the confusion matrices are in
-[`eval/results/RESULTS.md`](eval/results/RESULTS.md) ("Level 3 in detail").
+With 9 to 13 accepted answers per language the intervals are very wide, but German stands out: 2 of its 9 accepted
+answers are wrong at 10 dB (Whisper base's German WER is 22 %). The same table for clean speech, the per-finding table
+and the confusion matrices are in [`eval/results/RESULTS.md`](eval/results/RESULTS.md) ("Level 3 in detail").
 
 **Which Whisper.** Rule: the smallest model with FLEURS WER ≤ 30 % in every visitor language **and**, at 10 dB, error
 among accepted ≤ 10 % with capture at most 10 points below the best model. Tiny fails (FLEURS fr 67 %, de 52 %; 10 dB
-capture 20.9 %); **base passes** (35.2 % vs 40.7 % for small, 3.2× smaller). The rule was written after seeing the
-numbers; the table lets the reader apply another.
+capture 26.4 %, error 10.7 %); **base passes** (42.9 % captured, 8.7 % wrong); small captures more (49.5 %) but with
+11.1 % wrong at 10 dB it now fails the error part of the rule, and it is 3.2× larger. The rule was written after
+seeing the numbers; the table lets the reader apply another.
 
 ### 5.5 Unknown topic that comes back (coffee-cherry picking, 3 visitors)
 
 | Clustered chunks | Picking flagged in realistic months (6–7 visitors, 500 simulated months) | Months with a false alert (500) |
 |---|---:|---:|
 | Off-list only (literal SPEC 4.5) | 0 % | 0 % |
-| **Off-list + below-threshold "not sure" (shipped)** | **98 %** | **0.6 %** |
+| **Off-list + below-threshold "not sure" (shipped)** | **98 %** | **0.4 %** |
 
 The three picking remarks land in "not sure" (close to "field visit"), so the literal off-list-only rule never fires;
-the shipped rule also clusters below-threshold "not sure" chunks. This choice and the cluster threshold (0.59) were
+the shipped rule also clusters below-threshold "not sure" chunks. This choice and the cluster threshold (0.57) were
 made after seeing the picking result, and there is no second recurring topic to validate them blind. Stress test with
 all 250 feedbacks as one month: picking flagged, but 19 false alerts, so the signal suits one farm, not a
 cooperative-wide feed. In the web demo the three picking samples trigger the signal.
@@ -363,16 +395,22 @@ feedbacks, 0 for the same text a month later.
 
 ### 5.6 Echo vs keywords (summary)
 
-| | Echo | Keywords |
-|---|---:|---:|
-| Remarks captured, text (held-out) | 48 % | 88 % |
-| Error among accepted answers, text | **6 %** | 28 % |
-| Says "not sure" instead of guessing | yes (41 % of remarks) | never |
-| Cancelling negations handled | **85 %** | 0 % |
-| Off-list feedbacks given a finding | **0/15** | 5/15 |
-| Audio 10 dB: captured / error among accepted | 35 % / **3 %** | 69 % / 33 % |
+| | Echo | Keywords, blind lists (headline) | Keywords, original lists | *Echo before 2026-10-04* |
+|---|---:|---:|---:|---:|
+| Remarks captured, text (held-out) | 53 % | 80 % | 88 % | *48 %* |
+| Error among accepted answers, text | **6.5 %** | 30 % | 28 % | *6.0 %* |
+| Says "not sure" instead of guessing | yes (34 % of remarks) | never | never | *yes (41 %)* |
+| Cancelling negations handled (of 13) | **85 %** (11) | 15 % (2) | 0 % (0) | *85 %* |
+| Off-list feedbacks given a finding | **0/15** | 7/15 | 5/15 | *0/15* |
+| Audio 10 dB: captured / error among accepted | 43 % / **9 %** | 65 % / 30 % | 69 % / 33 % | *35 % / 3 %* |
 
-The keyword lists were written by the same author as the synthetic corpus, which favours the baseline.
+**Why two keyword baselines.** The original lists were written by the same agent that wrote the synthetic corpus, so
+they can reuse its exact wording; that flatters keyword matching. The blind lists were written afterwards in one pass,
+from the catalog's finding labels and example phrasings only, without opening the corpus, any result or the first lists,
+and were never tuned on a score (`eval/keywords-blind/README.md`). They capture 8 points fewer remarks than the
+original lists (80 % vs 88 %), with a similar error; we use them as the headline baseline and keep both. Neither is a
+keyword system a person would refine for months. **Echo before 2026-10-04**: catalog of 756 examples, threshold 0.84
+(§5.3); same held-out half, same code path.
 
 ### 5.7 Size, memory, speed
 
@@ -382,10 +420,10 @@ The keyword lists were written by the same author as the synthetic corpus, which
 | One-time download of the web app | ≈ 242 MB (models + 27 MB WebAssembly runtime) + app shell, catalog, clips, samples; side-loadable by copying `models/` |
 | Catalog + Kinyarwanda audio | 67 MP3 clips, ~360 KiB |
 | Side-loadable debug APK (models bundled) | ~150 MB (157 MB file). **On the phone: the installed APK (150 MB) + ~36 MB of app data**: the models are read in place from the APK, not copied (the data is the service worker's copy of the app shell and the 27 MB WebAssembly runtime). Measured on the Android 14 emulator: app data 267 MB before this fix (models copied into Cache Storage), 36 MB after. Cost: reading the 118 MB MiniLM file from the APK takes ~1.4–1.6 s vs ~0.7 s from Cache Storage (emulator) |
-| Memory (laptop, Node process, whisper-base) | 885 MB after loading, **peak 1.2 GB** (native runtime libraries + file buffers) |
+| Memory (laptop, Node process, whisper-base) | ~900 MB after loading, **peak 1.2–1.3 GB** (native runtime libraries + file buffers) |
 | Memory in the APK's WebView (**Android 14 emulator**, not a phone) | Both models loaded: renderer ≈ **1.55 GB**; with "2 GB" of RAM the renderer was killed by low memory during transcription; 3 GB works. **One model at a time** (automatic when the browser reports ≤ 2 GB, 2026-10-04 re-test, "2 GB" setting: the emulator raises a 2048 MB request to 2560 MB on this system image, MemTotal 2.42 GiB): renderer **peak RSS 1.66 GB** (PSS 1.64 GB; PSS + swap up to 2.34 GB, the rest in zram), lowest MemAvailable 57 MB, **renderer never killed** |
-| 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.2 s**; **10.8 s** with the English of the unclear parts for the review list (a timestamped Whisper pass, then each segment holding a not-sure / off-list chunk and no counted chunk cut out and translated alone; this French test message has several unclear segments, close to a worst case; the former single translation of the whole message took 4.3 s but could not be stored for a message with a counted chunk). 8 threads: 4.1 s / 13.0 s on a shared CPU. A voice note whose chunks are all counted needs no translation at all |
-| 30 s message, **low-end Android: ESTIMATE, not measured** | **~31–82 s** (~102–273 s with the English of the unclear parts) = 1-thread laptop time × measured WebAssembly overhead (×3.2) × assumed 3–8× per-core gap |
+| 30 s message, laptop (Intel Core Ultra 5 226V), 1 thread | **3.3 s**; **9.2 s** with the English of the unclear parts for the review list (a timestamped Whisper pass, then each segment holding a not-sure / off-list chunk and no counted chunk cut out and translated alone; this French test message has several unclear segments, close to a worst case; the former single translation of the whole message took 4.3 s but could not be stored for a message with a counted chunk). 8 threads: 4.1 s / 11.5 s on a shared CPU. A voice note whose chunks are all counted needs no translation at all |
+| 30 s message, **low-end Android: ESTIMATE, not measured** | **~32–86 s** (~89–238 s with the English of the unclear parts) = 1-thread laptop time × measured WebAssembly overhead (×3.25) × assumed 3–8× per-core gap |
 | In the browser (headless Chromium, this laptop) | first load 11 s from localhost; the 10 demo samples (≈ 51 s of audio) analysed in 25 s; offline reload ready in 3 s |
 | APK on an **Android 14 emulator** (KVM, 2 vCPUs, airplane mode; emulator, not a phone; WASM on 1 thread in the APK) | offline start with the bundled models: 2 GB 29 s first load then 10–11 s, 3 GB 19 s. With 3 GB: a **6 s sample transcribed and matched in 18.4 s**; a shared `.opus` voice note analysed from the queue in 6.5 s. "2 GB" with both models: no result (renderer killed). "2 GB" with one model at a time: the 6 s German sample in 30.8 s on-device (Whisper 30.2 s with the former whole-message English translation, which this sample no longer needs since every chunk is counted; 50 s from the tap, including two model swaps); a queue of 3 voice notes (6–8 s each) transcribed, then analysed, in 84 s from the tap, all three stored (screenshot `apps/android/screenshots/low-memory-host-batch.png`) |
 
@@ -429,7 +467,8 @@ The complete data sheet, with every license checked on its primary page (URL and
 | Piper TTS voices (**synthetic voices**) | engine GPL-3.0 (build-time tool); voices CC0 / CC-BY / CC-BY-SA / Unlicense | 13 voices, 80 clips, 6.5 min per condition; 10 demo samples | Level 3 audio, demo samples | Studio read speech, no hesitations, no non-native accents |
 | ESC-50 outdoor noise | CC BY-NC 3.0 (ESC-10 CC BY 3.0); clips kept only if Freesound source is CC0/CC-BY | 48 clips × 5 s, 12 classes, mixed at 20/10/5 dB SNR | Level 3 noise | Not recorded on a Rwandan farm; no wind on the mic |
 | Visitor feedbacks (**synthetic**, ours) | released with the project | 250 feedbacks, 137 KB | Levels 2 and 3 | Written by people who know the catalog |
-| Catalog examples (**synthetic**, ours) | released with the project | 756 sentences (21 findings × 9 × 4 languages) | Classifier training | Authored, not collected |
+| Catalog examples (**synthetic**, ours) | released with the project | 1,260 sentences (21 findings × 15 × 4 languages; 756 first, 504 added on 2026-10-04) | Classifier training | Authored, not collected |
+| Keyword lists of the no-AI baseline (**synthetic**, ours) | released with the project | 2 sets × 4 languages × 21 findings: original (`eval/keywords/`), blind (`eval/keywords-blind/`, 295–373 terms per language) | Evaluation only (the demo's comparison uses the blind set) | Not refined over time like a real keyword system; the original set was written by the corpus author |
 | First-name list of the PII scrubber (`packages/core/src/given-names.ts`, **shipped in the app**): US Census 1990 first names, INSEE Fichier des prénoms (2023), Wikidata | Census public domain; INSEE Licence Ouverte / Etalab 2.0; Wikidata CC0 (only folded names redistributed) | 6,154 names, 54 KB shipped | `scrubPii` removes a listed name in any position, lowercase transcripts included | Old (1990) US list; Wikidata favours notable people; many names of the world are missing (Noor, Kwame were missed in the check); names that are common words (Grace, Claire, Pierre, Rose, Dolores…) are only removed by the context rules |
 | Tatoeba sentences (en, fr, de, es) | CC BY 2.0 FR | eng 1.9 M, fra 0.6 M, deu 0.7 M, spa 0.4 M sentences, **build time only** | Decides which first names are also common words per language; only the resulting name flags are shipped | Written, crowd-sourced sentences; lowercase counts are a proxy for "is a common word" |
 | PII check sentences (**synthetic**, ours) | released with the project | 52 sentences, 58 names, 4 spoken phone numbers | Level-2 check of the scrubber (`pnpm eval -- --level pii`) | Written by the team; not real names spoken through Whisper; the name list was widened once after the first run, so the recall is optimistic |
@@ -489,10 +528,11 @@ with the unlocked phone and browser developer tools could read IndexedDB; what t
 scrubbed review chunks, never audio; names or numbers only where the scrubber missed one. There is no remote wipe.
 
 **Quality gaps by language (measured).** Whisper base on real voices: WER en 10.5 %, es 12.3 %, de 21.6 %,
-fr 28.7 %. On synthetic text, Echo's error among accepted answers is 4.2 % en, 0 % fr, 4.8 % es but **15.0 % de**
-(our worst), and it captures 56 % of English remarks vs 41 % of German ones; it says "not sure" about twice as often
-in French and German (52–54 % of chunks) as in English (26 %). So French and German visitors are more often routed to
-a person, and German errors are the ones to watch. Swahili (WER ≥ 77 %) and any language outside en/fr/de/es are
+fr 28.7 %. On synthetic text, Echo's error among accepted answers is 8.0 % en, 0 % fr, 8.7 % de, 8.0 % es (2 wrong
+answers each out of about 25, 0 of 19 in French), and it captures 56 % of English remarks vs 50 % of German ones; it
+says "not sure" about twice as often in French and German (44–48 % of chunks) as in English (21 %). So French and
+German visitors are more often routed to a person. On noisy audio German errors are the ones to watch (2 of 9
+accepted answers wrong at 10 dB, §5.4). Swahili (WER ≥ 77 %) and any language outside en/fr/de/es are
 treated as unsupported: the whole message is "not sure", never guessed. On the host side, the Kinyarwanda is the same
 29 recap sentences + 6 host-app labels + 32 number words for everyone, machine-translated and unvalidated (§8).
 
@@ -508,7 +548,8 @@ read them. Nothing technical stops the guide from reading the list if the host h
 host's decision, and we say so.
 
 **Biases we know of.** The catalog, the keyword lists and the evaluation corpus were written by the same team (style
-shared, even though near-duplicates are checked); synthetic voices are native, clear and read; the catalog reflects
+shared, even though near-duplicates are checked; the second, blind keyword lists were written without seeing the
+corpus, and they capture 8 points fewer remarks than the first ones); synthetic voices are native, clear and read; the catalog reflects
 what we imagined visitors say about a coffee farm.
 
 ## 8. A less-supported language
@@ -532,7 +573,7 @@ The jury asks how the tool behaves with a language that is less well covered. Tw
 ## 9. Replicability and next steps
 
 - **Another activity = another catalog.** Homestays, craft workshops, tea estates: rewrite the findings and their
-  5–10 example phrasings per language (`tools/catalog/examples_*.py`), the keyword lists, and re-run
+  example phrasings per language (15 per finding here, `tools/catalog/examples_*.py`), the keyword lists, and re-run
   `tools/catalog/build_kinyarwanda.py` (or let a speaker write the sentences), then `pnpm eval` re-calibrates the
   threshold and regenerates `calibration.ts`. No code change.
 - **Another host language** = another set of 29 sentences, 6 labels, 32 number words and their clips (§8). Another visitor language = examples in
@@ -581,9 +622,13 @@ Found during the build:
   Chromium-based browser.
 - **The SMS is not sent automatically**: Echo opens the SMS app pre-filled and a person presses Send (deliberate:
   human in the loop), one SMS part at a time.
-- **Echo captures about half of the remarks automatically** (48 % on synthetic text, 35 % on noisy synthetic audio);
-  the rest needs a person to read the review list. Recall is low for some findings (N4 0.17, P6/P11 0.25).
-- **German has the highest error among accepted answers (15 %)** on synthetic text, above the 5 % target.
+- **Echo captures about half of the remarks automatically** (53 % on synthetic text, 43 % on noisy synthetic audio),
+  fewer than keyword matching (80 % with lists written blind); the rest needs a person to read the review list.
+  Recall is low for some findings (N4 0.33, P3 0.36, N1 0.38).
+- **Error among accepted answers is above the 5 % first target**: 6.5 % [3–14] on synthetic text, 8.7 % at 10 dB and
+  10.4 % at 20 dB on synthetic audio (the calibration bound is 8 %); German on noisy audio 22 % (2 of 9). Keyword
+  matching is at 28–33 % everywhere. Before 2026-10-04 Echo was at 6.0 % on text and 2.7 % at 10 dB, with fewer
+  remarks captured (48 % and 35 %).
 - **Unknown-topic rule tuned on its only example** (picking); it deviates from SPEC 4.5 by also clustering
   below-threshold "not sure" chunks; with many messages it produces false alerts.
 - **The "ambiguous" demo sample is a chosen phrasing.** The first one ("c'était particulier… je ne sais pas trop quoi
@@ -615,13 +660,13 @@ Found during the build:
   Measured on 52 synthetic sentences: 90 % of names removed, 81 % when the transcript has no capitals. It keeps on
   purpose first names that are also common words (Grace, Claire, Pierre, Pilar, Rose, Ernst, Dolores) unless they
   sit next to another name or "and I", and misses names outside its list at the start of a sentence (Noor, Kwame).
-  It removes no word of the 9,584-word written corpus by mistake, but 2 of 965 words of the whisper-base transcripts
+  It removes no word of the 13,789-word written corpus (feedbacks + catalog examples) by mistake, but 2 of 965 words of the whisper-base transcripts
   (mishearings Whisper capitalised: "Newson's", "Frank"). A missed name in a "not sure" or
   off-list chunk is stored with that chunk's text. Real visitors' names through Whisper are not measured.
 - **English versions only for voice notes, and not for every unclear part, at a cost.** A not-sure chunk that
   shares a time segment with a counted chunk gets no English version; written messages never get one. Each unclear
   segment is translated on its own (one Whisper encoder pass per segment): on the laptop a 30 s French message with
-  several unclear segments takes 10.8 s instead of 3.2 s without translation (1 thread), ~102–273 s estimated on a
+  several unclear segments takes 9.2 s instead of 3.3 s without translation (1 thread), ~89–238 s estimated on a
   low-end phone (§5.7); a voice note whose chunks are all counted only pays the extra timestamped pass. A cheaper
   variant (one timestamped translation of the whole window, split by time) was measured here: about half the cost,
   but its English segments often straddled two source segments, which leaves the chunk without an English version.
@@ -644,7 +689,7 @@ Found during the build:
                                        └▶ audio deleted from queue, buffer zero-filled
                                      @echo/core (pure TypeScript, zero dependency, same code as the eval)
                                        inaudible checks ─▶ PII scrub ─▶ sentences/clauses ─▶ negation
-                                       ─▶ MiniLM embeddings ─▶ linear classifier (p ≥ 0.84) + negation agreement
+                                       ─▶ MiniLM embeddings ─▶ linear classifier (p ≥ 0.82) + negation agreement
                                        ─▶ matched | not sure | off-list ─▶ duplicates ─▶ off-list clustering
                                        ─▶ monthly recap from frozen catalog sentences only
                                                          │  IndexedDB: messages (findings only), reviewChunks
@@ -655,12 +700,12 @@ Found during the build:
 
 | Path | What |
 |---|---|
-| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation, month closure, per-segment English for review chunks). 132 tests with fakes (168 in the whole workspace). `calibration.ts` is generated by the evaluation. |
+| `packages/core` | All decision logic (segmentation, PII, negation, matcher + linear classifier, not-sure/off-list/inaudible rules, duplicates, clustering, recap, SMS split, keyword baseline, cooperative aggregation, month closure, per-segment English for review chunks). 136 tests with fakes (176 in the whole workspace). `calibration.ts` is generated by the evaluation. |
 | `packages/models` | transformers.js adapters: Whisper with our language detection, token-log-prob confidence, repetition-loop guard, 30 s windows; embedder (mean pooling, L2). Same file in the browser and in the evaluation. |
 | `apps/web` | Vite + Preact PWA: Try-it demo, host app (modes A/B), settings + PIN, cooperative view, visitor card, service worker, share target, worker. |
 | `apps/android` | Capacitor shell packaging `apps/web/dist` (models bundled) as a side-loadable APK; Android share intent → the web app's queue. |
-| `catalog/` | `catalog.json` (21 findings, 756 synthetic examples, keywords, frozen Kinyarwanda, templates, numbers) + 67 MP3 clips. |
-| `eval/` | `pnpm eval`: levels 1–3, performance, report; synthetic corpus, keyword lists, results. |
+| `catalog/` | `catalog.json` (21 findings, 1,260 synthetic examples, keywords, frozen Kinyarwanda, templates, numbers) + 67 MP3 clips. |
+| `eval/` | `pnpm eval`: levels 1–3, performance, report; synthetic corpus, keyword lists (original and blind), results (previous results kept in `eval/results/previous/`). |
 | `tools/` | Build-time Python only: Kinyarwanda catalog (NLLB-200, MMS-TTS), Piper test audio, ESC-50 noise, FLEURS fetch, model download. |
 
 Design choices and module contracts: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
@@ -691,7 +736,7 @@ pnpm dev                           # web app with hot reload: http://localhost:5
 pnpm build                         # production build into apps/web/dist (~260 MB with models)
 pnpm preview                       # serve the build: http://localhost:4173 (COOP/COEP headers → WASM threads)
 
-pnpm test                          # vitest, all packages (core, models, web, eval: 168 tests)
+pnpm test                          # vitest, all packages (core, models, web, eval: 176 tests)
 pnpm typecheck                     # tsc on every package
 pnpm --filter @echo/web e2e        # after `pnpm build`: real models in headless Chromium, online then offline
                                    #   (first time: npx playwright install chromium; writes docs/screenshots/)
@@ -758,7 +803,7 @@ on a real phone, a real SMS, a real WhatsApp share.
 | Evaluation feedback corpus (250 feedbacks, levels 2–3) | **Synthetic**: written by the team, no real visitor | `eval/data/README.md`, RESULTS.md, this README |
 | Level-3 test audio | **Synthetic voices** (Piper TTS) + real outdoor noise (ESC-50) | RESULTS.md, data sheet |
 | Demo sample messages (10) | **Synthetic voices**; 9 are selected takes (best of 4 by whisper-base WER; the German and the ambiguous ones re-taken as best of 6 among the takes whose outcome through the shipped pipeline matches the expected one): they demonstrate, they do not measure; 1 is generated noise | Demo UI badge "synthetic voices", `eval/data/demo-samples/manifest.json` |
-| Catalog example phrasings (756) | **Synthetic**, written by the team | `catalog/catalog.json` (`examplesSynthetic: true`) |
+| Catalog example phrasings (1,260) | **Synthetic**, written by the team | `catalog/catalog.json` (`examplesSynthetic: true`) |
 | Kinyarwanda sentences and audio clips | **Machine translation (NLLB-200) and synthetic voice (MMS-TTS), not validated by a speaker** | Recap view in the app, `catalog/README.md`, `status: machine_translated_unvalidated` |
 | 3-month history in the demo | **Synthetic**: hand-written finding lists, not produced by the models | Demo UI badges "synthetic" |
 | Cooperative view | **Simulated**: 11 synthetic farms generated on the phone; nothing is sent anywhere | Coop page notice, Settings |

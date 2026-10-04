@@ -1,0 +1,69 @@
+{
+  "synthetic": true,
+  "rule": "off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= 5%, >= 20 accepted answers and cancelling-negation accuracy >= 85%; variant (embedding model, scoring, L2, negation margin) = best capture under that rule",
+  "split": {
+    "seed": 20261004,
+    "calibration": 125,
+    "test": 125,
+    "stratifiedBy": "language x main category (picking, off-list, ambiguous, cancelling negation, inherent negation, multi-finding, single)"
+  },
+  "variant": {
+    "name": "linear-minilm-l2=0.00003-neg0",
+    "embedder": "minilm",
+    "scoring": "linear",
+    "aggregation": "max",
+    "crossLingual": true,
+    "l2": 0.00003,
+    "negationMargin": 0,
+    "selectable": true
+  },
+  "embeddingModel": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+  "scoring": "linear",
+  "acceptProbability": 0.84,
+  "acceptThreshold": null,
+  "offListThreshold": 0.59,
+  "linearL2": 0.00003,
+  "linearEpochs": 150,
+  "negationMargin": 0,
+  "floorSelection": {
+    "floor": 0.59,
+    "j": 0.7061,
+    "offBelow": 0.8333,
+    "inBelow": 0.1273,
+    "offListChunks": 18,
+    "inListChunks": 165
+  },
+  "offListClusterThreshold": 0.59,
+  "clusterThresholdSelection": {
+    "threshold": 0.59,
+    "rule": "lowest t with <= 1% of cross-language different-finding example pairs >= t",
+    "precise": {
+      "threshold": 0.59,
+      "sameAbove": 0.2923,
+      "diffAbove": 0.0091
+    },
+    "youden": {
+      "threshold": 0.27,
+      "j": 0.6332,
+      "sameAbove": 0.8292,
+      "diffAbove": 0.196
+    },
+    "samePairs": 10206,
+    "diffPairs": 204120
+  },
+  "unknownTopicSources": "off_list_and_unsure",
+  "atThresholdCalibration": {
+    "threshold": 0.84,
+    "coverage": 0.3206,
+    "acceptedErrorRate": 0.0448,
+    "accepted": 67,
+    "captureRate": 0.4615,
+    "precision": 0.9524,
+    "recall": 0.4724,
+    "f1": 0.6316,
+    "notSureRate": 0.4258,
+    "negationCancelsAccuracy": 1
+  },
+  "catalogExamples": 756,
+  "date": "2026-10-04"
+}

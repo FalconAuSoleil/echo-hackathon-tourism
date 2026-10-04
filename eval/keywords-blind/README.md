@@ -49,5 +49,6 @@ findings in each of en, fr, de, es (`KeywordFile` in `packages/core/src/baseline
 
 `pnpm eval -- --level 2` always reports both sets (`keywordSets.original` and `keywordSets.blind` in
 `eval/results/level2.json`, both rows in `RESULTS.md`). The *primary* set (the `keywords` field, level 3, the headline
-column) stays `original` by default; `pnpm eval -- --keywords blind` (or `ECHO_KEYWORDS=blind`) makes it this one.
+column) is this blind set by default since 2026-10-04 (eval-and-readme); `pnpm eval -- --keywords original` (or
+`ECHO_KEYWORDS=original`) switches back to the first lists. Results on the held-out half: `eval/results/RESULTS.md`.
 Code: `eval/src/lib/keyword-sets.ts`.

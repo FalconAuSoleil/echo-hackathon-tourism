@@ -7,8 +7,9 @@ import { KEYWORD_SET_NAMES, loadKeywordSet, primaryKeywordSet } from "./keyword-
 const ids = readJson<{ findings: { id: string }[] }>(CATALOG_PATH).findings.map((f) => f.id);
 
 describe("jeux de mots-clés", () => {
-  it("jeu principal : original par défaut, blind sur demande, erreur sinon", () => {
-    expect(primaryKeywordSet({})).toBe("original");
+  it("jeu principal : blind par défaut, original sur demande, erreur sinon", () => {
+    expect(primaryKeywordSet({})).toBe("blind");
+    expect(primaryKeywordSet({ ECHO_KEYWORDS: "original" })).toBe("original");
     expect(primaryKeywordSet({ ECHO_KEYWORDS: "blind" })).toBe("blind");
     expect(() => primaryKeywordSet({ ECHO_KEYWORDS: "other" })).toThrow();
   });

@@ -96,45 +96,76 @@ export function runReport(log: (s: string) => void = console.log) {
   // ---------- Headline ----------
   if (l2) {
     const e = l2.echo.test.all;
-    const k = l2.keywords.test.all;
-    const e3 = l3?.models?.["whisper-base"]?.snr10?.echo?.all;
-    const k3 = l3?.models?.["whisper-base"]?.snr10?.keywords?.all;
+    const sets = (l2.keywordSets ?? {}) as Record<string, J>;
+    const primary: string = l2.keywordSet ?? "original";
+    const k = l2.keywords.test.all; // jeu principal
+    const other = primary === "blind" ? "original" : "blind";
+    const ko = sets[other]?.test?.all as J | undefined;
+    const base3 = l3?.models?.["whisper-base"]?.snr10;
+    const e3 = base3?.echo?.all;
+    const k3 = base3?.keywords?.all;
+    const ko3 = base3?.keywordSets?.[other];
+    const setLabel = (n: string) => (n === "blind" ? "Keywords, blind lists" : "Keywords, original lists");
+    // Chiffres précédents d'Echo (avant le travail sur le rappel), gardés pour la transparence.
+    const prevFile = "previous/2026-10-04-before-recall/level2.json";
+    const prev = load(prevFile);
+    const pe = prev?.echo?.test?.all;
+    const negCell = (m: J) => `${pct(m.negationCancels.accuracy, 0)} (${m.negationCancels.spans - m.negationCancels.violations}/${m.negationCancels.spans})`;
     w("## Headline");
     w();
     w("**Share of visitor remarks correctly captured** (SPEC 13). Definition: a *remark* is a passage of a feedback annotated");
     w("as expressing one catalog finding (P1–N10). It is *correctly captured* when the system counts exactly that finding on");
     w("a chunk that overlaps the passage (≥ half of the shorter one's words in common). Remarks left \"not sure\" or counted as");
     w("another finding are not captured. Measured on the held-out half of the SYNTHETIC level-2 corpus");
-    w(`(${e.remarks.total} remarks in ${e.messages} feedbacks); the same remark set for both methods.`);
+    w(`(${e.remarks.total} remarks in ${e.messages} feedbacks); the same remark set for every method.`);
     w();
-    w(table(["", "Echo", "Keywords"], [
-      ["Remarks correctly captured (X / Y)", `**${pct(e.remarks.captureRate, 0)}** ${ci(e.remarks.ci95)}`, `**${pct(k.remarks.captureRate, 0)}** ${ci(k.remarks.ci95)}`],
-      ["Of the answers it counts, share that are wrong", `${pct(e.answers.acceptedErrorRate, 0)} ${ci(e.answers.ci95)}`, `${pct(k.answers.acceptedErrorRate, 0)} ${ci(k.answers.ci95)}`],
-      ["Remarks flagged \"not sure — ask a person\" instead", pct(e.remarks.notSure / Math.max(1, e.remarks.total), 0), "0 % (no such state)"],
-      ["Remarks either counted right or flagged \"not sure — ask a person\"", pct((e.remarks.captured + e.remarks.notSure) / Math.max(1, e.remarks.total), 0), `${pct(k.remarks.captureRate, 0)} (no such flag)`],
-      ...(e3 && k3 ? [["Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices)", `${pct(e3.remarks.captureRate, 0)} captured, ${pct(e3.answers.acceptedErrorRate, 0)} wrong`, `${pct(k3.remarks.captureRate, 0)} captured, ${pct(k3.answers.acceptedErrorRate, 0)} wrong`]] : []),
+    const cols = ["", "Echo", `**${setLabel(primary)}** (headline baseline)`, ...(ko ? [`${setLabel(other)} (transparency)`] : [])];
+    const row = (label: string, ec: string, kc: string, oc?: string) => [label, ec, kc, ...(ko ? [oc ?? "–"] : [])];
+    w(table(cols, [
+      row("Remarks correctly captured (X / Y)", `**${pct(e.remarks.captureRate, 0)}** ${ci(e.remarks.ci95)}`, `**${pct(k.remarks.captureRate, 0)}** ${ci(k.remarks.ci95)}`, ko && `${pct(ko.remarks.captureRate, 0)} ${ci(ko.remarks.ci95)}`),
+      row("Of the answers it counts, share that are wrong", `${pct(e.answers.acceptedErrorRate, 1)} ${ci(e.answers.ci95)} (${e.answers.wrong}/${e.answers.accepted})`, `${pct(k.answers.acceptedErrorRate, 1)} ${ci(k.answers.ci95)} (${k.answers.wrong}/${k.answers.accepted})`, ko && `${pct(ko.answers.acceptedErrorRate, 1)} ${ci(ko.answers.ci95)} (${ko.answers.wrong}/${ko.answers.accepted})`),
+      row("Cancelling negations not counted (\"the walk was not too long\")", negCell(e), negCell(k), ko && negCell(ko)),
+      row("Off-list feedbacks given a finding anyway", `${e.offListSpans.gotFinding}/${e.offListSpans.total}`, `${k.offListSpans.gotFinding}/${k.offListSpans.total}`, ko && `${ko.offListSpans.gotFinding}/${ko.offListSpans.total}`),
+      row("Remarks flagged \"not sure — ask a person\" instead", pct(e.remarks.notSure / Math.max(1, e.remarks.total), 0), "0 % (no such state)", "0 %"),
+      row("Remarks either counted right or flagged \"not sure — ask a person\"", pct((e.remarks.captured + e.remarks.notSure) / Math.max(1, e.remarks.total), 0), `${pct(k.remarks.captureRate, 0)} (no such flag)`, ko && pct(ko.remarks.captureRate, 0)),
+      ...(e3 && k3 ? [row("Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices): captured / wrong", `${pct(e3.remarks.captureRate, 0)} / ${pct(e3.answers.acceptedErrorRate, 0)}`, `${pct(k3.remarks.captureRate, 0)} / ${pct(k3.answers.acceptedErrorRate, 0)}`, ko3 && `${pct(ko3.captureRate, 0)} / ${pct(ko3.acceptedErrorRate, 0)}`)] : []),
     ]));
     w();
-    w("95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but about one counted answer in");
+    w("95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but more than one counted answer in");
     w("four is wrong (negations such as \"the walk was not too long\" count as complaints, a \"delicious coffee\" counts as a meal, …),");
-    w("and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate near the");
-    w(`${(l2.calibration.maxAcceptedError ?? 0.05) * 100} % bound of the calibration rule, and routes the rest to a person. The keyword lists were written by the same author as the synthetic corpus,`);
-    w("which favours the baseline (eval/keywords/README.md).");
+    w("and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate under the");
+    w(`${(l2.calibration.maxAcceptedError ?? 0.05) * 100} % bound of the calibration rule, and routes the rest to a person. The host acts on the counts, so a wrong count`);
+    w("costs more than a missed one (a missed remark is still read by a person from the review list).");
     w();
-    const sets = l2.keywordSets as Record<string, J> | undefined;
-    if (sets?.original && sets?.blind) {
-      const o = sets.original.test.all;
-      const b = sets.blind.test.all;
-      w(`Second keyword baseline, written blind (without opening the corpus, the results or the first lists; protocol in eval/keywords-blind/README.md). Primary set in the table above: \`${l2.keywordSet ?? "original"}\`.`);
+    w("**Why the blind lists are the headline baseline.** The original lists (`eval/keywords/`) were written by the same agent");
+    w("that wrote the synthetic corpus, so they can repeat its exact wording, which flatters keyword matching. The blind lists");
+    w("(`eval/keywords-blind/`) were written in one pass from the catalog's finding labels and example phrasings only, without");
+    w("opening the corpus, the results or the first lists, and were never tuned on a score (protocol: eval/keywords-blind/README.md).");
+    if (ko) {
+      w(`The gap between the two (${pct(ko.remarks.captureRate, 0)} vs ${pct(k.remarks.captureRate, 0)} of remarks captured) is an estimate of that leak; both are kept above.`);
+      w("Neither is a tuned commercial keyword system: a person maintaining lists for months would do better than the blind lists.");
+    }
+    w();
+    if (pe) {
+      w("**Previous Echo configuration** (same held-out half, kept for transparency; raw numbers in `eval/results/previous/2026-10-04-before-recall/`):");
       w();
-      w(table(["Keyword set (held-out test half)", "Remarks captured", "Error among accepted", "F1"], [
-        ["original (eval/keywords/, written by the corpus author)", `${pct(o.remarks.captureRate, 0)} ${ci(o.remarks.ci95)}`, `${pct(o.answers.acceptedErrorRate, 0)} ${ci(o.answers.ci95)}`, num(o.micro.f1)],
-        ["blind (eval/keywords-blind/)", `${pct(b.remarks.captureRate, 0)} ${ci(b.remarks.ci95)}`, `${pct(b.answers.acceptedErrorRate, 0)} ${ci(b.answers.ci95)}`, num(b.micro.f1)],
+      w(table(["Echo, held-out half", "Remarks captured", "Error among accepted", "Remarks flagged not sure", "Cancelling negations not counted", "Accepted answers"], [
+        [`Before (catalog ${prev.catalogExamples} examples, probability ≥ ${prev.calibration.acceptProbability}, floor ${prev.calibration.offListThreshold})`, `${pct(pe.remarks.captureRate)} ${ci(pe.remarks.ci95)}`, `${pct(pe.answers.acceptedErrorRate)} ${ci(pe.answers.ci95)}`, pct(pe.remarks.notSure / Math.max(1, pe.remarks.total)), negCell(pe), pe.answers.accepted],
+        [`Now (catalog ${l2.catalogExamples} examples, probability ≥ ${l2.calibration.acceptProbability}, floor ${l2.calibration.offListThreshold})`, `${pct(e.remarks.captureRate)} ${ci(e.remarks.ci95)}`, `${pct(e.answers.acceptedErrorRate)} ${ci(e.answers.ci95)}`, pct(e.remarks.notSure / Math.max(1, e.remarks.total)), negCell(e), e.answers.accepted],
       ]));
+      w();
+      w("What changed (all decided on the calibration half only; details and every intermediate run in eval/results/experiments/log.md):");
+      w(`${prev.catalogExamples} → ${l2.catalogExamples} synthetic catalog examples (6 more per finding and language, written from the finding definitions, checked disjoint`);
+      w("from the corpus); idioms that are not negations (\"sans hésiter\", \"without hesitation\") no longer block a finding; wider");
+      w("written-language detection; selection rule: error bound 8 % (was 5 %), every cancelling negation of the calibration half handled");
+      w("(was 85 %), lowest error among variants within 2 capture points of the best. The held-out half was evaluated once, after these");
+      w(`choices. On the calibration half the shipped setting gives ${pct(l2.calibration.atThresholdCalibration.captureRate)} captured, ${pct(l2.calibration.atThresholdCalibration.acceptedErrorRate)} wrong; on the held-out half the error`);
+      w(`is higher (${pct(e.answers.acceptedErrorRate)}, ${e.answers.wrong} of ${e.answers.accepted}), still under the 8 % bound but above the 5 % target of the first rule. The gain in capture`);
+      w(`(+${((e.remarks.captureRate - pe.remarks.captureRate) * 100).toFixed(1)} points, ${e.remarks.captured - pe.remarks.captured} remarks) is inside the 95 % intervals: it is a modest improvement, not a step change.`);
       w();
     }
     w("Suggested wording for the problem sentence: *\"our tests on synthetic feedback show the tool correctly captures " +
-      `${pct(e.remarks.captureRate, 0)} of visitor remarks with ${pct(e.answers.acceptedErrorRate, 0)} of its counted answers wrong ` +
+      `${pct(e.remarks.captureRate, 0)} of visitor remarks with ${pct(e.answers.acceptedErrorRate, 1)} of its counted answers wrong ` +
       `(most of the rest is flagged \"not sure\" for a person), versus ${pct(k.remarks.captureRate, 0)} for keyword matching with ${pct(k.answers.acceptedErrorRate, 0)} wrong.\"*`);
     w();
   }
@@ -186,7 +217,9 @@ export function runReport(log: (s: string) => void = console.log) {
     w("so the calibration numbers did not describe the shipped configuration); (2) relaxed negation margins were excluded (below);");
     w("(3) the unknown-topic rule (below). Changes (1) and (2) made the procedure more faithful or the system stricter; change (3)");
     w("was made so that the picking signal fires, i.e. it is tuned on the only recurring-topic example. The test half is therefore");
-    w("not perfectly untouched.");
+    w("not perfectly untouched. A fourth round (echo-recall, 2026-10-04: more catalog examples, non-negating idioms, language");
+    w("detection, the selection rule below) was decided on the calibration half only, but after the previous held-out numbers");
+    w("(48 % captured, 6 % wrong, fewer remarks than keywords) were known; the held-out half was then run once for this report.");
     w();
     w(`Chosen: **${c.variant.name}** — embedding model \`${c.embeddingModel}\`, scoring \`${c.scoring}\`` +
       (c.scoring === "linear" ? `, accept when the classifier probability ≥ **${c.acceptProbability}** (L2 ${c.linearL2}, ${c.linearEpochs} epochs, trained only on catalog examples)` : `, accept threshold **${c.acceptThreshold}**`) +
@@ -232,7 +265,7 @@ export function runReport(log: (s: string) => void = console.log) {
     w("Cancelling negations OK: share of annotated cancelling negations (\"the path was not too long\") that did **not** produce the");
     w("negated finding. Keywords have no not-sure state: a chunk without a hit is shown as off-list.");
     w();
-    w("Per language (test half):");
+    w(`Per language (test half; Kw = \`${l2.keywordSet ?? "original"}\` keyword lists):`);
     w();
     w(table(["Lang", "Feedbacks", "Echo P", "Echo R", "Echo F1", "Echo error among accepted", "Echo captured", "Echo not sure", "Kw P", "Kw R", "Kw F1", "Kw error among accepted", "Kw captured"],
       LANGS.map((l) => {
@@ -335,12 +368,19 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     const s2 = l3.level2SameMessages;
     const rows: (string | number)[][] = [["text (level 2, same messages)", "–", "–", "–", "–", pct(s2.echo.all.remarks.captureRate), pct(s2.echo.all.answers.acceptedErrorRate), num(s2.echo.all.micro.f1), pct(s2.echo.all.chunks.notSureRate), pct(s2.keywords.all.remarks.captureRate), pct(s2.keywords.all.answers.acceptedErrorRate), num(s2.keywords.all.micro.f1)]];
+    const kw3 = l3.keywordSet ?? "original";
+    const oth3 = kw3 === "blind" ? "original" : "blind";
+    const o2 = s2.keywordSets?.[oth3];
+    rows[0]!.push(o2 ? `${pct(o2.captureRate)} / ${pct(o2.acceptedErrorRate)}` : "–");
     for (const [m, conds] of Object.entries<J>(l3.models)) {
       for (const [cond, r] of Object.entries<J>(conds)) {
-        rows.push([`${m}, ${cond}`, pct(r.wer), pct(r.languageIdAccuracy, 0), `${r.messageStatus.inaudible ?? 0}`, num(r.realTimeFactor), pct(r.echo.all.remarks.captureRate), pct(r.echo.all.answers.acceptedErrorRate), num(r.echo.all.micro.f1), pct(r.echo.all.chunks.notSureRate), pct(r.keywords.all.remarks.captureRate), pct(r.keywords.all.answers.acceptedErrorRate), num(r.keywords.all.micro.f1)]);
+        const o = r.keywordSets?.[oth3];
+        rows.push([`${m}, ${cond}`, pct(r.wer), pct(r.languageIdAccuracy, 0), `${r.messageStatus.inaudible ?? 0}`, num(r.realTimeFactor), pct(r.echo.all.remarks.captureRate), pct(r.echo.all.answers.acceptedErrorRate), num(r.echo.all.micro.f1), pct(r.echo.all.chunks.notSureRate), pct(r.keywords.all.remarks.captureRate), pct(r.keywords.all.answers.acceptedErrorRate), num(r.keywords.all.micro.f1), o ? `${pct(o.captureRate)} / ${pct(o.acceptedErrorRate)}` : "–"]);
       }
     }
-    w(table(["Input", "WER", "Lang right", "Inaudible", "RTF", "Echo captured", "Echo error among accepted", "Echo F1", "Echo not sure", "Kw captured", "Kw error among accepted", "Kw F1"], rows));
+    w(`Kw = keyword baseline with the \`${kw3}\` lists (the headline baseline); the last column gives the \`${oth3}\` lists (captured / error among accepted) for transparency.`);
+    w();
+    w(table(["Input", "WER", "Lang right", "Inaudible", "RTF", "Echo captured", "Echo error among accepted", "Echo F1", "Echo not sure", "Kw captured", "Kw error among accepted", "Kw F1", `Kw ${oth3}: captured / error`], rows));
     w();
     w("Inaudible: clips the app refuses to analyse (SPEC 7). The very short feedbacks (\"Thanks!\", \"Meh.\") become clips under 3 s and are");
     w("inaudible by design; they count as missed remarks above. The raw TTS clips (\"clean\") have no silence around the speech, so");
@@ -364,7 +404,7 @@ export function runReport(log: (s: string) => void = console.log) {
         w("Per language. P / R / F1: message level. Error among accepted: chunk answers counted that do not match the annotation, with");
         w("its 95 % interval and the number of accepted answers (\"acc.\"); with so few accepted answers per language the intervals");
         w("are very wide. Captured: annotated remarks counted with the right finding. Not sure: share of chunks. Kw: keyword baseline on the");
-        w("same Whisper transcripts.");
+        w(`same Whisper transcripts (\`${l3.keywordSet ?? "original"}\` lists).`);
         w();
         w(level3LangTable(r));
         w();
@@ -441,6 +481,8 @@ export function runReport(log: (s: string) => void = console.log) {
   w("- Levels 2–3 are synthetic (written feedback, TTS voices): real visitors are messier (code-switching, names, long rambling voice notes, wind on the microphone, WhatsApp Opus compression).");
   w("- The held-out half has 125 feedbacks; intervals are wide (see brackets). Many choices (classifier, threshold, floor) were made on the calibration half, but the unknown-topic rule and cluster threshold were adjusted after seeing the only recurring-topic example (picking).");
   w("- The catalog examples and the corpus were written by the same team; they are checked for near-duplicates but share a style.");
+  w("- The original keyword lists were written by the author of the corpus (they can repeat its wording); the blind lists were not, but were written by the same team that wrote the catalog examples, from the catalog's labels and examples. Neither is a keyword system maintained by a person for months.");
+  w("- The held-out half had been evaluated before (previous configuration: 48 % captured, 6 % wrong). The recall changes were decided on the calibration half only, but with the knowledge that Echo captured fewer remarks than keywords on the held-out half.");
   w("- Mozilla Common Voice was not used: it moved to Mozilla Data Collective (account required) in Oct 2025 (docs/DATASHEET.md). FLEURS accents are read speech.");
   w("- The personal-data check uses 52 synthetic sentences written by the team, not names spoken by real visitors through Whisper; the scrubber is a heuristic and misses names (see the recall above).");
   w("- No Kinyarwanda is evaluated here: the host side only plays frozen catalog sentences (catalog back-translation scores are in the catalog).");

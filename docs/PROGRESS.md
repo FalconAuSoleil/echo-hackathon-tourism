@@ -947,3 +947,45 @@ configuration (48 % / 6 % on the held-out half).
   sentence, the catalog counts (756 → 1,260) and `docs/VIDEO_SCRIPT.md` from its output.
 - mpnet as an option for phones with ≥ 3 GB, after a real-phone memory measurement (thresholds are model-specific).
 - Off-list floor: 14 of the 60 remarks still lost fall under the Youden floor 0.62, 9 of them English.
+
+## 2026-10-04 — eval-and-readme: held-out evaluation of the recall configuration, blind keyword baseline as headline
+
+- **Run**: `pnpm eval -- --keywords blind` (all levels; level 1 and level-3 transcripts from the cache, the Whisper
+  models and FLEURS sample unchanged; `level1.json` restored to the committed file since only the recorded load average
+  of the cache-only run differed). Level 2 re-selected exactly the configuration of echo-recall (MiniLM, linear,
+  L2 3e-5, p ≥ 0.82, floor 0.62, cluster 0.57); `calibration.ts` values unchanged (comment only). The held-out half was
+  evaluated once with it.
+- **Held-out half (152 remarks, 125 synthetic feedbacks)**: Echo **53.3 %** captured [45–61], **6.5 %** of accepted
+  answers wrong (6/92) [3–14], 34 % of remarks "not sure", cancelling negations 11/13. Blind keywords **79.6 %** [73–85],
+  29.9 % wrong (58/194), negations 2/13. Original keywords 87.5 %, 27.8 % wrong, negations 0/13. Previous Echo
+  configuration on the same half: 48.0 % / 6.0 %. Calibration half (for reference): 53.8 % / 3.9 %.
+- **Level 3 (whisper-base, 10 dB, synthetic voices)**: Echo 42.9 % captured, **8.7 %** wrong (4/46), was 35.2 % / 2.7 %
+  (1/37); 20 dB 10.4 %; text of the same 80 messages 10.2 %. German at 10 dB: 2 of 9 accepted answers wrong. Blind
+  keywords 64.8 % / 30.3 %, original 69.2 % / 33.0 %. Whisper choice unchanged (base), but small now fails the 10 dB
+  error part of the rule (11.1 %).
+- **Headline baseline = blind lists** (`eval/keywords-blind/`): the original lists were written by the corpus author.
+  `primaryKeywordSet()` defaults to `blind` now (`--keywords original` switches back); level 3 also reports both sets
+  (`keywordSets` per condition and in `level2SameMessages`). `report.ts`: new headline (Echo / blind / original
+  columns, negation subset, off-list given a finding, previous Echo numbers read from
+  `eval/results/previous/2026-10-04-before-recall/level2.json`, what changed), level-3 table with the other set's
+  column, honesty note on the fourth round of changes, two limits. Old results kept in `eval/results/previous/`.
+- **README**: problem sentence X = 53 %, Y = 80 % (original 88 % stated next to it), §1 context bullets, §3, §4
+  (thresholds 0.82 / 0.62), §5.2 tables (both keyword sets + previous Echo row), §5.3 rewritten (new rule, history,
+  rejected options, mpnet), §5.4 (new level-3 tables; error on audio rose and is said so), §5.5–5.7, §6 data table
+  (1,260 examples, keyword lists row), §7 language gaps, limits, test counts (176). `docs/VIDEO_SCRIPT.md` (sentence,
+  30 % vs 6.5 %, 0.82, "93 % right"), `docs/DATASHEET.md` (catalog 1,260, keyword lists row), `docs/ARCHITECTURE.md`
+  §8 (keyword sets), `eval/keywords*/README.md`.
+- **Demo**: the "Compare with keyword matching" view now uses the blind lists (`apps/web/scripts/prepare-assets.ts`
+  copies `eval/keywords-blind/*.json`, clearing `public/keywords/` first). The en-negation sample is still counted by
+  both keyword sets (N3), so the video narration stays true. No demo copy quoted the old numbers.
+- **Verified**: `pnpm test` 176 passed, `pnpm typecheck`, `pnpm build`, `pnpm --filter @echo/web e2e` PASSED
+  (screenshots re-taken).
+- **Deviations / honesty**: the held-out half is not pristine: it had been evaluated with the previous configuration,
+  and the recall work was done knowing that Echo captured fewer remarks than keywords there (stated in RESULTS.md and
+  README §5.3). Echo still captures fewer remarks than keyword matching (X < Y); the case for Echo rests on the error
+  among accepted answers, the negation subset and the "not sure" routing. Touched outside the owned paths (minimal):
+  `eval/src/level3.ts`, `eval/src/report.ts`, `eval/src/run.ts`, `eval/src/lib/keyword-sets.ts` (+ test),
+  `apps/web/scripts/prepare-assets.ts`, `eval/keywords*/README.md`, `docs/ARCHITECTURE.md`.
+- **Remains**: the error on audio is above the 8 % bound in two conditions (20 dB, text of the level-3 messages); a
+  rule that also looks at audio (e.g. a stricter threshold when the transcription confidence is lower) would need its
+  own calibration, not on the test half. Real visitors and a real phone are still unmeasured.

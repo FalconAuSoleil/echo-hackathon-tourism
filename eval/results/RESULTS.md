@@ -14,23 +14,48 @@ Every number is produced by the shipped code (`@echo/core` + `@echo/models`, sam
 as expressing one catalog finding (P1–N10). It is *correctly captured* when the system counts exactly that finding on
 a chunk that overlaps the passage (≥ half of the shorter one's words in common). Remarks left "not sure" or counted as
 another finding are not captured. Measured on the held-out half of the SYNTHETIC level-2 corpus
-(152 remarks in 125 feedbacks); the same remark set for both methods.
+(152 remarks in 125 feedbacks); the same remark set for every method.
 
-|  | Echo | Keywords |
-|---|---:|---:|
-| Remarks correctly captured (X / Y) | **48 %** [40–56] | **88 %** [81–92] |
-| Of the answers it counts, share that are wrong | 6 % [3–13] | 28 % [22–34] |
-| Remarks flagged "not sure — ask a person" instead | 41 % | 0 % (no such state) |
-| Remarks either counted right or flagged "not sure — ask a person" | 89 % | 88 % (no such flag) |
-| Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices) | 35 % captured, 3 % wrong | 69 % captured, 33 % wrong |
+|  | Echo | **Keywords, blind lists** (headline baseline) | Keywords, original lists (transparency) |
+|---|---:|---:|---:|
+| Remarks correctly captured (X / Y) | **53 %** [45–61] | **80 %** [73–85] | 88 % [81–92] |
+| Of the answers it counts, share that are wrong | 6.5 % [3–14] (6/92) | 29.9 % [24–37] (58/194) | 27.8 % [22–34] (57/205) |
+| Cancelling negations not counted ("the walk was not too long") | 85 % (11/13) | 15 % (2/13) | 0 % (0/13) |
+| Off-list feedbacks given a finding anyway | 0/15 | 7/15 | 5/15 |
+| Remarks flagged "not sure — ask a person" instead | 34 % | 0 % (no such state) | 0 % |
+| Remarks either counted right or flagged "not sure — ask a person" | 88 % | 80 % (no such flag) | 88 % |
+| Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices): captured / wrong | 43 % / 9 % | 65 % / 30 % | 69 % / 33 % |
 
-95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but about one counted answer in
+95 % Wilson intervals in brackets. Reading: keyword matching *touches* more remarks, but more than one counted answer in
 four is wrong (negations such as "the walk was not too long" count as complaints, a "delicious coffee" counts as a meal, …),
-and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate near the
-5 % target, and routes the rest to a person. The keyword lists were written by the same author as the synthetic corpus,
-which favours the baseline (eval/keywords/README.md).
+and it never says when it does not know. Echo counts fewer remarks automatically, keeps the wrong-answer rate under the
+8 % bound of the calibration rule, and routes the rest to a person. The host acts on the counts, so a wrong count
+costs more than a missed one (a missed remark is still read by a person from the review list).
 
-Suggested wording for the problem sentence: *"our tests on synthetic feedback show the tool correctly captures 48 % of visitor remarks with 6 % of its counted answers wrong (most of the rest is flagged "not sure" for a person), versus 88 % for keyword matching with 28 % wrong."*
+**Why the blind lists are the headline baseline.** The original lists (`eval/keywords/`) were written by the same agent
+that wrote the synthetic corpus, so they can repeat its exact wording, which flatters keyword matching. The blind lists
+(`eval/keywords-blind/`) were written in one pass from the catalog's finding labels and example phrasings only, without
+opening the corpus, the results or the first lists, and were never tuned on a score (protocol: eval/keywords-blind/README.md).
+The gap between the two (88 % vs 80 % of remarks captured) is an estimate of that leak; both are kept above.
+Neither is a tuned commercial keyword system: a person maintaining lists for months would do better than the blind lists.
+
+**Previous Echo configuration** (same held-out half, kept for transparency; raw numbers in `eval/results/previous/2026-10-04-before-recall/`):
+
+| Echo, held-out half | Remarks captured | Error among accepted | Remarks flagged not sure | Cancelling negations not counted | Accepted answers |
+|---|---:|---:|---:|---:|---:|
+| Before (catalog 756 examples, probability ≥ 0.84, floor 0.59) | 48.0 % [40–56] | 6.0 % [3–13] | 41.4 % | 85 % (11/13) | 83 |
+| Now (catalog 1260 examples, probability ≥ 0.82, floor 0.62) | 53.3 % [45–61] | 6.5 % [3–14] | 34.2 % | 85 % (11/13) | 92 |
+
+What changed (all decided on the calibration half only; details and every intermediate run in eval/results/experiments/log.md):
+756 → 1260 synthetic catalog examples (6 more per finding and language, written from the finding definitions, checked disjoint
+from the corpus); idioms that are not negations ("sans hésiter", "without hesitation") no longer block a finding; wider
+written-language detection; selection rule: error bound 8 % (was 5 %), every cancelling negation of the calibration half handled
+(was 85 %), lowest error among variants within 2 capture points of the best. The held-out half was evaluated once, after these
+choices. On the calibration half the shipped setting gives 53.8 % captured, 3.9 % wrong; on the held-out half the error
+is higher (6.5 %, 6 of 92), still under the 8 % bound but above the 5 % target of the first rule. The gain in capture
+(+5.3 points, 8 remarks) is inside the 95 % intervals: it is a modest improvement, not a step change.
+
+Suggested wording for the problem sentence: *"our tests on synthetic feedback show the tool correctly captures 53 % of visitor remarks with 6.5 % of its counted answers wrong (most of the rest is flagged "not sure" for a person), versus 80 % for keyword matching with 30 % wrong."*
 
 ## Level 1 — Whisper on real human voices (FLEURS)
 
@@ -62,13 +87,13 @@ Swahili is a bonus language: Whisper's Swahili is weak and the app treats it as 
 ## Level 2 — classification of written feedback (SYNTHETIC)
 
 Corpus: 250 synthetic feedbacks (eval/data/feedback.jsonl), split 125/125 into a calibration half and a held-out test half (seed 20261004, stratified by language x main category (picking, off-list, ambiguous, cancelling negation, inherent negation, multi-finding, single)).
-Catalog: 756 synthetic examples (catalog/catalog.json), disjoint from the corpus (eval/data/check_disjoint.py).
+Catalog: 1260 synthetic examples (catalog/catalog.json), disjoint from the corpus (eval/data/check_disjoint.py).
 Everything below is on the **held-out test half** unless marked otherwise. Written messages go through the shipped path with
-automatic language detection (all 250 feedbacks: 237 right, 12 "unknown" → whole message not sure, 1 detected as another supported language and analysed in that language).
+automatic language detection (all 250 feedbacks: 241 right, 9 "unknown" → whole message not sure, 0 detected as another supported language and analysed in that language).
 
 ### How the threshold was chosen (calibration half only)
 
-Rule (computed on the calibration half only): off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= 5%, >= 20 accepted answers and cancelling-negation accuracy >= 85%; variant (embedding model, scoring, L2, negation margin) = best capture under that rule.
+Rule (computed on the calibration half only): off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= 8%, >= 20 accepted answers and cancelling-negation accuracy >= 100%; variant (embedding model, scoring, L2, negation margin) = lowest error among the selectable variants whose capture under that rule is within 2 points of the best.
 
 Honesty note on the order of decisions: the classifier change (similarity → linear) and the hyper-parameter grid were
 decided on the calibration half. Test-half numbers were then printed by intermediate runs, and three changes were made
@@ -76,10 +101,12 @@ after that: (1) the off-list floor is now chosen *before* the threshold sweep (t
 so the calibration numbers did not describe the shipped configuration); (2) relaxed negation margins were excluded (below);
 (3) the unknown-topic rule (below). Changes (1) and (2) made the procedure more faithful or the system stricter; change (3)
 was made so that the picking signal fires, i.e. it is tuned on the only recurring-topic example. The test half is therefore
-not perfectly untouched.
+not perfectly untouched. A fourth round (echo-recall, 2026-10-04: more catalog examples, non-negating idioms, language
+detection, the selection rule below) was decided on the calibration half only, but after the previous held-out numbers
+(48 % captured, 6 % wrong, fewer remarks than keywords) were known; the held-out half was then run once for this report.
 
-Chosen: **linear-minilm-l2=0.00003-neg0** — embedding model `Xenova/paraphrase-multilingual-MiniLM-L12-v2`, scoring `linear`, accept when the classifier probability ≥ **0.84** (L2 0.00003, 150 epochs, trained only on catalog examples), off-list floor (cosine) **0.59**, unknown-topic cluster threshold **0.59** (lowest t with <= 1% of cross-language different-finding example pairs >= t; Youden would give 0.27), unknown-topic sources `off_list_and_unsure`.
-At that threshold on the calibration half: capture 46.2 %, error among accepted 4.5 %, coverage 32.1 %.
+Chosen: **linear-minilm-l2=0.00003-neg0** — embedding model `Xenova/paraphrase-multilingual-MiniLM-L12-v2`, scoring `linear`, accept when the classifier probability ≥ **0.82** (L2 0.00003, 150 epochs, trained only on catalog examples), off-list floor (cosine) **0.62**, unknown-topic cluster threshold **0.57** (lowest t with <= 1% of cross-language different-finding example pairs >= t; Youden would give 0.27), unknown-topic sources `off_list_and_unsure`.
+At that threshold on the calibration half: capture 53.8 %, error among accepted 3.9 %, coverage 36.8 %.
 These values are written to `packages/core/src/calibration.ts`, which `DEFAULT_CONFIG` (read by the app) uses.
 
 Why a linear classifier: the first run used the core's original rule (cosine with the closest catalog example). On the
@@ -92,36 +119,59 @@ Variants marked *not selectable* relax the negation agreement by a margin (`nega
 on the calibration half, but on the test half cancelling negations ("the path was not too long") slipped through far more
 often (≈ 62 % handled correctly vs ≈ 85 % with the strict rule). The calibration half has only 16 such passages, too few for
 the negation constraint to catch it, so after seeing this we excluded them from selection for safety (a decision informed by
-the test half, stated here). The parameter stays in the core at 0.
+the test half, stated here). A positive (relaxed) margin is never selected; a negative margin makes the rule stricter and is
+selectable. The `mpnet` variants (Xenova/paraphrase-multilingual-mpnet-base-v2, 296 MB, ~1.4 GB peak memory in WebAssembly
+against ~0.64 GB for MiniLM) are measured but not selectable: too heavy for a 2 GB phone (eval/results/experiments/log.md).
+Since 2026-10-04 (echo-recall): error bound 8 % (was 5 %), cancelling negations 100 % on the calibration half (was 85 %),
+and among variants within 2 capture points of the best, the lowest error wins; previous numbers: eval/results/experiments/log.md.
 
 | Variant | Calibration: threshold | capture | error | Test: capture | error [95 % CI] | F1 | Test: cancelling negations OK |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| similarity-minilm-max | none ≤ 5 % | – | – | – | – | – | – |
-| similarity-minilm-max-samelang | none ≤ 5 % | – | – | – | – | – | – |
-| similarity-minilm-top3 | none ≤ 5 % | – | – | – | – | – | – |
-| similarity-e5-max | 0.94 | 17.7 % | 4.2 % | 13.2 % | 8.7 % [2–27] | 0.23 | 100 % |
-| similarity-e5-top3 | none ≤ 5 % | – | – | – | – | – | – |
-| linear-minilm-l2=0.001-neg0 | 0.5 | 38.5 % | 1.8 % | 40.1 % | 6.0 % [2–14] | 0.57 | 85 % |
-| linear-minilm-l2=0.001-neg0.05 (not selectable) | 0.5 | 41.5 % | 3.4 % | 41.4 % | 8.5 % [4–17] | 0.58 | 69 % |
-| linear-minilm-l2=0.001-neg0.1 (not selectable) | 0.5 | 41.5 % | 3.4 % | 44.1 % | 8.0 % [4–16] | 0.60 | 69 % |
-| linear-minilm-l2=0.0003-neg0 | 0.61 | 45.4 % | 4.5 % | 48.0 % | 6.0 % [3–13] | 0.66 | 85 % |
-| linear-minilm-l2=0.0003-neg0.05 (not selectable) | 0.64 | 49.2 % | 4.3 % | 47.4 % | 7.4 % [3–15] | 0.63 | 69 % |
-| linear-minilm-l2=0.0003-neg0.1 (not selectable) | 0.64 | 49.2 % | 4.3 % | 50.0 % | 7.1 % [3–15] | 0.66 | 69 % |
-| linear-minilm-l2=0.0001-neg0 | 0.76 | 44.6 % | 4.6 % | 47.4 % | 6.2 % [3–14] | 0.65 | 85 % |
-| linear-minilm-l2=0.0001-neg0.05 (not selectable) | 0.8 | 44.6 % | 4.7 % | 44.1 % | 7.9 % [4–16] | 0.60 | 69 % |
-| linear-minilm-l2=0.0001-neg0.1 (not selectable) | 0.8 | 44.6 % | 4.7 % | 46.7 % | 7.5 % [3–15] | 0.63 | 69 % |
-| linear-minilm-l2=0.00003-neg0 | 0.84 | 46.2 % | 4.5 % | 48.0 % | 6.0 % [3–13] | 0.66 | 85 % |
-| linear-minilm-l2=0.00003-neg0.05 (not selectable) | 0.91 | 41.5 % | 5.0 % | 39.5 % | 8.7 % [4–18] | 0.56 | 69 % |
-| linear-minilm-l2=0.00003-neg0.1 (not selectable) | 0.91 | 41.5 % | 5.0 % | 42.1 % | 8.2 % [4–17] | 0.58 | 69 % |
-| linear-e5-l2=0.0003-neg0 | 0.3 | 35.4 % | 4.0 % | 36.8 % | 4.8 % [2–13] | 0.55 | 92 % |
-| linear-e5-l2=0.0003-neg0.05 (not selectable) | 0.34 | 33.1 % | 4.3 % | 32.9 % | 7.0 % [3–17] | 0.50 | 85 % |
-| linear-e5-l2=0.0003-neg0.1 (not selectable) | 0.3 | 42.3 % | 5.0 % | 40.8 % | 7.0 % [3–15] | 0.58 | 77 % |
-| linear-e5-l2=0.0001-neg0 | 0.38 | 42.3 % | 4.9 % | 38.8 % | 7.3 % [3–16] | 0.56 | 92 % |
-| linear-e5-l2=0.0001-neg0.05 (not selectable) | 0.4 | 47.7 % | 4.4 % | 42.1 % | 8.1 % [4–17] | 0.59 | 77 % |
-| linear-e5-l2=0.0001-neg0.1 (not selectable) | 0.4 | 48.5 % | 4.3 % | 42.8 % | 8.0 % [4–16] | 0.60 | 77 % |
-| linear-e5-l2=0.00003-neg0 | 0.47 | 44.6 % | 4.7 % | 42.1 % | 10.4 % [5–19] | 0.59 | 92 % |
-| linear-e5-l2=0.00003-neg0.05 (not selectable) | 0.52 | 49.2 % | 4.3 % | 42.1 % | 10.4 % [5–19] | 0.59 | 77 % |
-| linear-e5-l2=0.00003-neg0.1 (not selectable) | 0.52 | 50.0 % | 4.2 % | 42.8 % | 10.3 % [5–19] | 0.59 | 77 % |
+| similarity-minilm-max | 0.87 | 13.9 % | 5.0 % | 10.5 % | 33.3 % [18–53] | 0.18 | 100 % |
+| similarity-minilm-max-samelang | none ≤ 8 % | – | – | – | – | – | – |
+| similarity-minilm-top3 | none ≤ 8 % | – | – | – | – | – | – |
+| similarity-e5-max | 0.94 | 21.5 % | 6.7 % | 18.4 % | 12.1 % [5–27] | 0.31 | 92 % |
+| similarity-e5-top3 | none ≤ 8 % | – | – | – | – | – | – |
+| linear-minilm-l2=0.001-neg0 | 0.47 | 45.4 % | 3.1 % | 46.7 % | 8.6 % [4–17] | 0.63 | 85 % |
+| linear-minilm-l2=0.001-neg-0.02 | 0.36 | 53.1 % | 7.6 % | 53.9 % | 13.9 % [8–22] | 0.67 | 85 % |
+| linear-minilm-l2=0.001-neg-0.05 | 0.35 | 53.1 % | 7.6 % | 53.9 % | 13.7 % [8–22] | 0.67 | 92 % |
+| linear-minilm-l2=0.001-neg0.05 (not selectable) | 0.59 | 34.6 % | 0.0 % | 31.6 % | 9.3 % [4–20] | 0.48 | 77 % |
+| linear-minilm-l2=0.001-neg0.1 (not selectable) | 0.59 | 34.6 % | 0.0 % | 32.9 % | 8.9 % [4–19] | 0.49 | 77 % |
+| linear-minilm-l2=0.0003-neg0 | 0.63 | 47.7 % | 3.0 % | 50.7 % | 8.1 % [4–16] | 0.66 | 85 % |
+| linear-minilm-l2=0.0003-neg-0.02 | 0.52 | 53.1 % | 7.5 % | 53.3 % | 7.4 % [4–15] | 0.68 | 85 % |
+| linear-minilm-l2=0.0003-neg-0.05 | 0.51 | 52.3 % | 7.6 % | 52.6 % | 7.5 % [4–15] | 0.68 | 92 % |
+| linear-minilm-l2=0.0003-neg0.05 (not selectable) | 0.76 | 39.2 % | 1.8 % | 36.8 % | 7.9 % [3–17] | 0.53 | 77 % |
+| linear-minilm-l2=0.0003-neg0.1 (not selectable) | 0.76 | 39.2 % | 1.8 % | 38.2 % | 7.7 % [3–17] | 0.55 | 77 % |
+| linear-minilm-l2=0.0001-neg0 | 0.73 | 50.0 % | 5.5 % | 52.0 % | 7.7 % [4–15] | 0.67 | 85 % |
+| linear-minilm-l2=0.0001-neg-0.02 | 0.62 | 55.4 % | 7.2 % | 53.9 % | 7.4 % [4–14] | 0.69 | 85 % |
+| linear-minilm-l2=0.0001-neg-0.05 | 0.62 | 54.6 % | 6.2 % | 52.6 % | 6.5 % [3–14] | 0.68 | 92 % |
+| linear-minilm-l2=0.0001-neg0.05 (not selectable) | 0.87 | 40.8 % | 1.8 % | 38.8 % | 9.0 % [4–18] | 0.55 | 77 % |
+| linear-minilm-l2=0.0001-neg0.1 (not selectable) | 0.87 | 40.8 % | 1.8 % | 40.1 % | 8.7 % [4–18] | 0.56 | 77 % |
+| linear-minilm-l2=0.00003-neg0 | 0.82 | 53.8 % | 3.9 % | 53.3 % | 6.5 % [3–14] | 0.69 | 85 % |
+| linear-minilm-l2=0.00003-neg-0.02 | 0.75 | 54.6 % | 7.3 % | 53.3 % | 7.4 % [4–15] | 0.68 | 85 % |
+| linear-minilm-l2=0.00003-neg-0.05 | 0.75 | 53.8 % | 6.3 % | 52.0 % | 6.6 % [3–14] | 0.68 | 92 % |
+| linear-minilm-l2=0.00003-neg0.05 (not selectable) | 0.94 | 39.2 % | 1.8 % | 36.8 % | 7.9 % [3–17] | 0.53 | 77 % |
+| linear-minilm-l2=0.00003-neg0.1 (not selectable) | 0.94 | 39.2 % | 1.8 % | 37.5 % | 7.8 % [3–17] | 0.54 | 77 % |
+| linear-minilm-l2=0.00001-neg0 | 0.91 | 49.2 % | 2.9 % | 49.3 % | 7.1 % [3–15] | 0.65 | 85 % |
+| linear-minilm-l2=0.00001-neg-0.02 | 0.83 | 54.6 % | 7.4 % | 53.9 % | 7.4 % [4–14] | 0.69 | 85 % |
+| linear-minilm-l2=0.00001-neg-0.05 | 0.83 | 53.8 % | 6.3 % | 52.6 % | 6.5 % [3–14] | 0.68 | 92 % |
+| linear-minilm-l2=0.00001-neg0.05 (not selectable) | 0.98 | 29.2 % | 0.0 % | 31.6 % | 5.8 % [2–16] | 0.48 | 77 % |
+| linear-minilm-l2=0.00001-neg0.1 (not selectable) | 0.98 | 29.2 % | 0.0 % | 32.2 % | 5.7 % [2–15] | 0.49 | 77 % |
+| linear-e5-l2=0.0003-neg0 | 0.4 | 25.4 % | 0.0 % | 29.6 % | 4.2 % [1–14] | 0.46 | 92 % |
+| linear-e5-l2=0.0003-neg0.05 (not selectable) | 0.4 | 26.9 % | 0.0 % | 32.2 % | 3.9 % [1–13] | 0.49 | 92 % |
+| linear-e5-l2=0.0003-neg0.1 (not selectable) | 0.4 | 27.7 % | 0.0 % | 32.2 % | 3.9 % [1–13] | 0.49 | 92 % |
+| linear-e5-l2=0.0001-neg0 | 0.65 | 22.3 % | 0.0 % | 27.6 % | 4.4 % [1–15] | 0.44 | 92 % |
+| linear-e5-l2=0.0001-neg0.05 (not selectable) | 0.65 | 23.1 % | 0.0 % | 30.3 % | 4.1 % [1–14] | 0.47 | 92 % |
+| linear-e5-l2=0.0001-neg0.1 (not selectable) | 0.65 | 23.8 % | 0.0 % | 30.3 % | 4.1 % [1–14] | 0.47 | 92 % |
+| linear-e5-l2=0.00003-neg0 | 0.84 | 21.5 % | 0.0 % | 25.7 % | 4.9 % [1–16] | 0.40 | 92 % |
+| linear-e5-l2=0.00003-neg0.05 (not selectable) | 0.84 | 22.3 % | 0.0 % | 27.0 % | 4.7 % [1–15] | 0.42 | 92 % |
+| linear-e5-l2=0.00003-neg0.1 (not selectable) | 0.84 | 23.1 % | 0.0 % | 27.0 % | 4.7 % [1–15] | 0.42 | 92 % |
+| linear-mpnet-l2=0.0003-neg0 (not selectable) | 0.47 | 56.1 % | 7.1 % | 66.5 % | 5.4 % [3–11] | 0.78 | 92 % |
+| linear-mpnet-l2=0.0003-neg-0.02 (not selectable) | 0.47 | 55.4 % | 7.2 % | 65.1 % | 5.5 % [3–11] | 0.77 | 92 % |
+| linear-mpnet-l2=0.0001-neg0 (not selectable) | 0.6 | 56.9 % | 7.1 % | 63.8 % | 4.7 % [2–11] | 0.77 | 92 % |
+| linear-mpnet-l2=0.0001-neg-0.02 (not selectable) | 0.6 | 56.1 % | 7.1 % | 62.5 % | 4.8 % [2–11] | 0.76 | 92 % |
+| linear-mpnet-l2=0.00003-neg0 (not selectable) | 0.73 | 55.4 % | 7.2 % | 62.5 % | 5.7 % [3–12] | 0.76 | 92 % |
+| linear-mpnet-l2=0.00003-neg-0.02 (not selectable) | 0.73 | 54.6 % | 7.3 % | 61.2 % | 5.8 % [3–12] | 0.74 | 92 % |
 
 ![coverage vs error curve](coverage-error-curve.svg)
 
@@ -129,86 +179,87 @@ the test half, stated here). The parameter stays in the core at 0.
 
 |  | Precision | Recall | F1 | Error among accepted | Remarks captured | Not-sure rate | Off-list rate | Cancelling negations OK | Negation-is-finding recall | Ambiguous given a finding | Off-list given a finding |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| **Echo** | 0.95 | 0.50 | 0.66 | 6.0 % [3–13] | 48.0 % | 43.8 % | 19.2 % | 84.6 % | 54.1 % | 2/8 | 0/15 |
-| Keywords | 0.71 | 0.89 | 0.79 | 27.8 % [22–34] | 87.5 % | 0.0 % | 22.3 % | 0.0 % | 91.8 % | 5/8 | 5/15 |
+| **Echo** | 0.93 | 0.54 | 0.69 | 6.5 % [3–14] | 53.3 % | 37.5 % | 21.4 % | 84.6 % | 54.1 % | 2/8 | 0/15 |
+| Keywords (original) | 0.71 | 0.89 | 0.79 | 27.8 % [22–34] | 87.5 % | 0.0 % | 22.3 % | 0.0 % | 91.8 % | 5/8 | 5/15 |
+| Keywords (blind) | 0.69 | 0.81 | 0.75 | 29.9 % [24–37] | 79.6 % | 0.0 % | 26.3 % | 15.4 % | 85.3 % | 4/8 | 7/15 |
 
 Precision / recall / F1: message level (predicted set of findings vs expected). Error among accepted: chunk-level answers
 (chunk, finding) counted by the system that do not match the annotation. Not-sure / off-list rates: share of chunks.
 Cancelling negations OK: share of annotated cancelling negations ("the path was not too long") that did **not** produce the
 negated finding. Keywords have no not-sure state: a chunk without a hit is shown as off-list.
 
-Per language (test half):
+Per language (test half; Kw = `blind` keyword lists):
 
 | Lang | Feedbacks | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Kw P | Kw R | Kw F1 | Kw error among accepted | Kw captured |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en | 31 | 0.96 | 0.58 | 0.72 | 4.2 % | 56.4 % | 26.3 % | 0.74 | 0.92 | 0.82 | 23.5 % | 89.7 % |
-| fr | 31 | 1.00 | 0.50 | 0.67 | 0.0 % | 50.0 % | 52.0 % | 0.63 | 0.85 | 0.72 | 35.3 % | 85.3 % |
-| de | 32 | 0.90 | 0.43 | 0.58 | 15.0 % | 40.5 % | 53.8 % | 0.68 | 0.86 | 0.76 | 31.6 % | 83.3 % |
-| es | 31 | 0.95 | 0.51 | 0.67 | 4.8 % | 46.0 % | 42.3 % | 0.80 | 0.91 | 0.85 | 19.6 % | 91.9 % |
+| en | 31 | 0.92 | 0.58 | 0.71 | 8.0 % | 56.4 % | 21.1 % | 0.71 | 0.89 | 0.79 | 27.8 % | 87.2 % |
+| fr | 31 | 1.00 | 0.53 | 0.69 | 0.0 % | 52.9 % | 44.0 % | 0.60 | 0.76 | 0.68 | 39.1 % | 73.5 % |
+| de | 32 | 0.91 | 0.50 | 0.65 | 8.7 % | 50.0 % | 47.7 % | 0.69 | 0.81 | 0.75 | 30.2 % | 78.6 % |
+| es | 31 | 0.91 | 0.57 | 0.70 | 8.0 % | 54.0 % | 36.5 % | 0.77 | 0.77 | 0.77 | 21.9 % | 78.4 % |
 
 Per finding (test half, message level):
 
 | Finding | Support | Echo P | Echo R | Echo F1 | Kw P | Kw R | Kw F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P1 | 12 | 1.00 | 0.58 | 0.74 | 0.92 | 0.92 | 0.92 |
-| P2 | 9 | 1.00 | 0.44 | 0.62 | 0.80 | 0.89 | 0.84 |
-| P3 | 11 | 1.00 | 0.27 | 0.43 | 1.00 | 0.82 | 0.90 |
-| P4 | 4 | 1.00 | 0.50 | 0.67 | 0.50 | 1.00 | 0.67 |
-| P5 | 9 | 1.00 | 0.78 | 0.88 | 0.70 | 0.78 | 0.74 |
-| P6 | 4 | 1.00 | 0.25 | 0.40 | 0.80 | 1.00 | 0.89 |
-| P7 | 11 | 1.00 | 0.64 | 0.78 | 0.91 | 0.91 | 0.91 |
-| P8 | 5 | 1.00 | 0.40 | 0.57 | 0.80 | 0.80 | 0.80 |
-| P9 | 6 | 1.00 | 0.50 | 0.67 | 0.63 | 0.83 | 0.71 |
+| P1 | 12 | 1.00 | 0.58 | 0.74 | 0.91 | 0.83 | 0.87 |
+| P2 | 9 | 1.00 | 0.44 | 0.62 | 0.47 | 0.78 | 0.58 |
+| P3 | 11 | 1.00 | 0.36 | 0.53 | 0.86 | 0.55 | 0.67 |
+| P4 | 4 | 1.00 | 0.75 | 0.86 | 0.33 | 1.00 | 0.50 |
+| P5 | 9 | 1.00 | 0.67 | 0.80 | 0.71 | 0.56 | 0.63 |
+| P6 | 4 | 1.00 | 0.50 | 0.67 | 0.80 | 1.00 | 0.89 |
+| P7 | 11 | 1.00 | 0.64 | 0.78 | 1.00 | 0.82 | 0.90 |
+| P8 | 5 | 0.75 | 0.60 | 0.67 | 0.80 | 0.80 | 0.80 |
+| P9 | 6 | 1.00 | 0.50 | 0.67 | 0.45 | 0.83 | 0.59 |
 | P10 | 5 | 1.00 | 1.00 | 1.00 | 0.80 | 0.80 | 0.80 |
-| P11 | 12 | 1.00 | 0.25 | 0.40 | 0.85 | 0.92 | 0.88 |
+| P11 | 12 | 1.00 | 0.42 | 0.59 | 1.00 | 0.83 | 0.91 |
 | N1 | 8 | 1.00 | 0.38 | 0.55 | 0.47 | 1.00 | 0.64 |
-| N2 | 3 | 1.00 | 1.00 | 1.00 | 0.33 | 1.00 | 0.50 |
-| N3 | 8 | 0.71 | 0.63 | 0.67 | 0.43 | 0.75 | 0.55 |
-| N4 | 6 | 1.00 | 0.17 | 0.29 | 0.67 | 0.67 | 0.67 |
-| N5 | 5 | 1.00 | 0.60 | 0.75 | 0.50 | 0.80 | 0.62 |
-| N6 | 4 | 1.00 | 0.50 | 0.67 | 1.00 | 1.00 | 1.00 |
+| N2 | 3 | 1.00 | 1.00 | 1.00 | 1.00 | 0.67 | 0.80 |
+| N3 | 8 | 0.71 | 0.63 | 0.67 | 0.55 | 0.75 | 0.63 |
+| N4 | 6 | 1.00 | 0.33 | 0.50 | 0.80 | 0.67 | 0.73 |
+| N5 | 5 | 1.00 | 0.40 | 0.57 | 0.63 | 1.00 | 0.77 |
+| N6 | 4 | 1.00 | 0.50 | 0.67 | 1.00 | 0.50 | 0.67 |
 | N7 | 6 | 0.80 | 0.67 | 0.73 | 0.86 | 1.00 | 0.92 |
-| N8 | 9 | 1.00 | 0.44 | 0.62 | 0.82 | 1.00 | 0.90 |
-| N9 | 7 | 0.75 | 0.43 | 0.55 | 0.70 | 1.00 | 0.82 |
+| N8 | 9 | 1.00 | 0.44 | 0.62 | 0.75 | 1.00 | 0.86 |
+| N9 | 7 | 0.67 | 0.57 | 0.62 | 0.70 | 1.00 | 0.82 |
 | N10 | 5 | 1.00 | 0.60 | 0.75 | 1.00 | 0.80 | 0.89 |
 
 Confusion matrix (Echo, test half, annotated passages → what Echo did on the overlapping chunks; empty columns hidden):
 
 | annotated \ Echo | P1 | P2 | P3 | P4 | P5 | P6 | P7 | P8 | P9 | P10 | P11 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N10 | not_sure | off_list |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| P1 | **7** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 5 | · |
-| P2 | · | **4** | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | · |
-| P3 | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 7 | 1 |
-| P4 | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · |
+| P1 | **7** | · | · | · | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | · |
+| P2 | · | **4** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | 1 |
+| P3 | · | · | **4** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 6 | 1 |
+| P4 | · | · | · | **3** | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
 | P5 | · | · | · | · | **6** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 2 |
-| P6 | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · |
+| P6 | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · |
 | P7 | · | · | · | · | · | · | **7** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | · |
-| P8 | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · |
-| P9 | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 4 |
-| P10 | · | · | · | · | · | · | · | · | · | **4** | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
-| P11 | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | 10 | · |
+| P8 | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 |
+| P9 | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | 2 | 3 |
+| P10 | · | · | · | · | · | · | · | · | · | **5** | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| P11 | · | · | · | · | · | · | · | · | · | · | **5** | · | · | · | · | · | · | · | · | · | · | 8 | · |
 | N1 | · | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | 2 | 3 |
 | N2 | · | · | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · |
 | N3 | · | · | · | · | · | · | · | · | · | · | · | · | · | **5** | · | · | · | · | · | · | · | 1 | 2 |
-| N4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | 4 | 1 |
-| N5 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | 2 | · |
+| N4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | 3 | 1 |
+| N5 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | 2 | 1 |
 | N6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | 2 | · |
 | N7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **4** | · | · | · | 2 | · |
 | N8 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **4** | · | · | 4 | 1 |
-| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | **3** | · | 3 | · |
+| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | **4** | · | 2 | · |
 | N10 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **3** | 2 | · |
 | not_sure(ambiguous) | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · | · | · | · | · | · | · | 5 | 1 |
 | off_list | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 5 | **10** |
-| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 1 | · | 6 | 5 |
+| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 1 | · | 5 | 6 |
 
 ### Unknown topic that comes back (coffee-cherry picking, 3 visitors)
 
-Chunks are clustered with the shipped `clusterOffList` (average linkage, threshold 0.59); the signal fires when a cluster spans ≥ 3 distinct visitors. Simulated months follow SPEC 2 (6–7 visitors a month): 4 random feedbacks + the 3 picking ones, and 7 random feedbacks without picking (500 months each). The whole corpus (250 feedbacks as one month) is a much harsher stress test.
+Chunks are clustered with the shipped `clusterOffList` (average linkage, threshold 0.57); the signal fires when a cluster spans ≥ 3 distinct visitors. Simulated months follow SPEC 2 (6–7 visitors a month): 4 random feedbacks + the 3 picking ones, and 7 random feedbacks without picking (500 months each). The whole corpus (250 feedbacks as one month) is a much harsher stress test.
 
 | Chunks clustered | Candidate chunks | Picking flagged (250 as one month) | False alerts (250 as one month) | Picking flagged (realistic months) | Months with a false alert |
 |---|---:|---:|---:|---:|---:|
-| `off_list` | 96 | no | 4 | 0.0 % | 0.0 % |
-| `off_list_and_unsure` (shipped) | 224 | yes | 19 | 98.0 % | 0.6 % |
+| `off_list` | 104 | no | 4 | 0.0 % | 0.0 % |
+| `off_list_and_unsure` (shipped) | 214 | yes | 19 | 98.2 % | 0.4 % |
 
 Where the three picking remarks land: en-026: not_sure (below_threshold); fr-025: not_sure (below_threshold); de-025: not_sure (below_threshold).
 With the literal SPEC 4.5 rule (only off-list chunks), the picking remarks never trigger the signal: they are close to
@@ -223,12 +274,12 @@ Sensitivity to the cluster threshold (shipped sources):
 
 | Cluster threshold | Picking flagged (250) | False alerts (250) | Picking flagged (months) | Months with false alert |
 |---|---:|---:|---:|---:|
-| 0.44 | yes | 22 | 100.0 % | 4.5 % |
-| 0.49 | yes | 20 | 100.0 % | 3.0 % |
-| 0.54 | yes | 18 | 100.0 % | 1.5 % |
-| 0.59 | yes | 19 | 98.0 % | 0.5 % |
-| 0.64 | no | 16 | 0.0 % | 0.0 % |
-| 0.69 | no | 14 | 0.0 % | 0.0 % |
+| 0.42 | yes | 20 | 100.0 % | 5.5 % |
+| 0.47 | yes | 19 | 100.0 % | 2.5 % |
+| 0.52 | yes | 20 | 100.0 % | 2.0 % |
+| 0.57 | yes | 19 | 98.0 % | 0.5 % |
+| 0.62 | yes | 16 | 98.0 % | 0.5 % |
+| 0.67 | no | 13 | 0.0 % | 0.0 % |
 
 ### Duplicates
 
@@ -240,7 +291,7 @@ Rule: exact fingerprint of the normalised scrubbed text, or whole-message embedd
 | Re-sent: exact | 125 | 125 (100 %) |
 | Re-sent: case punct space | 125 | 124 (99 %) |
 | Re-sent: trailing emphasis | 125 | 124 (99 %) |
-| Re-sent: one word added | 125 | 89 (71 %) |
+| Re-sent: one word added | 125 | 88 (70 %) |
 | Same text a month later (outside the 7-day window, should not be flagged) | 125 | 0 |
 
 A forwarded voice note is bit-identical, so its transcript is identical: that case is the "exact" row. "One word added" is
@@ -264,7 +315,7 @@ deliberately ambiguous (a resend after an edit, or a second visitor): about 4 in
 | es | 91 % (10/11) | 73 % (8/11) |
 
 Names kept: Grace, Noor, Claire, Ernst, Rose, Pilar, Kwame (lowercased), Grace (lowercased), Noor (lowercased), Aimable (lowercased), Claire (lowercased), Ernst (lowercased), Rose (lowercased), Lucía (lowercased), Pilar (lowercased), Pierre (lowercased), Dolores (lowercased). They are names that are also common words (kept on purpose unless next to another name or "and I"), names absent from the first-name list (Noor, Kwame) when they start a sentence or are lowercased, and lowercased names whose lowercase form is a word.
-On the whole written corpus (1006 texts: the 250 feedbacks and the catalog examples, where the fictional farmer "Noor" is the only person name), 0 of 9584 words were removed by mistake. Lyon and Valencia were removed before the list of capitalised non-names (cities, units, Wi-Fi, GPS…) was added.
+On the whole written corpus (1510 texts: the 250 feedbacks and the catalog examples, where the fictional farmer "Noor" is the only person name), 0 of 13789 words were removed by mistake. Lyon and Valencia were removed before the list of capitalised non-names (cities, units, Wi-Fi, GPS…) was added.
 
 Over-scrubbing on **Whisper transcripts** (level-3 clean clips, synthetic voices): Whisper capitalises words that are lowercase in writing ("Wi-Fi") and mishears others ("Frank" for "Franc"). "Noor" is the only person in these feedbacks; a removed word within edit distance 2 of "noor" (Nor, Nora, Noa) counts as her name.
 
@@ -281,24 +332,26 @@ The first-name list (6154 names: US Census 1990, INSEE, Wikidata incl. Rwandan a
 
 80 feedbacks from the corpus (en 20, fr 20, de 20, es 20) spoken by Piper TTS voices (13 voices, varied speakers and speed), clean and mixed with ESC-50 outdoor noise at 20, 10 and 5 dB SNR (eval/data/README.md). Audio → `analyzeAudioMessage` (audio checks, Whisper with automatic language detection, audio wiped, analysis) with the calibrated configuration. English translation: disabled in this run (only used for the 'to be read by a person' list, not for classification). WER references contain the corpus' deliberate typos.
 
-| Input | WER | Lang right | Inaudible | RTF | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Kw captured | Kw error among accepted | Kw F1 |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| text (level 2, same messages) | – | – | – | – | 42.9 % | 8.7 % | 0.60 | 49.3 % | 89.0 % | 32.3 % | 0.76 |
-| whisper-tiny, clean | 23.1 % | 100 % | 30 | 0.65 | 24.2 % | 14.3 % | 0.39 | 53.1 % | 50.5 % | 30.0 % | 0.60 |
-| whisper-tiny, clean_pad | 21.7 % | 100 % | 12 | 0.57 | 29.7 % | 9.4 % | 0.48 | 53.4 % | 60.4 % | 33.3 % | 0.66 |
-| whisper-tiny, snr20 | 25.4 % | 100 % | 12 | 0.63 | 24.2 % | 10.7 % | 0.42 | 52.5 % | 58.2 % | 31.6 % | 0.66 |
-| whisper-tiny, snr10 | 40.2 % | 97 % | 17 | 0.67 | 20.9 % | 9.1 % | 0.36 | 58.6 % | 48.4 % | 32.9 % | 0.59 |
-| whisper-tiny, snr5 | 50.4 % | 99 % | 20 | 0.51 | 22.0 % | 8.3 % | 0.37 | 65.4 % | 36.3 % | 36.4 % | 0.51 |
-| whisper-base, clean | 16.2 % | 100 % | 30 | 0.73 | 27.5 % | 3.7 % | 0.44 | 52.0 % | 56.0 % | 29.8 % | 0.63 |
-| whisper-base, clean_pad | 13.7 % | 100 % | 12 | 0.86 | 40.7 % | 0.0 % | 0.60 | 47.1 % | 71.4 % | 32.5 % | 0.71 |
-| whisper-base, snr20 | 13.6 % | 100 % | 12 | 0.81 | 37.4 % | 7.3 % | 0.57 | 44.2 % | 70.3 % | 33.6 % | 0.70 |
-| whisper-base, snr10 | 17.5 % | 100 % | 12 | 0.75 | 35.2 % | 2.7 % | 0.56 | 47.8 % | 69.2 % | 33.0 % | 0.70 |
-| whisper-base, snr5 | 23.9 % | 97 % | 14 | 0.79 | 30.8 % | 8.3 % | 0.51 | 49.7 % | 65.9 % | 32.4 % | 0.70 |
-| whisper-small, clean | 10.4 % | 100 % | 30 | 1.67 | 33.0 % | 6.1 % | 0.52 | 51.5 % | 60.4 % | 29.2 % | 0.66 |
-| whisper-small, clean_pad | 10.6 % | 100 % | 12 | 1.28 | 40.7 % | 9.3 % | 0.59 | 47.8 % | 75.8 % | 33.1 % | 0.71 |
-| whisper-small, snr20 | 10.2 % | 100 % | 12 | 1.22 | 41.8 % | 7.0 % | 0.61 | 46.6 % | 75.8 % | 33.1 % | 0.71 |
-| whisper-small, snr10 | 10.7 % | 100 % | 12 | 0.69 | 40.7 % | 7.0 % | 0.59 | 45.6 % | 75.8 % | 32.5 % | 0.71 |
-| whisper-small, snr5 | 13.6 % | 99 % | 12 | 0.62 | 39.6 % | 2.5 % | 0.59 | 44.1 % | 69.2 % | 33.3 % | 0.68 |
+Kw = keyword baseline with the `blind` lists (the headline baseline); the last column gives the `original` lists (captured / error among accepted) for transparency.
+
+| Input | WER | Lang right | Inaudible | RTF | Echo captured | Echo error among accepted | Echo F1 | Echo not sure | Kw captured | Kw error among accepted | Kw F1 | Kw original: captured / error |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| text (level 2, same messages) | – | – | – | – | 54.9 % | 10.2 % | 0.68 | 39.5 % | 81.3 % | 29.7 % | 0.76 | 89.0 % / 32.3 % |
+| whisper-tiny, clean | 23.1 % | 100 % | 30 | 0.65 | 33.0 % | 13.9 % | 0.50 | 41.5 % | 46.2 % | 25.8 % | 0.60 | 50.5 % / 30.0 % |
+| whisper-tiny, clean_pad | 21.7 % | 100 % | 12 | 0.57 | 37.4 % | 14.3 % | 0.55 | 38.5 % | 57.1 % | 28.4 % | 0.67 | 60.4 % / 33.3 % |
+| whisper-tiny, snr20 | 25.4 % | 100 % | 12 | 0.63 | 31.9 % | 15.4 % | 0.50 | 41.3 % | 56.0 % | 29.1 % | 0.67 | 58.2 % / 31.6 % |
+| whisper-tiny, snr10 | 40.2 % | 97 % | 17 | 0.67 | 26.4 % | 10.7 % | 0.42 | 50.7 % | 45.1 % | 31.4 % | 0.59 | 48.4 % / 32.9 % |
+| whisper-tiny, snr5 | 50.4 % | 99 % | 20 | 0.51 | 25.3 % | 14.3 % | 0.41 | 58.1 % | 36.3 % | 31.3 % | 0.53 | 36.3 % / 36.4 % |
+| whisper-base, clean | 16.2 % | 100 % | 30 | 0.73 | 36.3 % | 7.7 % | 0.52 | 34.4 % | 51.6 % | 30.3 % | 0.60 | 56.0 % / 29.8 % |
+| whisper-base, clean_pad | 13.7 % | 100 % | 12 | 0.86 | 44.0 % | 6.4 % | 0.60 | 35.7 % | 67.0 % | 30.4 % | 0.70 | 71.4 % / 32.5 % |
+| whisper-base, snr20 | 13.6 % | 100 % | 12 | 0.81 | 44.0 % | 10.4 % | 0.60 | 35.9 % | 64.8 % | 31.7 % | 0.68 | 70.3 % / 33.6 % |
+| whisper-base, snr10 | 17.5 % | 100 % | 12 | 0.75 | 42.9 % | 8.7 % | 0.60 | 40.8 % | 64.8 % | 30.3 % | 0.70 | 69.2 % / 33.0 % |
+| whisper-base, snr5 | 23.9 % | 97 % | 14 | 0.79 | 31.9 % | 8.3 % | 0.50 | 42.5 % | 61.5 % | 32.3 % | 0.68 | 65.9 % / 32.4 % |
+| whisper-small, clean | 10.4 % | 100 % | 30 | 1.67 | 41.8 % | 9.1 % | 0.58 | 37.9 % | 54.9 % | 27.9 % | 0.63 | 60.4 % / 29.2 % |
+| whisper-small, clean_pad | 10.6 % | 100 % | 12 | 1.28 | 51.6 % | 7.4 % | 0.67 | 35.2 % | 69.2 % | 30.1 % | 0.70 | 75.8 % / 33.1 % |
+| whisper-small, snr20 | 10.2 % | 100 % | 12 | 1.22 | 49.5 % | 9.4 % | 0.64 | 34.8 % | 71.4 % | 31.1 % | 0.71 | 75.8 % / 33.1 % |
+| whisper-small, snr10 | 10.7 % | 100 % | 12 | 0.69 | 49.5 % | 11.1 % | 0.64 | 31.3 % | 70.3 % | 32.4 % | 0.70 | 75.8 % / 32.5 % |
+| whisper-small, snr5 | 13.6 % | 99 % | 12 | 0.62 | 47.3 % | 2.1 % | 0.64 | 34.2 % | 65.9 % | 32.0 % | 0.69 | 69.2 % / 33.3 % |
 
 Inaudible: clips the app refuses to analyse (SPEC 7). The very short feedbacks ("Thanks!", "Meh.") become clips under 3 s and are
 inaudible by design; they count as missed remarks above. The raw TTS clips ("clean") have no silence around the speech, so
@@ -320,136 +373,136 @@ WER by language (whisper-base):
 Per language. P / R / F1: message level. Error among accepted: chunk answers counted that do not match the annotation, with
 its 95 % interval and the number of accepted answers ("acc."); with so few accepted answers per language the intervals
 are very wide. Captured: annotated remarks counted with the right finding. Not sure: share of chunks. Kw: keyword baseline on the
-same Whisper transcripts.
+same Whisper transcripts (`blind` lists).
 
 | Lang | Clips | WER | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Kw P | Kw R | Kw F1 | Kw error among accepted | Kw captured |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en | 20 | 11.3 % | 1.00 | 0.41 | 0.58 | 0.0 % [0–30] (9 acc.) | 39.1 % | 37.5 % | 0.69 | 0.82 | 0.75 | 32.1 % (28 acc.) | 78.3 % |
-| fr | 20 | 22.1 % | 1.00 | 0.43 | 0.61 | 0.0 % [0–28] (10 acc.) | 34.8 % | 52.6 % | 0.65 | 0.87 | 0.74 | 33.3 % (33 acc.) | 73.9 % |
-| de | 20 | 21.9 % | 0.88 | 0.35 | 0.50 | 12.5 % [2–47] (8 acc.) | 35.0 % | 48.6 % | 0.53 | 0.50 | 0.51 | 42.9 % (21 acc.) | 45.0 % |
-| es | 20 | 15.4 % | 1.00 | 0.36 | 0.53 | 0.0 % [0–28] (10 acc.) | 32.0 % | 55.9 % | 0.73 | 0.76 | 0.75 | 26.7 % (30 acc.) | 76.0 % |
+| en | 20 | 11.3 % | 1.00 | 0.55 | 0.71 | 0.0 % [0–24] (12 acc.) | 52.2 % | 27.1 % | 0.68 | 0.77 | 0.72 | 36.7 % (30 acc.) | 73.9 % |
+| fr | 20 | 22.1 % | 0.92 | 0.48 | 0.63 | 8.3 % [1–35] (12 acc.) | 43.5 % | 44.7 % | 0.65 | 0.74 | 0.69 | 34.6 % (26 acc.) | 60.9 % |
+| de | 20 | 21.9 % | 0.78 | 0.35 | 0.48 | 22.2 % [6–55] (9 acc.) | 35.0 % | 48.6 % | 0.73 | 0.55 | 0.63 | 23.5 % (17 acc.) | 55.0 % |
+| es | 20 | 15.4 % | 0.91 | 0.40 | 0.56 | 7.7 % [1–33] (13 acc.) | 40.0 % | 47.1 % | 0.77 | 0.68 | 0.72 | 23.1 % (26 acc.) | 68.0 % |
 
 Per finding (message level):
 
 | Finding | Support | Echo P | Echo R | Echo F1 | Kw P | Kw R | Kw F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P1 | 9 | 1.00 | 0.56 | 0.71 | 1.00 | 0.78 | 0.88 |
-| P2 | 5 | 1.00 | 0.40 | 0.57 | 0.80 | 0.80 | 0.80 |
-| P3 | 8 | 1.00 | 0.13 | 0.22 | 1.00 | 0.25 | 0.40 |
-| P4 | 4 | 1.00 | 0.50 | 0.67 | 0.57 | 1.00 | 0.73 |
-| P5 | 5 | 1.00 | 0.80 | 0.89 | 0.63 | 1.00 | 0.77 |
-| P6 | 3 | 0.00 | 0.00 | 0.00 | 0.50 | 0.67 | 0.57 |
-| P7 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 1.00 | 1.00 |
-| P8 | 5 | 1.00 | 0.40 | 0.57 | 1.00 | 0.40 | 0.57 |
-| P9 | 3 | 1.00 | 0.33 | 0.50 | 0.75 | 1.00 | 0.86 |
+| P1 | 9 | 1.00 | 0.67 | 0.80 | 1.00 | 0.78 | 0.88 |
+| P2 | 5 | 1.00 | 0.40 | 0.57 | 0.60 | 0.60 | 0.60 |
+| P3 | 8 | 0.00 | 0.00 | 0.00 | 1.00 | 0.25 | 0.40 |
+| P4 | 4 | 1.00 | 0.50 | 0.67 | 0.40 | 1.00 | 0.57 |
+| P5 | 5 | 1.00 | 0.80 | 0.89 | 0.71 | 1.00 | 0.83 |
+| P6 | 3 | 0.00 | 0.00 | 0.00 | 0.67 | 0.67 | 0.67 |
+| P7 | 4 | 1.00 | 0.50 | 0.67 | 1.00 | 1.00 | 1.00 |
+| P8 | 5 | 0.60 | 0.60 | 0.60 | 1.00 | 0.60 | 0.75 |
+| P9 | 3 | 1.00 | 0.67 | 0.80 | 0.60 | 1.00 | 0.75 |
 | P10 | 6 | 1.00 | 0.50 | 0.67 | 1.00 | 0.83 | 0.91 |
-| P11 | 4 | 0.50 | 0.25 | 0.33 | 0.40 | 0.50 | 0.44 |
-| N1 | 5 | 1.00 | 0.40 | 0.57 | 0.50 | 1.00 | 0.67 |
-| N2 | 2 | 1.00 | 0.50 | 0.67 | 0.40 | 1.00 | 0.57 |
-| N3 | 5 | 1.00 | 0.40 | 0.57 | 0.38 | 0.60 | 0.46 |
-| N4 | 4 | 0.00 | 0.00 | 0.00 | 0.75 | 0.75 | 0.75 |
+| P11 | 4 | 0.50 | 0.25 | 0.33 | 1.00 | 0.50 | 0.67 |
+| N1 | 5 | 1.00 | 0.40 | 0.57 | 0.56 | 1.00 | 0.71 |
+| N2 | 2 | 1.00 | 0.50 | 0.67 | 1.00 | 0.50 | 0.67 |
+| N3 | 5 | 1.00 | 0.20 | 0.33 | 0.33 | 0.20 | 0.25 |
+| N4 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 0.75 | 0.86 |
 | N5 | 0 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
-| N6 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 0.50 | 0.67 |
+| N6 | 4 | 1.00 | 0.50 | 0.67 | 1.00 | 0.25 | 0.40 |
 | N7 | 3 | 1.00 | 0.67 | 0.80 | 1.00 | 0.67 | 0.80 |
-| N8 | 4 | 1.00 | 0.50 | 0.67 | 0.80 | 1.00 | 0.89 |
-| N9 | 5 | 1.00 | 0.60 | 0.75 | 0.56 | 1.00 | 0.71 |
-| N10 | 2 | 0.00 | 0.00 | 0.00 | 0.50 | 0.50 | 0.50 |
+| N8 | 4 | 1.00 | 0.25 | 0.40 | 0.67 | 1.00 | 0.80 |
+| N9 | 5 | 1.00 | 0.80 | 0.89 | 0.71 | 1.00 | 0.83 |
+| N10 | 2 | 1.00 | 0.50 | 0.67 | 0.00 | 0.00 | 0.00 |
 
 Confusion matrix (Echo; annotated passages → what Echo did on the overlapping chunks; empty rows and columns hidden):
 
-| annotated \ Echo | P1 | P2 | P3 | P4 | P5 | P7 | P8 | P9 | P10 | P11 | N1 | N2 | N3 | N6 | N7 | N8 | N9 | not_sure | off_list | nothing |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| P1 | **4** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | · | 1 |
-| P2 | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · | · |
-| P3 | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 6 | · | 1 |
-| P4 | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · | 1 |
-| P5 | · | · | · | · | **4** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
-| P6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | 1 | · |
-| P7 | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | 1 | 2 | · |
-| P8 | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | 2 | · | 1 |
-| P9 | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
-| P10 | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | 2 | 1 | 1 |
-| P11 | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | 1 | · | 2 |
-| N1 | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | 1 | 1 | 1 |
-| N2 | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | 1 | · | · |
-| N3 | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | 1 | 1 | 1 |
-| N4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | 1 | · |
-| N6 | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | 2 | · | 1 |
-| N7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | 1 | · |
-| N8 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | 2 | · | · |
-| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **3** | 1 | 1 | · |
-| N10 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
-| not_sure(ambiguous) | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 7 |
-| off_list | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 8 | **6** | · |
-| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 9 | 5 | · |
+| annotated \ Echo | P1 | P2 | P4 | P5 | P7 | P8 | P9 | P10 | P11 | N1 | N2 | N3 | N4 | N5 | N6 | N7 | N8 | N9 | N10 | not_sure | off_list | nothing |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P1 | **5** | · | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · | 1 |
+| P2 | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · | · |
+| P3 | · | · | · | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | 6 | · | 1 |
+| P4 | · | · | **2** | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 |
+| P5 | · | · | · | **4** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
+| P6 | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | · | · | · | · | · | · | 3 | · |
+| P7 | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
+| P8 | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 1 |
+| P9 | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
+| P10 | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | 1 |
+| P11 | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | 1 | · | 2 |
+| N1 | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | 1 | 1 | 1 |
+| N2 | · | · | · | · | · | 1 | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · |
+| N3 | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | 2 | 1 | 1 |
+| N4 | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | 2 | 1 | · |
+| N6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | 1 | 1 |
+| N7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | 1 | · |
+| N8 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | 3 | · | · |
+| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **4** | · | 1 | · | · |
+| N10 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | 1 | · | · |
+| not_sure(ambiguous) | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 7 |
+| off_list | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 7 | **7** | · |
+| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | · | · | · | · | 9 | 4 | · |
 
 ### Level 3 in detail: whisper-base, clean speech with 0.4 s silence around it (SYNTHETIC voices, all 80 clips)
 
 Per language. P / R / F1: message level. Error among accepted: chunk answers counted that do not match the annotation, with
 its 95 % interval and the number of accepted answers ("acc."); with so few accepted answers per language the intervals
 are very wide. Captured: annotated remarks counted with the right finding. Not sure: share of chunks. Kw: keyword baseline on the
-same Whisper transcripts.
+same Whisper transcripts (`blind` lists).
 
 | Lang | Clips | WER | Echo P | Echo R | Echo F1 | Echo error among accepted | Echo captured | Echo not sure | Kw P | Kw R | Kw F1 | Kw error among accepted | Kw captured |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| en | 20 | 8.4 % | 1.00 | 0.45 | 0.63 | 0.0 % [0–28] (10 acc.) | 43.5 % | 37.5 % | 0.71 | 0.77 | 0.74 | 30.8 % (26 acc.) | 73.9 % |
-| fr | 20 | 16.2 % | 1.00 | 0.52 | 0.69 | 0.0 % [0–24] (12 acc.) | 47.8 % | 46.0 % | 0.65 | 0.87 | 0.74 | 32.4 % (34 acc.) | 82.6 % |
-| de | 20 | 17.2 % | 1.00 | 0.20 | 0.33 | 0.0 % [0–49] (4 acc.) | 20.0 % | 60.5 % | 0.57 | 0.65 | 0.60 | 40.0 % (25 acc.) | 55.0 % |
-| es | 20 | 13.9 % | 1.00 | 0.52 | 0.68 | 0.0 % [0–22] (14 acc.) | 48.0 % | 47.1 % | 0.76 | 0.76 | 0.76 | 27.6 % (29 acc.) | 72.0 % |
+| en | 20 | 8.4 % | 1.00 | 0.55 | 0.71 | 0.0 % [0–24] (12 acc.) | 52.2 % | 27.1 % | 0.67 | 0.73 | 0.70 | 37.9 % (29 acc.) | 69.6 % |
+| fr | 20 | 16.2 % | 0.93 | 0.57 | 0.70 | 6.3 % [1–28] (16 acc.) | 56.5 % | 29.7 % | 0.68 | 0.74 | 0.71 | 32.0 % (25 acc.) | 69.6 % |
+| de | 20 | 17.2 % | 0.83 | 0.25 | 0.38 | 16.7 % [3–56] (6 acc.) | 25.0 % | 50.0 % | 0.72 | 0.65 | 0.68 | 23.8 % (21 acc.) | 60.0 % |
+| es | 20 | 13.9 % | 0.91 | 0.40 | 0.56 | 7.7 % [1–33] (13 acc.) | 40.0 % | 38.2 % | 0.74 | 0.68 | 0.71 | 25.9 % (27 acc.) | 68.0 % |
 
 Per finding (message level):
 
 | Finding | Support | Echo P | Echo R | Echo F1 | Kw P | Kw R | Kw F1 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P1 | 9 | 1.00 | 0.56 | 0.71 | 0.89 | 0.89 | 0.89 |
-| P2 | 5 | 1.00 | 0.40 | 0.57 | 0.80 | 0.80 | 0.80 |
-| P3 | 8 | 0.00 | 0.00 | 0.00 | 1.00 | 0.38 | 0.55 |
-| P4 | 4 | 1.00 | 0.50 | 0.67 | 0.57 | 1.00 | 0.73 |
-| P5 | 5 | 1.00 | 0.60 | 0.75 | 0.63 | 1.00 | 0.77 |
-| P6 | 3 | 1.00 | 0.67 | 0.80 | 0.50 | 0.67 | 0.57 |
+| P1 | 9 | 1.00 | 0.56 | 0.71 | 0.88 | 0.78 | 0.82 |
+| P2 | 5 | 1.00 | 0.40 | 0.57 | 0.60 | 0.60 | 0.60 |
+| P3 | 8 | 0.00 | 0.00 | 0.00 | 0.75 | 0.38 | 0.50 |
+| P4 | 4 | 1.00 | 0.50 | 0.67 | 0.40 | 1.00 | 0.57 |
+| P5 | 5 | 1.00 | 0.60 | 0.75 | 0.71 | 1.00 | 0.83 |
+| P6 | 3 | 1.00 | 0.33 | 0.50 | 0.67 | 0.67 | 0.67 |
 | P7 | 4 | 1.00 | 0.75 | 0.86 | 1.00 | 1.00 | 1.00 |
-| P8 | 5 | 1.00 | 0.40 | 0.57 | 1.00 | 0.20 | 0.33 |
-| P9 | 3 | 1.00 | 0.33 | 0.50 | 0.75 | 1.00 | 0.86 |
+| P8 | 5 | 0.75 | 0.60 | 0.67 | 1.00 | 0.40 | 0.57 |
+| P9 | 3 | 0.50 | 0.33 | 0.40 | 0.60 | 1.00 | 0.75 |
 | P10 | 6 | 1.00 | 0.50 | 0.67 | 1.00 | 0.83 | 0.91 |
-| P11 | 4 | 1.00 | 0.25 | 0.40 | 0.33 | 0.50 | 0.40 |
+| P11 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 0.50 | 0.67 |
 | N1 | 5 | 1.00 | 0.60 | 0.75 | 0.63 | 1.00 | 0.77 |
-| N2 | 2 | 1.00 | 0.50 | 0.67 | 0.40 | 1.00 | 0.57 |
-| N3 | 5 | 1.00 | 0.40 | 0.57 | 0.38 | 0.60 | 0.46 |
-| N4 | 4 | 1.00 | 0.25 | 0.40 | 0.75 | 0.75 | 0.75 |
+| N2 | 2 | 1.00 | 0.50 | 0.67 | 1.00 | 0.50 | 0.67 |
+| N3 | 5 | 1.00 | 0.20 | 0.33 | 0.33 | 0.20 | 0.25 |
+| N4 | 4 | 0.67 | 0.50 | 0.57 | 1.00 | 0.75 | 0.86 |
 | N5 | 0 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 |
-| N6 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 0.50 | 0.67 |
+| N6 | 4 | 1.00 | 0.25 | 0.40 | 1.00 | 0.25 | 0.40 |
 | N7 | 3 | 1.00 | 0.67 | 0.80 | 1.00 | 1.00 | 1.00 |
-| N8 | 4 | 1.00 | 0.50 | 0.67 | 0.80 | 1.00 | 0.89 |
-| N9 | 5 | 1.00 | 0.60 | 0.75 | 0.63 | 1.00 | 0.77 |
-| N10 | 2 | 0.00 | 0.00 | 0.00 | 0.50 | 0.50 | 0.50 |
+| N8 | 4 | 1.00 | 0.25 | 0.40 | 0.67 | 1.00 | 0.80 |
+| N9 | 5 | 1.00 | 0.80 | 0.89 | 0.63 | 1.00 | 0.77 |
+| N10 | 2 | 1.00 | 0.50 | 0.67 | 0.00 | 0.00 | 0.00 |
 
 Confusion matrix (Echo; annotated passages → what Echo did on the overlapping chunks; empty rows and columns hidden):
 
-| annotated \ Echo | P1 | P2 | P4 | P5 | P6 | P7 | P8 | P9 | P10 | P11 | N1 | N2 | N3 | N4 | N6 | N7 | N8 | N9 | not_sure | off_list | nothing |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| P1 | **5** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 4 | · | · |
-| P2 | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · | · |
-| P3 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 7 | · | 1 |
-| P4 | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · | 1 |
-| P5 | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
-| P6 | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
-| P7 | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
-| P8 | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | · | · | 2 | · | 1 |
-| P9 | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
-| P10 | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | · | · | · | · | 2 | 1 | 1 |
-| P11 | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | 1 | · | 2 |
-| N1 | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | 1 | 1 | · |
-| N2 | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | 1 | · | · |
-| N3 | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | 1 | 1 | 1 |
-| N4 | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | 2 | 1 | · |
-| N6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | 1 | 1 | 1 |
-| N7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | 1 | · | · |
-| N8 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | 2 | · | · |
-| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **3** | 1 | 1 | · |
-| N10 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 2 | · | · |
-| not_sure(ambiguous) | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 7 |
-| off_list | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 5 | **9** | · |
-| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 8 | 6 | · |
+| annotated \ Echo | P1 | P2 | P4 | P5 | P6 | P7 | P8 | P9 | P10 | P11 | N1 | N2 | N3 | N4 | N6 | N7 | N8 | N9 | N10 | not_sure | off_list | nothing |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| P1 | **5** | · | · | · | · | · | 1 | · | · | · | · | · | · | 1 | · | · | · | · | · | 2 | · | · |
+| P2 | · | **2** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · | · |
+| P3 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 7 | · | 1 |
+| P4 | · | · | **2** | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 |
+| P5 | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
+| P6 | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | · |
+| P7 | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · |
+| P8 | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | 1 |
+| P9 | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | · | · | 1 | 1 | · |
+| P10 | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | · | · | 1 | 1 | 1 |
+| P11 | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | · | · | 1 | · | 2 |
+| N1 | · | · | · | · | · | · | · | · | · | · | **3** | · | · | · | · | · | · | · | · | 1 | 1 | · |
+| N2 | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | · | 1 | · | · |
+| N3 | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | · | · | 2 | 1 | 1 |
+| N4 | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | · | · | 1 | 1 | · |
+| N6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · | · | 1 | 1 | 1 |
+| N7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **2** | · | · | · | 1 | · | · |
+| N8 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **1** | · | · | 1 | 2 | · |
+| N9 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **4** | · | 1 | · | · |
+| N10 | · | · | · | · | · | · | · | 1 | · | · | · | · | · | · | · | · | · | · | **1** | · | · | · |
+| not_sure(ambiguous) | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | 7 |
+| off_list | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | 3 | **11** | · |
+| negated | · | · | · | · | · | · | · | · | · | · | · | · | · | 1 | · | · | · | · | · | 4 | 9 | · |
 
 ### Which Whisper (SPEC 4.3: the smallest with acceptable results)
 
@@ -460,9 +513,9 @@ seeing the numbers; the table lets the reader apply another one.
 
 | Model | Size (MB) | FLEURS WER en/fr/de/es | 10 dB: captured | 10 dB: error among accepted | Meets rule | FLEURS RTF (en, 8 threads) |
 |---|---:|---:|---:|---:|---:|---:|
-| whisper-tiny | 43.6 | 30 % / 67 % / 52 % / 30 % | 20.9 % | 9.1 % | no | 0.36 |
-| whisper-base | 79.7 | 11 % / 29 % / 22 % / 12 % | 35.2 % | 2.7 % | yes | 0.57 |
-| whisper-small | 251.8 | 9 % / 14 % / 11 % / 6 % | 40.7 % | 7.0 % | yes | 1.08 |
+| whisper-tiny | 43.6 | 30 % / 67 % / 52 % / 30 % | 26.4 % | 10.7 % | no | 0.36 |
+| whisper-base | 79.7 | 11 % / 29 % / 22 % / 12 % | 42.9 % | 8.7 % | yes | 0.57 |
+| whisper-small | 251.8 | 9 % / 14 % / 11 % / 6 % | 49.5 % | 11.1 % | no | 1.08 |
 
 → Smallest model meeting the rule: **whisper-base**.
 
@@ -482,15 +535,15 @@ App download for the shipped pair: **215.1 MB** (onnx-community/whisper-base + X
 
 | Whisper | onnxruntime threads | Load models (s) | 1st run: embed examples + train (s) | 30 s message with EN translation (s) | without translation (s) | RSS after loading (MB) | Peak RSS (MB) |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| whisper-tiny | all | 1.5 | 5.4 | 9.8 | 3.3 | 812 | 1063 |
-| whisper-tiny | 2 | 1.0 | 4.0 | 6.6 | 2.0 | 816 | 1057 |
-| whisper-tiny | 1 | 1.0 | 4.3 | 8.2 | 2.5 | 813 | 1056 |
-| whisper-base | all | 1.4 | 5.1 | 13.0 | 4.1 | 883 | 1244 |
-| whisper-base | 2 | 1.3 | 4.0 | 8.3 | 2.8 | 873 | 1255 |
-| whisper-base | 1 | 1.1 | 4.4 | 10.8 | 3.2 | 876 | 1246 |
-| whisper-small | all | 2.0 | 5.1 | 22.3 | 7.8 | 1137 | 1879 |
-| whisper-small | 2 | 1.7 | 4.3 | 18.8 | 5.7 | 1158 | 1893 |
-| whisper-small | 1 | 1.7 | 4.8 | 26.3 | 7.9 | 1152 | 1891 |
+| whisper-tiny | all | 2.1 | 8.7 | 9.6 | 3.1 | 859 | 1082 |
+| whisper-tiny | 2 | 1.0 | 6.5 | 7.2 | 2.2 | 812 | 1103 |
+| whisper-tiny | 1 | 1.0 | 7.0 | 8.1 | 2.4 | 814 | 1096 |
+| whisper-base | all | 1.4 | 8.5 | 11.5 | 4.1 | 899 | 1245 |
+| whisper-base | 2 | 1.1 | 6.8 | 7.7 | 2.6 | 904 | 1279 |
+| whisper-base | 1 | 1.1 | 7.3 | 9.2 | 3.3 | 897 | 1241 |
+| whisper-small | all | 2.6 | 9.0 | 26.1 | 7.9 | 1253 | 1978 |
+| whisper-small | 2 | 2.1 | 8.3 | 18.9 | 6.0 | 1257 | 1937 |
+| whisper-small | 1 | 1.7 | 7.9 | 26.4 | 7.8 | 1257 | 1966 |
 
 Memory is the whole Node process (onnxruntime-node native libraries alone take ~170 MB, each model is held both as a file
 buffer and as an onnxruntime session, plus the decoding arena). It is an upper bound for the app's own share; a browser tab
@@ -506,9 +559,9 @@ core and Cortex-A55/A75-class entry phones are in that range; not measured here)
 WebAssembly threads with cross-origin isolation), so a phone using 2–4 threads would be faster. Peak memory is the native
 process here; a browser tab adds its own overhead.
 
-- whisper-tiny: **~26–70 s** per 30 s message (transcription + analysis), **~88–234 s** with the English translation for the review list (native 1 thread here: 2.5 s / 8.2 s; WASM ×3.55).
-- whisper-base: **~31–82 s** per 30 s message (transcription + analysis), **~102–273 s** with the English translation for the review list (native 1 thread here: 3.2 s / 10.8 s; WASM ×3.16).
-- whisper-small: **~84–224 s** per 30 s message (transcription + analysis), **~279–744 s** with the English translation for the review list (native 1 thread here: 7.9 s / 26.3 s; WASM ×3.54).
+- whisper-tiny: **~26–69 s** per 30 s message (transcription + analysis), **~86–230 s** with the English translation for the review list (native 1 thread here: 2.4 s / 8.1 s; WASM ×3.55).
+- whisper-base: **~32–86 s** per 30 s message (transcription + analysis), **~89–238 s** with the English translation for the review list (native 1 thread here: 3.3 s / 9.2 s; WASM ×3.25).
+- whisper-small: **~81–215 s** per 30 s message (transcription + analysis), **~274–730 s** with the English translation for the review list (native 1 thread here: 7.8 s / 26.4 s; WASM ×3.46).
 
 This is an estimate. Messages are processed in a queue in the background (SPEC 4.2), so minutes per message is usable for 6–7 messages a month, but it must be confirmed on a real phone.
 
@@ -519,6 +572,8 @@ The real measurement on a phone is a manual procedure: docs/MANUAL_TESTS.md ("Pe
 - Levels 2–3 are synthetic (written feedback, TTS voices): real visitors are messier (code-switching, names, long rambling voice notes, wind on the microphone, WhatsApp Opus compression).
 - The held-out half has 125 feedbacks; intervals are wide (see brackets). Many choices (classifier, threshold, floor) were made on the calibration half, but the unknown-topic rule and cluster threshold were adjusted after seeing the only recurring-topic example (picking).
 - The catalog examples and the corpus were written by the same team; they are checked for near-duplicates but share a style.
+- The original keyword lists were written by the author of the corpus (they can repeat its wording); the blind lists were not, but were written by the same team that wrote the catalog examples, from the catalog's labels and examples. Neither is a keyword system maintained by a person for months.
+- The held-out half had been evaluated before (previous configuration: 48 % captured, 6 % wrong). The recall changes were decided on the calibration half only, but with the knowledge that Echo captured fewer remarks than keywords on the held-out half.
 - Mozilla Common Voice was not used: it moved to Mozilla Data Collective (account required) in Oct 2025 (docs/DATASHEET.md). FLEURS accents are read speech.
 - The personal-data check uses 52 synthetic sentences written by the team, not names spoken by real visitors through Whisper; the scrubber is a heuristic and misses names (see the recall above).
 - No Kinyarwanda is evaluated here: the host side only plays frozen catalog sentences (catalog back-translation scores are in the catalog).

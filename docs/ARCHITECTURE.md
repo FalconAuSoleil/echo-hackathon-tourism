@@ -225,7 +225,7 @@ buildMonthlyRecap({ month, messages: MonthMessage[], recurringUnknownVisitors },
 RecapLine = { templateId; findingId?; slots; rw; fr; en; audio: string[]; missingAudio: string[] }
 recapRwLines(recap); recapAudio(recap)
 isGsm7; gsm7Length; toGsm7; splitSms(lines, maxLen = 160, { numbered? }); smsUri(phone, body)
-keywordClassify(chunk, lang, lists | catalog, mode = "prefix"); keywordAnalyze(...); keywordListsFromFiles(eval/keywords/*.json)
+keywordClassify(chunk, lang, lists | catalog, mode = "prefix"); keywordAnalyze(...); keywordListsFromFiles(eval/keywords-blind/*.json | eval/keywords/*.json)
 aggregateCooperative(farms: { farmId; consent; messages: { month; status; coopFindings }[] }[], catalog, { months? })
 ```
 
@@ -320,6 +320,10 @@ Full results: `eval/results/RESULTS.md` (generated) + `level1.json`, `level2.jso
   `packages/core/src/calibration.ts`**, which `DEFAULT_CONFIG` reads, and `DEFAULT_EMBEDDING_MODEL` (`@echo/models`)
   follows `CALIBRATION.embeddingModel`. Unknown-topic cluster threshold calibrated on catalog examples only.
 - Level 3: the 80 Piper clips (clean, clean + 0.4 s silence, 20/10/5 dB SNR ESC-50) → `analyzeAudioMessage`.
+- Keyword baseline: two sets, both always reported (levels 2 and 3): `eval/keywords-blind/` (written without seeing the
+  corpus; the **primary** set since 2026-10-04: headline column of RESULTS.md and README, demo comparison) and
+  `eval/keywords/` (original, written by the corpus author, kept for transparency). `pnpm eval -- --keywords original`
+  makes the original set primary (`eval/src/lib/keyword-sets.ts`). Earlier results are kept in `eval/results/previous/`.
 - Performance: per-process peak RSS and 30 s message timings with 8/2/1 cores (`taskset`), WebAssembly overhead measured
   with onnxruntime-web vs onnxruntime-node on the same ONNX files, low-end Android = labelled estimate
   (real measurement: `docs/MANUAL_TESTS.md`).

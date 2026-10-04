@@ -3,7 +3,7 @@
 //   pnpm eval -- --level 2          # un seul niveau (répétable : --level 2 --level 3), aussi perf, report
 //   pnpm eval -- --level pii --level report   # contrôle du nettoyage des noms/numéros seul (sans modèle)
 //   pnpm eval -- --whisper tiny,base,small   --fleurs-limit 20   --quick
-//   pnpm eval -- --keywords blind   # jeu de mots-clés principal : original (défaut) ou blind (eval/keywords-blind/)
+//   pnpm eval -- --keywords original   # jeu de mots-clés principal : blind (défaut, eval/keywords-blind/) ou original (eval/keywords/)
 // Mêmes modèles (@echo/models) et même code (@echo/core) que l'app. Les sorties brutes (transcriptions
 // en cache) vont dans eval/results/raw/ (git-ignoré) : relancer reprend là où l'on s'était arrêté.
 import { parseArgs } from "node:util";
@@ -25,7 +25,7 @@ const { values } = parseArgs({
   allowPositionals: true,
 });
 
-// Jeu de mots-clés principal (eval/src/lib/keyword-sets.ts) : original (défaut) | blind. Les deux restent rapportés au niveau 2.
+// Jeu de mots-clés principal (eval/src/lib/keyword-sets.ts) : blind (défaut) | original. Les deux restent rapportés au niveau 2.
 if (values.keywords) process.env.ECHO_KEYWORDS = values.keywords;
 
 const levels = new Set(values.level?.length ? values.level.flatMap((l) => l.split(",")) : ["1", "2", "3", "perf", "report"]);

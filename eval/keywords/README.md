@@ -1,5 +1,10 @@
 # Keyword lists for the no-AI baseline (SPEC 9, "La comparaison sans IA")
 
+> **Since 2026-10-04 these are the *original* lists, kept for transparency.** The headline baseline is now the blind
+> set in `eval/keywords-blind/` (written without seeing the corpus), because of the bias described below. On the
+> held-out half these original lists capture 88 % of remarks with 28 % wrong; the blind lists 80 % with 30 % wrong
+> (`eval/results/RESULTS.md`).
+
 **Synthetic / hand-written.** One file per visitor language (`en.json`, `fr.json`, `de.json`, `es.json`), each
 mapping the 21 finding ids (P1–P11, N1–N10) to a list of keywords or short phrases.
 

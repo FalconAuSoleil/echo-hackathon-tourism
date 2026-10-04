@@ -306,8 +306,8 @@
     }
   ],
   "corpus": {
-    "texts": 1510,
-    "words": 13789,
+    "texts": 1006,
+    "words": 9584,
     "removedWords": 0,
     "falseRemovalRate": 0,
     "textsTouched": 0,

@@ -1,6 +1,9 @@
 {
   "synthetic": true,
-  "rule": "off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= 5%, >= 20 accepted answers and cancelling-negation accuracy >= 85%; variant (embedding model, scoring, L2, negation margin) = best capture under that rule",
+  "maxAcceptedError": 0.08,
+  "minNegationAccuracy": 1,
+  "captureTolerance": 0.02,
+  "rule": "off-list floor first = Youden index between chunks aligned only with off-list passages and chunks aligned with finding/ambiguous passages (calibration half); then threshold = maximise the share of remarks captured on the calibration half subject to accepted-answer error <= 8%, >= 20 accepted answers and cancelling-negation accuracy >= 100%; variant (embedding model, scoring, L2, negation margin) = lowest error among the selectable variants whose capture under that rule is within 2 points of the best",
   "split": {
     "seed": 20261004,
     "calibration": 125,
@@ -19,51 +22,51 @@
   },
   "embeddingModel": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
   "scoring": "linear",
-  "acceptProbability": 0.84,
+  "acceptProbability": 0.82,
   "acceptThreshold": null,
-  "offListThreshold": 0.59,
+  "offListThreshold": 0.62,
   "linearL2": 0.00003,
   "linearEpochs": 150,
   "negationMargin": 0,
   "floorSelection": {
-    "floor": 0.59,
-    "j": 0.7061,
+    "floor": 0.62,
+    "j": 0.6879,
     "offBelow": 0.8333,
-    "inBelow": 0.1273,
+    "inBelow": 0.1455,
     "offListChunks": 18,
     "inListChunks": 165
   },
-  "offListClusterThreshold": 0.59,
+  "offListClusterThreshold": 0.57,
   "clusterThresholdSelection": {
-    "threshold": 0.59,
+    "threshold": 0.57,
     "rule": "lowest t with <= 1% of cross-language different-finding example pairs >= t",
     "precise": {
-      "threshold": 0.59,
-      "sameAbove": 0.2923,
-      "diffAbove": 0.0091
+      "threshold": 0.57,
+      "sameAbove": 0.3001,
+      "diffAbove": 0.0099
     },
     "youden": {
       "threshold": 0.27,
-      "j": 0.6332,
-      "sameAbove": 0.8292,
-      "diffAbove": 0.196
+      "j": 0.6255,
+      "sameAbove": 0.8192,
+      "diffAbove": 0.1937
     },
-    "samePairs": 10206,
-    "diffPairs": 204120
+    "samePairs": 28350,
+    "diffPairs": 567000
   },
   "unknownTopicSources": "off_list_and_unsure",
   "atThresholdCalibration": {
-    "threshold": 0.84,
-    "coverage": 0.3206,
-    "acceptedErrorRate": 0.0448,
-    "accepted": 67,
-    "captureRate": 0.4615,
-    "precision": 0.9524,
-    "recall": 0.4724,
-    "f1": 0.6316,
-    "notSureRate": 0.4258,
+    "threshold": 0.82,
+    "coverage": 0.3684,
+    "acceptedErrorRate": 0.039,
+    "accepted": 77,
+    "captureRate": 0.5385,
+    "precision": 0.9589,
+    "recall": 0.5512,
+    "f1": 0.7,
+    "notSureRate": 0.3636,
     "negationCancelsAccuracy": 1
   },
-  "catalogExamples": 756,
+  "catalogExamples": 1260,
   "date": "2026-10-04"
 }
