@@ -55,3 +55,30 @@ that sends the `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embed
 
 Record for each step: pass/fail, timings, phone model and Android/Chrome versions, and copy the results into
 `docs/PROGRESS.md`.
+
+## Performance on a low-end Android (SPEC 9 "Les performances") — evaluation agent
+
+The evaluation measures speed and memory on a laptop CPU and gives only an **estimate** for a low-end phone
+(`eval/results/RESULTS.md`, section Performance). This procedure replaces the estimate with a measurement.
+
+**Phone**: an entry-level Android already owned by a household (e.g. 2–3 GB RAM, Cortex-A53/A55-class CPU, Android 10+),
+Chrome up to date. Note model, RAM, CPU (Settings → About phone) and Chrome version.
+
+1. On a computer on the same Wi-Fi: `pnpm install && pnpm models:download && pnpm build && pnpm preview -- --host`
+   (or use the public demo link once deployed by the team).
+2. On the phone, open the app URL in Chrome, let the models download completely (progress bar), then switch the phone to
+   **airplane mode**.
+3. Connect the phone by USB, enable USB debugging, open `chrome://inspect` on the computer and inspect the tab
+   (Console + Performance monitor: "JS heap size", and Android "Settings → Developer options → Running services" or
+   `adb shell dumpsys meminfo com.android.chrome` for the tab's total memory).
+4. Import `eval/data/demo-samples/de-roasting-path.wav`, then the **30 s** test message `eval/results/raw/perf-30s-fr.wav`
+   (written by `pnpm eval -- --level perf`: synthetic French voices, same file as the laptop measurement), copied to the
+   phone by USB. Also record 30 s of your own speech with the app's recorder.
+5. For each message, note: time from "Analyse" to the result (the UI shows it, or use the Performance tab), peak memory
+   during the analysis, whether the phone stayed responsive, battery drop over 10 messages.
+6. Repeat once with the screen locked during processing (does the analysis continue?).
+7. Record the results (phone model, Chrome version, whisper model, seconds per 30 s message with and without the English
+   machine translation, peak memory) in `docs/PROGRESS.md` and in README § Results, replacing the estimate.
+
+**Pass criteria** (proposed): a 30 s message is analysed in under 3 minutes in airplane mode without the tab being
+killed; the result is identical to the one obtained on the laptop for the same file (same findings).

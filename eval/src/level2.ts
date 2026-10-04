@@ -283,8 +283,8 @@ function writeCoreCalibration(cfg: AnalysisConfig, meta: { embeddingModel: strin
   const pct = (x: number) => (x * 100).toFixed(1);
   const ts = `// GÉNÉRÉ par \`pnpm eval -- --level 2\` (eval/src/level2.ts) le ${meta.date}. Ne pas modifier à la main :
 // relancer l'évaluation. Seuils calibrés sur la moitié « calibration » du corpus SYNTHÉTIQUE
-// (eval/data/feedback.jsonl), règle fixée d'avance : part des remarques captées maximale sous la contrainte
-// « erreur parmi les réponses acceptées ≤ ${MAX_ACCEPTED_ERROR * 100} % ». Variante retenue : ${meta.variant}.
+// (eval/data/feedback.jsonl), règle : part des remarques captées maximale sous la contrainte
+// « erreur parmi les réponses acceptées ≤ ${MAX_ACCEPTED_ERROR * 100} % » et négations qui annulent ≥ ${MIN_NEGATION_ACCURACY * 100} %. Variante retenue : ${meta.variant}.
 // Calibration : erreur ${pct(meta.calibration.acceptedErrorRate)} %, capture ${pct(meta.calibration.captureRate)} %, couverture ${pct(meta.calibration.coverage)} %.
 // Partie test réservée : erreur ${pct(meta.test.acceptedErrorRate)} %, capture ${pct(meta.test.captureRate)} %. Détails : eval/results/RESULTS.md.
 

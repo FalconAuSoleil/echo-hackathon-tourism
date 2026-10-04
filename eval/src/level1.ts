@@ -4,7 +4,8 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { readJsonl, readJsonIfExists, loadAudio16k, round, writeJson } from "./lib/io.ts";
 import { loadavg } from "node:os";
-import { FLEURS_DIR, RAW_DIR, RESULTS_DIR } from "./lib/paths.ts";
+import { FLEURS_DIR, RAW_DIR, RESULTS_DIR, ROOT } from "./lib/paths.ts";
+import { execFileSync } from "node:child_process";
 import { TranscriptCache, loadWhisper, whisperAvailable, type CachedTranscript } from "./lib/asr.ts";
 import { errorCounts, rates, sumCounts } from "./lib/wer.ts";
 
@@ -12,7 +13,20 @@ interface FleursRow { key: string; lang: string; fleursId: number; file: string;
 
 export const LEVEL1_LANGS = ["en", "fr", "de", "es", "sw"];
 
+/** Télécharge l'échantillon FLEURS s'il manque (outil Python de build, .venv). */
+function ensureFleurs(log: (s: string) => void): void {
+  if (LEVEL1_LANGS.every((l) => existsSync(join(FLEURS_DIR, l, "manifest.jsonl")))) return;
+  const py = join(ROOT, ".venv", "bin", "python");
+  log("[level1] FLEURS sample missing: running eval/scripts/fetch_fleurs.py (~2.7 GB of parquet downloads)");
+  try {
+    execFileSync(existsSync(py) ? py : "python3", [join(ROOT, "eval", "scripts", "fetch_fleurs.py")], { stdio: "inherit" });
+  } catch (e) {
+    log(`[level1] FLEURS download failed (${String(e).slice(0, 200)}); needs .venv with pyarrow, soundfile, huggingface_hub`);
+  }
+}
+
 export async function runLevel1(opts: { sizes: string[]; limit?: number; limits?: Record<string, number>; log: (s: string) => void }) {
+  ensureFleurs(opts.log);
   const previous = readJsonIfExists<{ models?: Record<string, Record<string, unknown>> }>(join(RESULTS_DIR, "level1.json"));
   const out: Record<string, unknown> = {};
   const perModel: Record<string, Record<string, unknown>> = { ...(previous?.models ?? {}) };

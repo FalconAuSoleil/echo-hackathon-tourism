@@ -1,7 +1,7 @@
 // Performances (SPEC 9) : taille des modèles, mémoire de pointe, temps pour un message de 30 s.
-// Chaque mesure tourne dans un processus séparé (perf-child.ts) ; le nombre de cœurs est limité avec
-// taskset pour approcher un téléphone d'entrée de gamme (ESTIMATION, voir docs/MANUAL_TESTS.md pour la
-// mesure sur un vrai Android).
+// Chaque mesure tourne dans un processus séparé (perf-child.ts) ; le nombre de threads d'onnxruntime est
+// limité (tous, 2, 1) pour approcher un téléphone d'entrée de gamme (ESTIMATION, voir docs/MANUAL_TESTS.md pour
+// la mesure sur un vrai Android).
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { cpus, loadavg } from "node:os";
@@ -62,7 +62,7 @@ function make30s(lang: string): string {
   return path;
 }
 
-export async function runPerf(opts: { sizes: string[]; log: (s: string) => void; threads?: string[]; devices?: string[]; appWhisper?: string }) {
+export async function runPerf(opts: { sizes: string[]; log: (s: string) => void; threads?: string[]; appWhisper?: string }) {
   const log = opts.log;
   const l2 = readJson<{ config: object; calibration: { embeddingModel: string } }>(join(RESULTS_DIR, "level2.json"));
   const configPath = join(RAW_DIR, "perf-config.json");
@@ -82,26 +82,23 @@ export async function runPerf(opts: { sizes: string[]; log: (s: string) => void;
   const threadSets = opts.threads ?? ["all", "2", "1"];
   for (const size of opts.sizes.filter(whisperAvailable)) {
     for (const th of threadSets) {
-      for (const device of opts.devices ?? ["default"]) {
-        const cpuList = th === "all" ? `0-${ncpu - 1}` : th === "2" ? "0,1" : "0";
-        const before = loadavg()[0]!;
-        try {
-          const outStr = execFileSync("taskset", ["-c", cpuList, process.execPath, "--import", "tsx", join(ROOT, "eval", "src", "perf-child.ts"), WHISPER_IDS[size]!, embId, audioFr, configPath, device], {
-            cwd: join(ROOT, "eval"),
-            encoding: "utf8",
-            maxBuffer: 1 << 24,
-            timeout: 30 * 60 * 1000,
-            stdio: ["ignore", "pipe", "pipe"],
-          });
-          const line = outStr.trim().split("\n").filter((l) => l.startsWith("{")).pop()!;
-          const r = { whisper: `whisper-${size}`, cores: th, loadAverage1mBefore: round(before, 1), ...JSON.parse(line) };
-          runs.push(r);
-          log(`[perf] whisper-${size} cores=${th} device=${device}: 30 s message ${r.message30sWithTranslationSec.toFixed(1)} s (no translation ${r.message30sNoTranslationSec.toFixed(1)} s), peak RSS ${r.peakRssMB.toFixed(0)} MB`);
-        } catch (e) {
-          const msg = (e as { stderr?: string }).stderr?.toString().slice(-400) ?? String(e);
-          runs.push({ whisper: `whisper-${size}`, cores: th, device, error: msg });
-          log(`[perf] whisper-${size} cores=${th} device=${device}: FAILED ${msg.slice(0, 200)}`);
-        }
+      const before = loadavg()[0]!;
+      try {
+        const outStr = execFileSync(process.execPath, ["--import", "tsx", join(ROOT, "eval", "src", "perf-child.ts"), WHISPER_IDS[size]!, embId, audioFr, configPath, th], {
+          cwd: join(ROOT, "eval"),
+          encoding: "utf8",
+          maxBuffer: 1 << 24,
+          timeout: 30 * 60 * 1000,
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+        const line = outStr.trim().split("\n").filter((l) => l.startsWith("{")).pop()!;
+        const r = { whisper: `whisper-${size}`, cores: th, loadAverage1mBefore: round(before, 1), ...JSON.parse(line) };
+        runs.push(r);
+        log(`[perf] whisper-${size} threads=${th}: 30 s message ${r.message30sWithTranslationSec.toFixed(1)} s (no translation ${r.message30sNoTranslationSec.toFixed(1)} s), peak RSS ${r.peakRssMB.toFixed(0)} MB`);
+      } catch (e) {
+        const msg = (e as { stderr?: string }).stderr?.toString().slice(-400) ?? String(e);
+        runs.push({ whisper: `whisper-${size}`, cores: th, error: msg });
+        log(`[perf] whisper-${size} threads=${th}: FAILED ${msg.slice(0, 200)}`);
       }
     }
   }
@@ -109,7 +106,7 @@ export async function runPerf(opts: { sizes: string[]; log: (s: string) => void;
   const wasm: Record<string, unknown> = {};
   for (const size of opts.sizes.filter(whisperAvailable)) {
     try {
-      const o = execFileSync("taskset", ["-c", "0", process.execPath, "--import", "tsx", join(ROOT, "eval", "src", "perf-wasm.ts"),
+      const o = execFileSync(process.execPath, ["--import", "tsx", join(ROOT, "eval", "src", "perf-wasm.ts"),
         join(MODELS_DIR, WHISPER_IDS[size]!, "onnx", "encoder_model_quantized.onnx"), join(MODELS_DIR, embId, "onnx", "model_quantized.onnx")], { cwd: join(ROOT, "eval"), encoding: "utf8", timeout: 20 * 60 * 1000, stdio: ["ignore", "pipe", "pipe"] });
       wasm[`whisper-${size}`] = JSON.parse(o.trim().split("\n").pop()!);
       log(`[perf] wasm overhead whisper-${size}: encoder x${(wasm[`whisper-${size}`] as { encoderWasmFactor: number }).encoderWasmFactor.toFixed(1)}`);
@@ -134,14 +131,14 @@ export async function runPerf(opts: { sizes: string[]; log: (s: string) => void;
     perCoreSlowdownAssumed: PER_CORE_SLOWDOWN,
     rows: estimate,
     lines: [
-      "Method: (time for a 30 s message measured here on **1 core**, native onnxruntime) × (WebAssembly overhead **measured here**:",
+      "Method: (time for a 30 s message measured here with **1 onnxruntime thread**, native backend) × (WebAssembly overhead **measured here**:",
       "same ONNX file, 1 thread, onnxruntime-web vs onnxruntime-node — the browser runs WebAssembly) × (per-core speed gap between this",
       `laptop core and an entry-level phone core, **assumed** ${PER_CORE_SLOWDOWN[0]}–${PER_CORE_SLOWDOWN[1]}×: public single-core benchmark ratios between a 2024 laptop`,
       "core and Cortex-A55/A75-class entry phones are in that range; not measured here). One thread is used (the browser only gets",
       "WebAssembly threads with cross-origin isolation), so a phone using 2–4 threads would be faster. Peak memory is the native",
       "process here; a browser tab adds its own overhead.",
       "",
-      ...estimate.map((e) => `- ${e.whisper}: **~${e.estimateNoTranslationSec[0]}–${e.estimateNoTranslationSec[1]} s** per 30 s message (transcription + analysis), **~${e.estimateWithTranslationSec[0]}–${e.estimateWithTranslationSec[1]} s** with the English translation for the review list (native 1 core here: ${e.native1CoreNoTranslationSec} s / ${e.native1CoreWithTranslationSec} s; WASM ×${e.wasmFactor}).`),
+      ...estimate.map((e) => `- ${e.whisper}: **~${e.estimateNoTranslationSec[0]}–${e.estimateNoTranslationSec[1]} s** per 30 s message (transcription + analysis), **~${e.estimateWithTranslationSec[0]}–${e.estimateWithTranslationSec[1]} s** with the English translation for the review list (native 1 thread here: ${e.native1CoreNoTranslationSec} s / ${e.native1CoreWithTranslationSec} s; WASM ×${e.wasmFactor}).`),
       "",
       "This is an estimate. Messages are processed in a queue in the background (SPEC 4.2), so minutes per message is usable for 6–7 messages a month, but it must be confirmed on a real phone.",
     ],

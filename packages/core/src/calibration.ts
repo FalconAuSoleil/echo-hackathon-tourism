@@ -1,7 +1,7 @@
-// GÉNÉRÉ par `pnpm eval -- --level 2` (eval/src/level2.ts) le 2026-10-03. Ne pas modifier à la main :
+// GÉNÉRÉ par `pnpm eval -- --level 2` (eval/src/level2.ts) le 2026-10-04. Ne pas modifier à la main :
 // relancer l'évaluation. Seuils calibrés sur la moitié « calibration » du corpus SYNTHÉTIQUE
-// (eval/data/feedback.jsonl), règle fixée d'avance : part des remarques captées maximale sous la contrainte
-// « erreur parmi les réponses acceptées ≤ 5 % ». Variante retenue : linear-minilm-l2=0.00003-neg0.
+// (eval/data/feedback.jsonl), règle : part des remarques captées maximale sous la contrainte
+// « erreur parmi les réponses acceptées ≤ 5 % » et négations qui annulent ≥ 85 %. Variante retenue : linear-minilm-l2=0.00003-neg0.
 // Calibration : erreur 4.5 %, capture 46.2 %, couverture 32.1 %.
 // Partie test réservée : erreur 6.0 %, capture 48.0 %. Détails : eval/results/RESULTS.md.
 
@@ -20,6 +20,6 @@ export const CALIBRATION = {
   unknownTopicSources: "off_list_and_unsure" as "off_list" | "off_list_and_unsure",
   /** Modèle d'embedding avec lequel ces seuils ont été calibrés (les seuils n'ont de sens qu'avec lui). */
   embeddingModel: "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
-  calibratedAt: "2026-10-03",
+  calibratedAt: "2026-10-04",
   catalogExamples: 756,
 } as const;

@@ -9,7 +9,8 @@ import { TranscriptCache, cachingTranscriber, whisperAvailable } from "./lib/asr
 import { loadFeedback, splitCorpus, type Feedback } from "./lib/corpus.ts";
 import { loadAudio16k, readJson, readJsonl, round, writeJson } from "./lib/io.ts";
 import { evaluateByLang, summary, type SystemOutput } from "./lib/metrics.ts";
-import { DATA_DIR, RAW_DIR, RESULTS_DIR, abs } from "./lib/paths.ts";
+import { DATA_DIR, RAW_DIR, RESULTS_DIR, ROOT, abs } from "./lib/paths.ts";
+import { execFileSync } from "node:child_process";
 import { EMBEDDERS, fromAnalysis, getEmbedder, keywordOutput, loadCatalog, loadKeywordLists } from "./lib/system.ts";
 import { createMatcher } from "@echo/core";
 import { errorCounts, rates, sumCounts } from "./lib/wer.ts";
@@ -54,8 +55,14 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
   const feedbacks: Feedback[] = rows.map((r) => fbById.get(r.id)!);
   const testIds = new Set(splitCorpus([...fbById.values()]).test.map((f) => f.id));
   const testSubset = feedbacks.filter((f) => testIds.has(f.id));
-  const missing = rows.filter((r) => !existsSync(abs(r.clean)));
-  if (missing.length) throw new Error(`level 3 audio missing (${missing.length} clips): run bash tools/tts/make_eval_audio.sh`);
+  if (rows.some((r) => !existsSync(abs(r.clean)) || Object.values(r.noisy).some((p) => !existsSync(abs(p))))) {
+    log("[level3] synthetic audio missing: running bash tools/tts/make_eval_audio.sh (corpus agent's TTS + noise pipeline)");
+    try {
+      execFileSync("bash", [join(ROOT, "tools", "tts", "make_eval_audio.sh")], { stdio: "inherit", cwd: ROOT });
+    } catch (e) {
+      throw new Error(`level 3 audio could not be generated (${String(e).slice(0, 200)}): see eval/data/README.md`);
+    }
+  }
 
   // Référence niveau 2 sur les MÊMES 80 textes (pour la perte de qualité).
   const textOut = new Map<string, SystemOutput>();
@@ -107,8 +114,12 @@ export async function runLevel3(opts: { sizes: string[]; log: (s: string) => voi
       const statusCount: Record<string, number> = {};
       for (const a of analyses) statusCount[a.status] = (statusCount[a.status] ?? 0) + 1;
       const inaudible = analyses.filter((a) => a.status === "inaudible").map((a) => ({ id: a.id, reason: a.reason, durationSec: rows.find((r) => r.id === a.id)!.durationSec }));
-      const echo = evaluateByLang(feedbacks, outs);
-      const kw = evaluateByLang(feedbacks, kwOuts);
+      // par langue : résumé seulement (le JSON complet par langue × condition × modèle serait trop gros)
+      const compact = (x: ReturnType<typeof evaluateByLang>) => ({ all: x.all, byLang: Object.fromEntries(Object.entries(x.byLang).map(([l, m]) => [l, summary(m)])) });
+      const echoFull = evaluateByLang(feedbacks, outs);
+      const kwFull = evaluateByLang(feedbacks, kwOuts);
+      const echo = compact(echoFull);
+      const kw = compact(kwFull);
       const compSec = transcribed.reduce((s, x) => s + x.t!.seconds, 0);
       const audioSec = transcribed.reduce((s, x) => s + x.t!.durationSec, 0);
       perCond[cond] = {

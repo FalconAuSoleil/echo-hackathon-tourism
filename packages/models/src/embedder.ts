@@ -11,6 +11,8 @@ export interface EmbedderOptions {
    */
   batchSize?: number;
   device?: "cpu" | "wasm" | "webgpu";
+  /** Nombre de threads du backend natif (Node). Défaut : celui d'onnxruntime (tous les cœurs). */
+  threads?: number;
 }
 
 export async function createEmbedder(modelId: string, options: EmbedderOptions = {}): Promise<EmbedFn> {
@@ -20,6 +22,7 @@ export async function createEmbedder(modelId: string, options: EmbedderOptions =
   const extractor = (await pipeline("feature-extraction", modelId, {
     dtype: "q8",
     ...(options.device ? { device: options.device } : {}),
+    ...(options.threads ? { session_options: { intraOpNumThreads: options.threads, interOpNumThreads: 1 } } : {}),
   })) as FeatureExtractionPipeline;
 
   return async (texts: string[]) => {

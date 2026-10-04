@@ -1,11 +1,11 @@
 // Mesure isolée (processus à part, pour une mémoire de pointe propre) : charge un Whisper + l'embedder,
 // prépare le matcher, puis traite un message de 30 s comme l'app (analyzeAudioMessage, traduction anglaise
-// pour la liste « à faire lire »). Sortie : une ligne JSON. Lancé par perf.ts, éventuellement sous taskset.
+// pour la liste « à faire lire »). Sortie : une ligne JSON. Lancé par perf.ts.
 import { readFileSync } from "node:fs";
 import { analyzeAudioMessage, createMatcher, exportExampleEmbeddings, makeConfig, validateCatalog, type AnalysisConfig } from "@echo/core";
 import { createEmbedder, createWhisperTranscriber, useLocalModels } from "@echo/models";
 
-const [asrId, embId, audioPath, configPath, device] = process.argv.slice(2) as [string, string, string, string, string | undefined];
+const [asrId, embId, audioPath, configPath, threadsArg] = process.argv.slice(2) as [string, string, string, string, string | undefined];
 const ROOT = new URL("../../", import.meta.url).pathname;
 useLocalModels(`${ROOT}models`);
 const hwm = () => {
@@ -14,7 +14,9 @@ const hwm = () => {
 };
 const rss = () => process.memoryUsage().rss / 1e6;
 const t = () => performance.now() / 1000;
-const dev = device && device !== "default" ? { device: device as "wasm" | "cpu" } : {};
+// Nombre de threads d'onnxruntime (taskset ne suffit pas : onnxruntime fixe lui-même l'affinité de ses threads).
+const threads = threadsArg && threadsArg !== "all" ? Number(threadsArg) : undefined;
+const dev = threads ? { threads } : {};
 
 const config = makeConfig(JSON.parse(readFileSync(configPath, "utf8")) as Partial<AnalysisConfig>);
 const catalog = validateCatalog(JSON.parse(readFileSync(`${ROOT}catalog/catalog.json`, "utf8")));
@@ -42,7 +44,7 @@ console.log(
   JSON.stringify({
     asrId,
     embId,
-    device: device ?? "default",
+    threads: threads ?? "all",
     audioSec: durationSec,
     loadEmbedderSec: t1 - t0,
     loadAsrSec: t2 - t1,

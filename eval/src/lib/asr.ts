@@ -55,7 +55,8 @@ export function cachingTranscriber(cache: TranscriptCache, size: string, keyOf: 
     async transcribe(audio: Float32Array, opts?: TranscribeOptions): Promise<Transcript> {
       const key = keyOf();
       const hit = cache.get(key);
-      if (hit) return hit;
+      // garde-fou : si l'audio a été régénéré (autre durée), le cache n'est plus valable
+      if (hit && Math.abs(hit.durationSec - audio.length / 16000) < 0.01) return hit;
       real ??= await loadWhisper(size);
       const t0 = performance.now();
       const t = await real.transcribe(audio, opts);

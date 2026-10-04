@@ -20,29 +20,33 @@ const LANGS = ["en", "fr", "de", "es"];
 function curveSvg(cal: J[], test: J[], chosen: number, kw: { coverage: number; err: number } | undefined, label: string): string {
   const W = 720, H = 420, L = 64, R = 24, T = 48, B = 56;
   const x = (v: number) => L + v * (W - L - R);
-  const maxY = 0.6;
+  const maxY = 0.4;
   const y = (v: number) => T + (1 - Math.min(v, maxY) / maxY) * (H - T - B);
   const path = (pts: J[]) => pts.filter((p) => p.accepted > 0).map((p, i) => `${i ? "L" : "M"}${x(p.coverage).toFixed(1)},${y(p.acceptedErrorRate).toFixed(1)}`).join(" ");
-  const grid = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e3df" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#52514e">${v * 100} %</text>`).join("");
+  const grid = [0, 0.1, 0.2, 0.3, 0.4].map((v) => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e3df" stroke-width="1"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#52514e">${v * 100} %</text>`).join("");
   const xt = [0, 0.2, 0.4, 0.6, 0.8, 1].map((v) => `<text x="${x(v)}" y="${H - B + 20}" text-anchor="middle" font-size="12" fill="#52514e">${v * 100} %</text>`).join("");
   const dots = (pts: J[], color: string, name: string) =>
     pts.filter((p) => p.accepted > 0).map((p) => `<circle cx="${x(p.coverage).toFixed(1)}" cy="${y(p.acceptedErrorRate).toFixed(1)}" r="3" fill="${color}"><title>${name}, threshold ${p.threshold}: chunks accepted ${pct(p.coverage)}, error among accepted ${pct(p.acceptedErrorRate)}, remarks captured ${pct(p.captureRate)}</title></circle>`).join("");
   const c = test.find((p) => Math.abs(p.threshold - chosen) < 1e-6);
   const cc = cal.find((p) => Math.abs(p.threshold - chosen) < 1e-6);
-  const mark = (p: J | undefined, color: string, text: string, dy: number) =>
-    p ? `<circle cx="${x(p.coverage)}" cy="${y(p.acceptedErrorRate)}" r="7" fill="none" stroke="${color}" stroke-width="2"/><text x="${x(p.coverage) + 12}" y="${y(p.acceptedErrorRate) + dy}" font-size="12" fill="#0b0b0b">${text}</text>` : "";
+  // Étiquettes dans la zone vide en bas à droite, reliées à l'anneau par un trait fin.
+  const mark = (p: J | undefined, color: string, text: string, ly: number) => {
+    if (!p) return "";
+    const cx = x(p.coverage), cy = y(p.acceptedErrorRate), lx = x(0.66);
+    return `<circle cx="${cx}" cy="${cy}" r="7" fill="none" stroke="${color}" stroke-width="2"/><line x1="${cx + 7}" y1="${cy}" x2="${lx - 4}" y2="${ly - 4}" stroke="#a8a7a1" stroke-width="1"/><text x="${lx}" y="${ly}" font-size="12" fill="#0b0b0b">${text}</text>`;
+  };
   const kwMark = kw ? `<rect x="${x(kw.coverage) - 6}" y="${y(kw.err) - 6}" width="12" height="12" fill="#52514e" rx="2"><title>Keyword baseline: chunks with a hit ${pct(kw.coverage)}, error among accepted ${pct(kw.err)}</title></rect><text x="${x(kw.coverage) - 10}" y="${y(kw.err) - 12}" text-anchor="end" font-size="12" fill="#0b0b0b">keywords (no threshold)</text>` : "";
   const bound = `<line x1="${L}" x2="${W - R}" y1="${y(0.05)}" y2="${y(0.05)}" stroke="#a8a7a1" stroke-dasharray="4 4"/><text x="${W - R}" y="${y(0.05) - 6}" text-anchor="end" font-size="11" fill="#52514e">5 % bound (calibration rule)</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="Inter, system-ui, sans-serif" role="img" aria-label="Coverage versus error among accepted answers as the acceptance threshold varies">
 <rect width="${W}" height="${H}" fill="#fcfcfb"/>
 <text x="${L}" y="24" font-size="15" font-weight="600" fill="#0b0b0b">Echo: share of chunks accepted vs error among accepted (SYNTHETIC level 2)</text>
-<text x="${L}" y="40" font-size="12" fill="#52514e">${label}. Each dot = one threshold; ring = chosen threshold.</text>
+<text x="${L}" y="40" font-size="12" fill="#52514e">${label}. Dot = one threshold; ring = chosen.</text>
 ${grid}${xt}${bound}
 <text x="${(L + W - R) / 2}" y="${H - 14}" text-anchor="middle" font-size="12" fill="#52514e">share of chunks accepted (coverage)</text>
 <text transform="translate(16 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" font-size="12" fill="#52514e">error among accepted answers</text>
 <path d="${path(cal)}" fill="none" stroke="#2a78d6" stroke-width="2"/>${dots(cal, "#2a78d6", "calibration")}
 <path d="${path(test)}" fill="none" stroke="#eb6834" stroke-width="2"/>${dots(test, "#eb6834", "held-out test")}
-${mark(cc, "#2a78d6", `calibration, t=${chosen}`, -8)}${mark(c, "#eb6834", `test, t=${chosen}`, 16)}${kwMark}
+${mark(cc, "#2a78d6", `chosen threshold ${chosen} on calibration`, y(0.012))}${mark(c, "#eb6834", `same threshold on held-out test`, y(0.032))}${kwMark}
 <g transform="translate(${W - R - 200} ${T + 8})"><rect width="200" height="48" fill="#fcfcfb" stroke="#e4e3df" rx="4"/>
 <line x1="10" x2="30" y1="16" y2="16" stroke="#2a78d6" stroke-width="2"/><text x="38" y="20" font-size="12" fill="#0b0b0b">calibration half</text>
 <line x1="10" x2="30" y1="34" y2="34" stroke="#eb6834" stroke-width="2"/><text x="38" y="38" font-size="12" fill="#0b0b0b">held-out test half</text></g>
@@ -87,7 +91,7 @@ export function runReport(log: (s: string) => void = console.log) {
       ["Remarks correctly captured (X / Y)", `**${pct(e.remarks.captureRate, 0)}** ${ci(e.remarks.ci95)}`, `**${pct(k.remarks.captureRate, 0)}** ${ci(k.remarks.ci95)}`],
       ["Of the answers it counts, share that are wrong", `${pct(e.answers.acceptedErrorRate, 0)} ${ci(e.answers.ci95)}`, `${pct(k.answers.acceptedErrorRate, 0)} ${ci(k.answers.ci95)}`],
       ["Remarks flagged \"not sure — ask a person\" instead", pct(e.remarks.notSure / Math.max(1, e.remarks.total), 0), "0 % (no such state)"],
-      ["Remarks either counted right or put in the \"to be read by a person\" list (not sure / off-list)", pct((e.remarks.captured + e.remarks.notSure + e.remarks.offList) / Math.max(1, e.remarks.total), 0), `${pct(k.remarks.captureRate, 0)} (no review list)`],
+      ["Remarks either counted right or flagged \"not sure — ask a person\"", pct((e.remarks.captured + e.remarks.notSure) / Math.max(1, e.remarks.total), 0), `${pct(k.remarks.captureRate, 0)} (no such flag)`],
       ...(e3 && k3 ? [["Same, end to end on audio (whisper-base, 10 dB SNR, synthetic voices)", `${pct(e3.remarks.captureRate, 0)} captured, ${pct(e3.answers.acceptedErrorRate, 0)} wrong`, `${pct(k3.remarks.captureRate, 0)} captured, ${pct(k3.answers.acceptedErrorRate, 0)} wrong`]] : []),
     ]));
     w();
@@ -99,7 +103,7 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     w("Suggested wording for the problem sentence: *\"our tests on synthetic feedback show the tool correctly captures " +
       `${pct(e.remarks.captureRate, 0)} of visitor remarks with ${pct(e.answers.acceptedErrorRate, 0)} of its counted answers wrong ` +
-      `(the rest is flagged for a person), versus ${pct(k.remarks.captureRate, 0)} for keyword matching with ${pct(k.answers.acceptedErrorRate, 0)} wrong.\"*`);
+      `(most of the rest is flagged \"not sure\" for a person), versus ${pct(k.remarks.captureRate, 0)} for keyword matching with ${pct(k.answers.acceptedErrorRate, 0)} wrong.\"*`);
     w();
   }
 
@@ -258,7 +262,7 @@ export function runReport(log: (s: string) => void = console.log) {
   if (l3) {
     w("## Level 3 — end to end on audio (SYNTHETIC voices + real outdoor noise)");
     w();
-    w(`${l3.clips} feedbacks from the corpus (${Object.entries(l3.byLang).map(([k2, v]) => `${k2} ${v}`).join(", ")}) spoken by Piper TTS voices (13 voices, varied speakers and speed), clean and mixed with ESC-50 outdoor noise at 20, 10 and 5 dB SNR (eval/data/README.md). Audio → \`analyzeAudioMessage\` (audio checks, Whisper with automatic language detection, audio wiped, analysis) with the calibrated configuration. ${l3.englishTranslation}. WER references contain the corpus' deliberate typos.`);
+    w(`${l3.clips} feedbacks from the corpus (${Object.entries(l3.byLang).map(([k2, v]) => `${k2} ${v}`).join(", ")}) spoken by Piper TTS voices (13 voices, varied speakers and speed), clean and mixed with ESC-50 outdoor noise at 20, 10 and 5 dB SNR (eval/data/README.md). Audio → \`analyzeAudioMessage\` (audio checks, Whisper with automatic language detection, audio wiped, analysis) with the calibrated configuration. English translation: ${l3.englishTranslation}. WER references contain the corpus' deliberate typos.`);
     w();
     const s2 = l3.level2SameMessages;
     const rows: (string | number)[][] = [["text (level 2, same messages)", "–", "–", "–", "–", pct(s2.echo.all.remarks.captureRate), pct(s2.echo.all.answers.acceptedErrorRate), num(s2.echo.all.micro.f1), pct(s2.echo.all.chunks.notSureRate), pct(s2.keywords.all.remarks.captureRate), pct(s2.keywords.all.answers.acceptedErrorRate), num(s2.keywords.all.micro.f1)]];
@@ -270,9 +274,11 @@ export function runReport(log: (s: string) => void = console.log) {
     w(table(["Input", "WER", "Lang right", "Inaudible", "RTF", "Echo captured", "Echo error among accepted", "Echo F1", "Echo not sure", "Kw captured", "Kw error among accepted", "Kw F1"], rows));
     w();
     w("Inaudible: clips the app refuses to analyse (SPEC 7). The very short feedbacks (\"Thanks!\", \"Meh.\") become clips under 3 s and are");
-    w("inaudible by design; they count as missed remarks above. Keywords run on the same Whisper transcripts.");
+    w("inaudible by design; they count as missed remarks above. The raw TTS clips (\"clean\") have no silence around the speech, so");
+    w("30 of 80 last under 3 s; with the 0.4 s of silence before and after that a real voice note has (\"clean_pad\", and the noisy");
+    w("versions), 12 remain under 3 s. Keywords run on the same Whisper transcripts (no inaudible rule).");
     w();
-    const anyModel = Object.keys(l3.models)[0];
+    const anyModel = l3.models["whisper-base"] ? "whisper-base" : Object.keys(l3.models)[0];
     if (anyModel) {
       w(`WER by language (${anyModel}):`);
       w();
@@ -284,16 +290,19 @@ export function runReport(log: (s: string) => void = console.log) {
     const cands = ["whisper-tiny", "whisper-base", "whisper-small"].filter((m) => base10(m));
     if (cands.length) {
       const best = Math.max(...cands.map((m) => base10(m).remarks.captureRate));
-      const ok = cands.filter((m) => base10(m).answers.acceptedErrorRate <= 0.1 && base10(m).remarks.captureRate >= best - 0.05);
+      const fleursOk = (m: string) => LANGS.every((l) => (l1?.models?.[m]?.[l]?.wer ?? 1) <= 0.3);
+      const ok = cands.filter((m) => fleursOk(m) && base10(m).answers.acceptedErrorRate <= 0.1 && base10(m).remarks.captureRate >= best - 0.1);
       w("### Which Whisper (SPEC 4.3: the smallest with acceptable results)");
       w();
-      w("Rule: the smallest model whose end-to-end result at 10 dB SNR keeps error among accepted answers ≤ 10 % and captures at");
-      w("most 5 points fewer remarks than the best model, cross-checked with its FLEURS WER on real voices.");
+      w("Rule: the smallest model that (1) keeps FLEURS WER ≤ 30 % in each visitor language on real voices, and (2) end to end at");
+      w("10 dB SNR keeps the error among accepted answers ≤ 10 % and captures at most 10 points fewer remarks than the best model");
+      w("(with ~90 remarks the 95 % interval is about ±10 points, so smaller gaps are not distinguishable). The rule was written after");
+      w("seeing the numbers; the table lets the reader apply another one.");
       w();
-      w(table(["Model", "Size (MB)", "FLEURS WER en/fr/de/es", "10 dB: captured", "10 dB: error among accepted", "Meets rule"], cands.map((m) => {
+      w(table(["Model", "Size (MB)", "FLEURS WER en/fr/de/es", "10 dB: captured", "10 dB: error among accepted", "Meets rule", "FLEURS RTF (en, 8 threads)"], cands.map((m) => {
         const f = l1?.models?.[m];
         const size = perf?.modelSizes?.[`onnx-community/${m}`]?.totalMB;
-        return [m, size ?? "–", f ? LANGS.map((l) => (f[l] ? pct(f[l].wer, 0) : "–")).join(" / ") : "–", pct(base10(m).remarks.captureRate), pct(base10(m).answers.acceptedErrorRate), ok.includes(m) ? "yes" : "no"];
+        return [m, size ?? "–", f ? LANGS.map((l) => (f[l] ? pct(f[l].wer, 0) : "–")).join(" / ") : "–", pct(base10(m).remarks.captureRate), pct(base10(m).answers.acceptedErrorRate), ok.includes(m) ? "yes" : "no", num(f?.en?.realTimeFactor)];
       })));
       w();
       w(`→ Smallest model meeting the rule: **${ok[0] ?? "none"}**.`);
@@ -311,8 +320,13 @@ export function runReport(log: (s: string) => void = console.log) {
     w();
     if (perf.appDownload) w(`App download for the shipped pair: **${perf.appDownload.totalMB} MB** (${perf.appDownload.models.join(" + ")}).`);
     w();
-    w(table(["Whisper", "Cores", "Backend", "Load models (s)", "1st run: embed examples + train (s)", "30 s message with EN translation (s)", "without translation (s)", "Peak RSS (MB)"],
-      perf.runs.map((r: J) => r.error ? [r.whisper, r.cores, r.device, "failed", "", "", "", ""] : [r.whisper, r.cores, r.device, num(r.loadEmbedderSec + r.loadAsrSec, 1), num(r.firstRunMatcherSec, 1), num(r.message30sWithTranslationSec, 1), num(r.message30sNoTranslationSec, 1), num(r.peakRssMB, 0)])));
+    w(table(["Whisper", "onnxruntime threads", "Load models (s)", "1st run: embed examples + train (s)", "30 s message with EN translation (s)", "without translation (s)", "RSS after loading (MB)", "Peak RSS (MB)"],
+      perf.runs.map((r: J) => r.error ? [r.whisper, r.cores, "failed", "", "", "", "", ""] : [r.whisper, r.cores, num(r.loadEmbedderSec + r.loadAsrSec, 1), num(r.firstRunMatcherSec, 1), num(r.message30sWithTranslationSec, 1), num(r.message30sNoTranslationSec, 1), num(r.rssAfterLoadMB, 0), num(r.peakRssMB, 0)])));
+    w();
+    w("Memory is the whole Node process (onnxruntime-node native libraries alone take ~170 MB, each model is held both as a file");
+    w("buffer and as an onnxruntime session, plus the decoding arena). It is an upper bound for the app's own share; a browser tab");
+    w("uses onnxruntime-web (WebAssembly) with a different footprint, to be measured on the phone (docs/MANUAL_TESTS.md).");
+    w("\"1st run\" = embedding the catalog examples one by one and training the classifier, done once and cached by the app.");
     w();
     if (perf.androidEstimate) {
       w("### Low-end Android: ESTIMATE, not a measurement");
@@ -337,7 +351,7 @@ export function runReport(log: (s: string) => void = console.log) {
   if (l2) {
     const kwPoint = { coverage: l2.keywords.test.all.chunks.coverage, err: l2.keywords.test.all.answers.acceptedErrorRate };
     const chosen = l2.calibration.scoring === "linear" ? l2.calibration.acceptProbability : l2.calibration.acceptThreshold;
-    writeFileSync(join(RESULTS_DIR, "coverage-error-curve.svg"), curveSvg(l2.curves.calibration, l2.curves.test, chosen, kwPoint, `${l2.calibration.variant.name}, threshold swept 0.30–1.00`));
+    writeFileSync(join(RESULTS_DIR, "coverage-error-curve.svg"), curveSvg(l2.curves.calibration, l2.curves.test, chosen, kwPoint, `${l2.calibration.variant.name}, probability threshold 0.30–1.00`));
   }
   log("[report] eval/results/RESULTS.md written");
 }

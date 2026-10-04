@@ -1,0 +1,540 @@
+{
+  "machine": {
+    "cpuModel": "Intel(R) Core(TM) Ultra 5 226V",
+    "logicalCpus": 8,
+    "platform": "Linux WSL2, Node v24.19.0, onnxruntime-node (transformers.js 4)"
+  },
+  "message": "30.0 s French message made of concatenated SYNTHETIC Piper clips (worst case: French triggers the second Whisper pass for the English machine translation of the review list)",
+  "modelSizes": {
+    "onnx-community/whisper-tiny": {
+      "present": true,
+      "totalMB": 43.6,
+      "files": [
+        {
+          "file": "config.json",
+          "bytes": 2243,
+          "mb": 0
+        },
+        {
+          "file": "generation_config.json",
+          "bytes": 3772,
+          "mb": 0
+        },
+        {
+          "file": "onnx/decoder_model_merged_quantized.onnx",
+          "bytes": 30719241,
+          "mb": 30.7
+        },
+        {
+          "file": "onnx/encoder_model_quantized.onnx",
+          "bytes": 10124990,
+          "mb": 10.1
+        },
+        {
+          "file": "preprocessor_config.json",
+          "bytes": 339,
+          "mb": 0
+        },
+        {
+          "file": "tokenizer.json",
+          "bytes": 2480466,
+          "mb": 2.5
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 282683,
+          "mb": 0.3
+        }
+      ]
+    },
+    "onnx-community/whisper-base": {
+      "present": true,
+      "totalMB": 79.7,
+      "files": [
+        {
+          "file": "config.json",
+          "bytes": 2243,
+          "mb": 0
+        },
+        {
+          "file": "generation_config.json",
+          "bytes": 3832,
+          "mb": 0
+        },
+        {
+          "file": "onnx/decoder_model_merged_quantized.onnx",
+          "bytes": 53693315,
+          "mb": 53.7
+        },
+        {
+          "file": "onnx/encoder_model_quantized.onnx",
+          "bytes": 23201314,
+          "mb": 23.2
+        },
+        {
+          "file": "preprocessor_config.json",
+          "bytes": 339,
+          "mb": 0
+        },
+        {
+          "file": "tokenizer.json",
+          "bytes": 2480466,
+          "mb": 2.5
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 282682,
+          "mb": 0.3
+        }
+      ]
+    },
+    "onnx-community/whisper-small": {
+      "present": true,
+      "totalMB": 251.8,
+      "files": [
+        {
+          "file": "config.json",
+          "bytes": 2227,
+          "mb": 0
+        },
+        {
+          "file": "generation_config.json",
+          "bytes": 3893,
+          "mb": 0
+        },
+        {
+          "file": "onnx/decoder_model_merged_quantized.onnx",
+          "bytes": 156750845,
+          "mb": 156.8
+        },
+        {
+          "file": "onnx/encoder_model_quantized.onnx",
+          "bytes": 92326160,
+          "mb": 92.3
+        },
+        {
+          "file": "preprocessor_config.json",
+          "bytes": 339,
+          "mb": 0
+        },
+        {
+          "file": "tokenizer.json",
+          "bytes": 2480466,
+          "mb": 2.5
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 282683,
+          "mb": 0.3
+        }
+      ]
+    },
+    "Xenova/paraphrase-multilingual-MiniLM-L12-v2": {
+      "present": true,
+      "totalMB": 135.4,
+      "files": [
+        {
+          "file": "config.json",
+          "bytes": 673,
+          "mb": 0
+        },
+        {
+          "file": "onnx/model_quantized.onnx",
+          "bytes": 118308126,
+          "mb": 118.3
+        },
+        {
+          "file": "special_tokens_map.json",
+          "bytes": 280,
+          "mb": 0
+        },
+        {
+          "file": "tokenizer.json",
+          "bytes": 17082913,
+          "mb": 17.1
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 496,
+          "mb": 0
+        }
+      ]
+    },
+    "Xenova/multilingual-e5-small": {
+      "present": true,
+      "totalMB": 135.4,
+      "files": [
+        {
+          "file": "config.json",
+          "bytes": 658,
+          "mb": 0
+        },
+        {
+          "file": "onnx/model_quantized.onnx",
+          "bytes": 118308185,
+          "mb": 118.3
+        },
+        {
+          "file": "special_tokens_map.json",
+          "bytes": 167,
+          "mb": 0
+        },
+        {
+          "file": "tokenizer.json",
+          "bytes": 17082730,
+          "mb": 17.1
+        },
+        {
+          "file": "tokenizer_config.json",
+          "bytes": 443,
+          "mb": 0
+        }
+      ]
+    }
+  },
+  "runs": [
+    {
+      "whisper": "whisper-tiny",
+      "cores": "all",
+      "loadAverage1mBefore": 5.6,
+      "asrId": "onnx-community/whisper-tiny",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": "all",
+      "audioSec": 30,
+      "loadEmbedderSec": 0.789491632,
+      "loadAsrSec": 0.4774333669999997,
+      "firstRunMatcherSec": 4.991158118,
+      "cachedMatcherSec": 0.022601520000000264,
+      "message30sWithTranslationSec": 5.795183236999999,
+      "message30sNoTranslationSec": 3.257218055000001,
+      "rssAfterLoadMB": 811.86816,
+      "peakRssMB": 1053.23828125,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "P4"
+      ],
+      "transcriptPreview": "Le déjeuner préparei par la famille est vraiment bon, surtout les arriquaux. On ne s'arrête pas combien ça côté avant de",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-tiny",
+      "cores": "2",
+      "loadAverage1mBefore": 6.5,
+      "asrId": "onnx-community/whisper-tiny",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 2,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.6404009159999999,
+      "loadAsrSec": 0.35422298100000016,
+      "firstRunMatcherSec": 3.9110043190000003,
+      "cachedMatcherSec": 0.0244507279999997,
+      "message30sWithTranslationSec": 3.5533992869999995,
+      "message30sNoTranslationSec": 2.2666171019999997,
+      "rssAfterLoadMB": 814.309376,
+      "peakRssMB": 1059.95703125,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "P4"
+      ],
+      "transcriptPreview": "Le déjeuner préparei par la famille est vraiment bon, surtout les arriquaux. On ne s'arrête pas combien ça côté avant de",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-tiny",
+      "cores": "1",
+      "loadAverage1mBefore": 6.5,
+      "asrId": "onnx-community/whisper-tiny",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 1,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.649246324,
+      "loadAsrSec": 0.3379999240000001,
+      "firstRunMatcherSec": 4.295674505999999,
+      "cachedMatcherSec": 0.02377428700000017,
+      "message30sWithTranslationSec": 3.9490242690000006,
+      "message30sNoTranslationSec": 2.3985720859999997,
+      "rssAfterLoadMB": 812.773376,
+      "peakRssMB": 1051.8046875,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "P4"
+      ],
+      "transcriptPreview": "Le déjeuner préparei par la famille est vraiment bon, surtout les arriquaux. On ne s'arrête pas combien ça côté avant de",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-base",
+      "cores": "all",
+      "loadAverage1mBefore": 5.6,
+      "asrId": "onnx-community/whisper-base",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": "all",
+      "audioSec": 30,
+      "loadEmbedderSec": 0.7244932820000001,
+      "loadAsrSec": 0.6759280319999998,
+      "firstRunMatcherSec": 5.279304162,
+      "cachedMatcherSec": 0.022394831000000615,
+      "message30sWithTranslationSec": 5.226663753000001,
+      "message30sNoTranslationSec": 4.662058501999999,
+      "rssAfterLoadMB": 882.597888,
+      "peakRssMB": 1225.1875,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "N2",
+        "P4",
+        "P1"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon sur tous les agricaux. On ne savait pas combien ça a coûté avant d",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-base",
+      "cores": "2",
+      "loadAverage1mBefore": 5.8,
+      "asrId": "onnx-community/whisper-base",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 2,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.6619201109999999,
+      "loadAsrSec": 0.49164959099999983,
+      "firstRunMatcherSec": 4.103199953000001,
+      "cachedMatcherSec": 0.02566277100000036,
+      "message30sWithTranslationSec": 3.6254614819999995,
+      "message30sNoTranslationSec": 2.917419625000001,
+      "rssAfterLoadMB": 875.442176,
+      "peakRssMB": 1238.8125,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "N2",
+        "P4",
+        "P1"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon sur tous les agricaux. On ne savait pas combien ça a coûté avant d",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-base",
+      "cores": "1",
+      "loadAverage1mBefore": 5.3,
+      "asrId": "onnx-community/whisper-base",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 1,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.667628383,
+      "loadAsrSec": 0.4601398099999999,
+      "firstRunMatcherSec": 4.4204716269999995,
+      "cachedMatcherSec": 0.022859952000000128,
+      "message30sWithTranslationSec": 4.325772678,
+      "message30sNoTranslationSec": 3.291948294999999,
+      "rssAfterLoadMB": 885.202944,
+      "peakRssMB": 1232.75390625,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "N9",
+        "P10",
+        "N2",
+        "P4",
+        "P1"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon sur tous les agricaux. On ne savait pas combien ça a coûté avant d",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-small",
+      "cores": "all",
+      "loadAverage1mBefore": 4.3,
+      "asrId": "onnx-community/whisper-small",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": "all",
+      "audioSec": 30,
+      "loadEmbedderSec": 0.8460308479999998,
+      "loadAsrSec": 1.268370192,
+      "firstRunMatcherSec": 5.222526794,
+      "cachedMatcherSec": 0.02255286400000056,
+      "message30sWithTranslationSec": 13.456398138,
+      "message30sNoTranslationSec": 8.133386239,
+      "rssAfterLoadMB": 1144.233984,
+      "peakRssMB": 1844.96484375,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "P4",
+        "N9",
+        "P10",
+        "N2"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon, surtout les haricots. On ne savait pas combien ça coté avant d'ar",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-small",
+      "cores": "2",
+      "loadAverage1mBefore": 7,
+      "asrId": "onnx-community/whisper-small",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 2,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.654932289,
+      "loadAsrSec": 1.0833364039999998,
+      "firstRunMatcherSec": 4.165921277000001,
+      "cachedMatcherSec": 0.027177198999999597,
+      "message30sWithTranslationSec": 9.980686861,
+      "message30sNoTranslationSec": 6.212829006,
+      "rssAfterLoadMB": 1153.49504,
+      "peakRssMB": 1873.05859375,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "P4",
+        "N9",
+        "P10",
+        "N2"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon, surtout les haricots. On ne savait pas combien ça coté avant d'ar",
+      "statusNoTranslation": "analyzed"
+    },
+    {
+      "whisper": "whisper-small",
+      "cores": "1",
+      "loadAverage1mBefore": 5.7,
+      "asrId": "onnx-community/whisper-small",
+      "embId": "Xenova/paraphrase-multilingual-MiniLM-L12-v2",
+      "threads": 1,
+      "audioSec": 30,
+      "loadEmbedderSec": 0.6594126889999999,
+      "loadAsrSec": 1.1038078059999998,
+      "firstRunMatcherSec": 4.671503129,
+      "cachedMatcherSec": 0.02582502699999978,
+      "message30sWithTranslationSec": 13.281336962999998,
+      "message30sNoTranslationSec": 7.983851674,
+      "rssAfterLoadMB": 1151.594496,
+      "peakRssMB": 1870.40234375,
+      "status": "analyzed",
+      "lang": "fr",
+      "findings": [
+        "P4",
+        "N9",
+        "P10",
+        "N2"
+      ],
+      "transcriptPreview": "Le déjeuner préparé par la famille était vraiment bon, surtout les haricots. On ne savait pas combien ça coté avant d'ar",
+      "statusNoTranslation": "analyzed"
+    }
+  ],
+  "wasmOverhead": {
+    "whisper-tiny": {
+      "encoderNative1tMs": 218.38902866666663,
+      "encoderWasm1tMs": 776.0722936666667,
+      "embedderNative1tMs": 5.951358399999935,
+      "embedderWasm1tMs": 23.661350800000037,
+      "encoderWasmFactor": 3.553623084478332,
+      "embedderWasmFactor": 3.975789930581276
+    },
+    "whisper-base": {
+      "encoderNative1tMs": 486.09555099999994,
+      "encoderWasm1tMs": 1603.0082903333332,
+      "embedderNative1tMs": 5.640358100000048,
+      "embedderWasm1tMs": 21.40989989999998,
+      "encoderWasmFactor": 3.29772261242797,
+      "embedderWasmFactor": 3.795840533600127
+    },
+    "whisper-small": {
+      "encoderNative1tMs": 1547.9631630000001,
+      "encoderWasm1tMs": 5373.063164333334,
+      "embedderNative1tMs": 5.583354500000132,
+      "embedderWasm1tMs": 22.64966170000007,
+      "encoderWasmFactor": 3.471053635359237,
+      "embedderWasmFactor": 4.056640447960009
+    }
+  },
+  "androidEstimate": {
+    "perCoreSlowdownAssumed": [
+      3,
+      8
+    ],
+    "rows": [
+      {
+        "whisper": "whisper-tiny",
+        "native1CoreWithTranslationSec": 3.9,
+        "native1CoreNoTranslationSec": 2.4,
+        "wasmFactor": 3.55,
+        "estimateWithTranslationSec": [
+          42,
+          112
+        ],
+        "estimateNoTranslationSec": [
+          26,
+          68
+        ],
+        "peakRssMB": 1052
+      },
+      {
+        "whisper": "whisper-base",
+        "native1CoreWithTranslationSec": 4.3,
+        "native1CoreNoTranslationSec": 3.3,
+        "wasmFactor": 3.3,
+        "estimateWithTranslationSec": [
+          43,
+          114
+        ],
+        "estimateNoTranslationSec": [
+          33,
+          87
+        ],
+        "peakRssMB": 1233
+      },
+      {
+        "whisper": "whisper-small",
+        "native1CoreWithTranslationSec": 13.3,
+        "native1CoreNoTranslationSec": 8,
+        "wasmFactor": 3.47,
+        "estimateWithTranslationSec": [
+          138,
+          369
+        ],
+        "estimateNoTranslationSec": [
+          83,
+          222
+        ],
+        "peakRssMB": 1870
+      }
+    ],
+    "lines": [
+      "Method: (time for a 30 s message measured here with **1 onnxruntime thread**, native backend) × (WebAssembly overhead **measured here**:",
+      "same ONNX file, 1 thread, onnxruntime-web vs onnxruntime-node — the browser runs WebAssembly) × (per-core speed gap between this",
+      "laptop core and an entry-level phone core, **assumed** 3–8×: public single-core benchmark ratios between a 2024 laptop",
+      "core and Cortex-A55/A75-class entry phones are in that range; not measured here). One thread is used (the browser only gets",
+      "WebAssembly threads with cross-origin isolation), so a phone using 2–4 threads would be faster. Peak memory is the native",
+      "process here; a browser tab adds its own overhead.",
+      "",
+      "- whisper-tiny: **~26–68 s** per 30 s message (transcription + analysis), **~42–112 s** with the English translation for the review list (native 1 thread here: 2.4 s / 3.9 s; WASM ×3.55).",
+      "- whisper-base: **~33–87 s** per 30 s message (transcription + analysis), **~43–114 s** with the English translation for the review list (native 1 thread here: 3.3 s / 4.3 s; WASM ×3.3).",
+      "- whisper-small: **~83–222 s** per 30 s message (transcription + analysis), **~138–369 s** with the English translation for the review list (native 1 thread here: 8 s / 13.3 s; WASM ×3.47).",
+      "",
+      "This is an estimate. Messages are processed in a queue in the background (SPEC 4.2), so minutes per message is usable for 6–7 messages a month, but it must be confirmed on a real phone."
+    ]
+  },
+  "appDownload": {
+    "models": [
+      "onnx-community/whisper-base",
+      "Xenova/paraphrase-multilingual-MiniLM-L12-v2"
+    ],
+    "totalMB": 215.1
+  }
+}

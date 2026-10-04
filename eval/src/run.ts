@@ -7,13 +7,17 @@
 import { parseArgs } from "node:util";
 import { runLevel1 } from "./level1.ts";
 
+// `pnpm eval -- --level 2` transmet le « -- » tel quel : on le retire, sinon tout devient positionnel.
+const argv = process.argv.slice(2).filter((a, i) => !(i === 0 && a === "--"));
 const { values } = parseArgs({
+  args: argv,
   options: {
     level: { type: "string", multiple: true },
     whisper: { type: "string" },
     "fleurs-limit": { type: "string" },
     quick: { type: "boolean", default: false },
     "small-limit": { type: "string" },
+    "app-whisper": { type: "string" },
   },
   allowPositionals: true,
 });
@@ -40,7 +44,7 @@ if (levels.has("3")) {
 }
 if (levels.has("perf")) {
   const { runPerf } = await import("./perf.ts");
-  await runPerf({ sizes, log, devices: ["default"] });
+  await runPerf({ sizes, log, appWhisper: values["app-whisper"] ?? "base" });
 }
 if (levels.has("report")) {
   const { runReport } = await import("./report.ts");

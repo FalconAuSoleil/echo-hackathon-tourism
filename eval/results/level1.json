@@ -1,0 +1,262 @@
+{
+  "dataset": {
+    "name": "FLEURS (google/fleurs), split test",
+    "license": "CC BY 4.0",
+    "source": "https://huggingface.co/datasets/google/fleurs (refs/convert/parquet)",
+    "configs": {
+      "en": "en_us",
+      "fr": "fr_fr",
+      "de": "de_de",
+      "es": "es_419 (Latin American Spanish)",
+      "sw": "sw_ke"
+    },
+    "samplePerLanguage": "see models.<model>.<lang>.n (first N rows of the fixed sample)",
+    "sampling": "fixed random sample, seed 20261004, one reading per FLEURS sentence id (eval/scripts/fetch_fleurs.py)",
+    "reference": "FLEURS `transcription` field (normalised), same normaliser applied to Whisper output",
+    "realVoices": true
+  },
+  "setup": {
+    "decoding": "greedy, automatic language detection over all Whisper languages (as in the app), task transcribe, q8 ONNX via onnxruntime-node CPU",
+    "normaliser": "lowercase NFKC, bracketed text removed, punctuation → space; accents kept; numbers not normalised",
+    "realTimeFactor": "compute seconds / audio seconds on this machine (8 vCPU WSL2 x86-64), all threads; the machine was shared with other jobs (load average recorded), so RTF here is pessimistic: see perf.json for controlled timings"
+  },
+  "models": {
+    "whisper-tiny": {
+      "en": {
+        "n": 100,
+        "wer": 0.2992,
+        "cer": 0.1716,
+        "refWords": 2246,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.652,
+        "audioSeconds": 977.2,
+        "computeSeconds": 347.8,
+        "realTimeFactor": 0.356,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "fr": {
+        "n": 100,
+        "wer": 0.6712,
+        "cer": 0.4456,
+        "refWords": 2746,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.402,
+        "audioSeconds": 1073,
+        "computeSeconds": 314.7,
+        "realTimeFactor": 0.293,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "de": {
+        "n": 100,
+        "wer": 0.5161,
+        "cer": 0.2551,
+        "refWords": 2230,
+        "languageIdAccuracy": 0.99,
+        "wrongLanguages": {
+          "en": 1
+        },
+        "meanConfidence": 0.463,
+        "audioSeconds": 1315.7,
+        "computeSeconds": 269.7,
+        "realTimeFactor": 0.205,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "es": {
+        "n": 100,
+        "wer": 0.3044,
+        "cer": 0.1551,
+        "refWords": 2477,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.604,
+        "audioSeconds": 1193.3,
+        "computeSeconds": 283.8,
+        "realTimeFactor": 0.238,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "sw": {
+        "n": 100,
+        "wer": 1.0282,
+        "cer": 0.7358,
+        "refWords": 2024,
+        "languageIdAccuracy": 0.41,
+        "wrongLanguages": {
+          "pt": 5,
+          "ko": 4,
+          "it": 8,
+          "en": 7,
+          "bn": 6,
+          "as": 2,
+          "ja": 3,
+          "vi": 1,
+          "fr": 5,
+          "id": 3,
+          "ms": 1,
+          "es": 1,
+          "ml": 3,
+          "jw": 1,
+          "ru": 4,
+          "hu": 1,
+          "ar": 3,
+          "yo": 1
+        },
+        "meanConfidence": 0.218,
+        "audioSeconds": 1404.5,
+        "computeSeconds": 273.1,
+        "realTimeFactor": 0.194,
+        "loadAverage1mAtEnd": 1.9
+      }
+    },
+    "whisper-base": {
+      "en": {
+        "n": 100,
+        "wer": 0.1051,
+        "cer": 0.0416,
+        "refWords": 2246,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.836,
+        "audioSeconds": 977.2,
+        "computeSeconds": 556.3,
+        "realTimeFactor": 0.569,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "fr": {
+        "n": 100,
+        "wer": 0.2873,
+        "cer": 0.1267,
+        "refWords": 2746,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.689,
+        "audioSeconds": 1073,
+        "computeSeconds": 695.9,
+        "realTimeFactor": 0.649,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "de": {
+        "n": 100,
+        "wer": 0.2157,
+        "cer": 0.0712,
+        "refWords": 2230,
+        "languageIdAccuracy": 0.99,
+        "wrongLanguages": {
+          "en": 1
+        },
+        "meanConfidence": 0.736,
+        "audioSeconds": 1315.7,
+        "computeSeconds": 585.5,
+        "realTimeFactor": 0.445,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "es": {
+        "n": 100,
+        "wer": 0.1227,
+        "cer": 0.0415,
+        "refWords": 2477,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.808,
+        "audioSeconds": 1193.3,
+        "computeSeconds": 523.9,
+        "realTimeFactor": 0.439,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "sw": {
+        "n": 100,
+        "wer": 1.0128,
+        "cer": 0.4279,
+        "refWords": 2024,
+        "languageIdAccuracy": 0.86,
+        "wrongLanguages": {
+          "ar": 1,
+          "pt": 2,
+          "yo": 2,
+          "ne": 1,
+          "ja": 1,
+          "tl": 2,
+          "mi": 2,
+          "ru": 2,
+          "am": 1
+        },
+        "meanConfidence": 0.322,
+        "audioSeconds": 1404.5,
+        "computeSeconds": 423.8,
+        "realTimeFactor": 0.302,
+        "loadAverage1mAtEnd": 1.9
+      }
+    },
+    "whisper-small": {
+      "en": {
+        "n": 50,
+        "wer": 0.0855,
+        "cer": 0.0311,
+        "refWords": 1017,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.894,
+        "audioSeconds": 470,
+        "computeSeconds": 509.8,
+        "realTimeFactor": 1.085,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "fr": {
+        "n": 50,
+        "wer": 0.1401,
+        "cer": 0.0562,
+        "refWords": 1335,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.848,
+        "audioSeconds": 538.3,
+        "computeSeconds": 634,
+        "realTimeFactor": 1.178,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "de": {
+        "n": 50,
+        "wer": 0.1148,
+        "cer": 0.0343,
+        "refWords": 1167,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.874,
+        "audioSeconds": 697.3,
+        "computeSeconds": 543.9,
+        "realTimeFactor": 0.78,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "es": {
+        "n": 50,
+        "wer": 0.0611,
+        "cer": 0.0236,
+        "refWords": 1194,
+        "languageIdAccuracy": 1,
+        "wrongLanguages": {},
+        "meanConfidence": 0.904,
+        "audioSeconds": 581,
+        "computeSeconds": 435.2,
+        "realTimeFactor": 0.749,
+        "loadAverage1mAtEnd": 1.9
+      },
+      "sw": {
+        "n": 50,
+        "wer": 0.7707,
+        "cer": 0.2201,
+        "refWords": 1016,
+        "languageIdAccuracy": 0.96,
+        "wrongLanguages": {
+          "en": 1,
+          "sn": 1
+        },
+        "meanConfidence": 0.511,
+        "audioSeconds": 702.2,
+        "computeSeconds": 492.5,
+        "realTimeFactor": 0.701,
+        "loadAverage1mAtEnd": 1.9
+      }
+    }
+  }
+}

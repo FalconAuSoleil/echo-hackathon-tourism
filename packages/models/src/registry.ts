@@ -61,7 +61,10 @@ export const MODELS: Record<string, ModelInfo> = {
   },
 };
 
-/** Choix par défaut du squelette ; l'évaluation (SPEC 9) confirme ou remplace. */
+/**
+ * Whisper livré : base, confirmé par l'évaluation (SPEC 4.3, eval/results/RESULTS.md « Which Whisper ») : tiny dépasse 50 % de WER
+ * sur FLEURS en français et allemand ; small fait mieux mais pèse 3 fois plus et va 2 à 3 fois moins vite.
+ */
 export const DEFAULT_ASR_MODEL = "onnx-community/whisper-base";
 /**
  * Modèle d'embedding livré : celui avec lequel l'évaluation a calibré les seuils (packages/core/src/calibration.ts,

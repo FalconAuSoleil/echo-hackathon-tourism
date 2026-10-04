@@ -21,6 +21,8 @@ export interface WhisperOptions {
   /** Limite le choix de langue à ces codes (ex. ["en","fr","de","es","sw"]). Sinon toutes les langues Whisper. */
   candidateLanguages?: string[];
   maxNewTokens?: number;
+  /** Nombre de threads du backend natif (Node). Défaut : celui d'onnxruntime (tous les cœurs). */
+  threads?: number;
   /**
    * Arrête le décodage quand Whisper boucle (même bloc de tokens répété 3 fois de suite, ou même token
    * 6 fois) et garde une seule occurrence du bloc. Défaut : true. Sans ce garde-fou, le décodage glouton
@@ -129,6 +131,7 @@ export async function createWhisperTranscriber(modelId: string, options: Whisper
   const model = await WhisperForConditionalGeneration.from_pretrained(modelId, {
     dtype: { encoder_model: "q8", decoder_model_merged: "q8" },
     ...(options.device ? { device: options.device } : {}),
+    ...(options.threads ? { session_options: { intraOpNumThreads: options.threads, interOpNumThreads: 1 } } : {}),
   });
   const gen = model.generation_config as unknown as GenerationConfigLike;
   const langTokens = Object.entries(gen.lang_to_id)
