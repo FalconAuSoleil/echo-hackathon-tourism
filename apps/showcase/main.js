@@ -2,7 +2,7 @@
 // et le découpage en SMS passent par le vrai code de @echo/core. Ce que le modèle comprend de chaque message est
 // le résultat attendu, préparé à l'avance (aucun modèle ne tourne ici).
 import { buildMonthlyRecap, recapRwLines, scrubPii, segment, splitSms, validateCatalog, PII_TOKENS } from "@echo/core";
-import rawCatalog from "../../catalog/catalog.json";
+import rawCatalog from "../../catalog/catolog.json";
 import samples from "../web/public/samples/manifest.json";
 
 const catalog = validateCatalog(rawCatalog);
